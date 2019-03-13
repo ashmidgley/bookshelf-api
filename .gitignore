@@ -1,0 +1,9 @@
+﻿bin
+obj
+.vs
+Logs
+PublishProfiles
+Properties
+test-data.json
+reads.db
+*.user
