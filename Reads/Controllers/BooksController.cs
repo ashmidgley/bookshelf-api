@@ -19,7 +19,7 @@ namespace Reads.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Book>> Get()
         {
-            IEnumerable<Book> books = _bookRepository.GetAll();
+            List<Book> books = _bookRepository.GetAll().Result;
             return Ok(books);
         }
 
@@ -55,7 +55,7 @@ namespace Reads.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var book = _bookRepository.Get(id);
+            var book = _bookRepository.Get(id).Result;
             _bookRepository.Delete(book);
             return Ok();
         }

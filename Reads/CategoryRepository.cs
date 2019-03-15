@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Reads.Models;
 
 namespace Reads
@@ -14,40 +16,34 @@ namespace Reads
             _context = context;
         }
 
-        public List<Category> GetAll()
+        public async Task<List<Category>> GetAll()
         {
-            return _context.Categories
-                .ToList();
+            return await _context.Categories
+                .ToListAsync();
         }
 
-        public Category Get(int id)
+        public async Task<Category> Get(int id)
         {
-            return _context.Categories
-                .SingleOrDefault(c => c.Id == id);
+            return await _context.Categories
+                .SingleOrDefaultAsync(c => c.Id == id);
         }
 
         public void Add(Category category)
         {
             _context.Categories.Add(category);
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
         }
 
         public void Update(Category category)
         {
-            var old = _context.Categories
-                .SingleOrDefault(c => c.Id == category.Id);
-
-            if(old == null) return;
-
-            old.Code = category.Code;
-            old.Description = category.Description;
-            _context.SaveChanges();
+            _context.Categories.Update(category);
+            _context.SaveChangesAsync();
         }
 
         public void Delete(Category category)
         {
             _context.Categories.Remove(category);
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
         }
     }
 }

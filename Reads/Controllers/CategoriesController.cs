@@ -20,7 +20,7 @@ namespace Reads.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            List<Category> categories = _categoryRepository.GetAll();
+            List<Category> categories = _categoryRepository.GetAll().Result;
             return Ok(categories);
         }
 
@@ -56,7 +56,7 @@ namespace Reads.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var category = _categoryRepository.Get(id);
+            var category = _categoryRepository.Get(id).Result;
             _categoryRepository.Delete(category);
             return Ok();
         }

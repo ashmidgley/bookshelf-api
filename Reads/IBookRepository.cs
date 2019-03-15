@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Reads.Models;
 
 namespace Reads
 {
     public interface IBookRepository
     {
-        List<Book> GetAll();
-        Book Get(int id);
+        Task<List<Book>> GetAll();
+        Task<Book> Get(int id);
         void Add(Book book);
         void Update(Book book);
         void Delete(Book book);
