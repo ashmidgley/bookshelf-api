@@ -20,6 +20,7 @@ namespace Reads
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ReadsContext>(options => options.UseSqlite("Data Source=reads.db"));
+            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddTransient<IBookRepository, BookRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
@@ -43,6 +44,12 @@ namespace Reads
                 app.UseHsts();
             }
 
+            app.UseCors(builder =>
+                builder
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin()
+            );
             app.UseHttpsRedirection();
             app.UseMvc();
         }
