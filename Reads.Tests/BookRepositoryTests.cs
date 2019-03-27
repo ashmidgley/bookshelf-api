@@ -1,32 +1,48 @@
 using System;
-using System.Configuration;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using EntityFrameworkCoreMock;
+using Reads.Models;
 using Xunit;
 
 namespace Reads.Tests
 {
     public class BookRepositoryTests
     {
-        [Fact(DisplayName = "Should get all the books")]
-        public void Should_Get_All_Books()
+        private static IEnumerable<Book> InitialBooks => new[]
         {
-            var repo = BookRepository;
-            repo.GetAll().Should().NotBeNull();
-        }
+            new Book { Id = 1, Image = "testing", CategoryId = 1, StartedOn = new DateTime(2019,1,1), FinishedOn = new DateTime(2019,1,11), PageCount = 112, Title = "Testing", Author = "Testing", Summary = "Testing", Removed = false },
+            new Book { Id = 2, Image = "testing", CategoryId = 1, StartedOn = new DateTime(2019,1,1), FinishedOn = new DateTime(2019,1,11), PageCount = 112, Title = "Testing", Author = "Testing", Summary = "Testing", Removed = false }
+        };
 
-        private IBookRepository BookRepository
+        private IEfRepository<Book> TestRepository
         {
             get
             {
-                var builder = new DbContextOptionsBuilder<ReadsContext>();
-                builder.UseSqlServer(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
-                DbContextOptions<ReadsContext> options = builder.Options;
-                ReadsContext readContext = new ReadsContext(options);
-                readContext.Database.EnsureDeleted();
-                readContext.Database.EnsureCreated();
-                return new BookRepository(readContext);
+                var dbContextMock = new DbContextMock<ReadsContext>();
+                dbContextMock.CreateDbSetMock(x => x.Books, InitialBooks);
+                return new EfRepository<Book>(dbContextMock.Object);
             }
+        }
+
+        [Fact(DisplayName = "Should get multiple books.")]
+        public void ShouldGetMultipleBooks()
+        {
+            var books = TestRepository.GetAll().Result;
+            Assert.NotNull(books);
+        }
+
+        [Fact(DisplayName = "Should not get book.")]
+        public void ShouldNotGetBook()
+        {
+            var book = TestRepository.Get(5).Result;
+            Assert.Null(book);
+        }
+
+        [Fact(DisplayName = "Should get book.")]
+        public void ShouldGetBook()
+        {
+            var book = TestRepository.Get(1).Result;
+            Assert.NotNull(book);
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Reads.Models;
 
 namespace Reads
 {
@@ -23,8 +24,8 @@ namespace Reads
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddTransient<IBookRepository, BookRepository>();
-            services.AddTransient<ICategoryRepository, CategoryRepository>();
+            services.AddTransient<IEfRepository<Book>, EfRepository<Book>>();
+            services.AddTransient<IEfRepository<Category>, EfRepository<Category>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

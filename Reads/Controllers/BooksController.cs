@@ -8,9 +8,9 @@ namespace Reads.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly IEfRepository<Book> _bookRepository;
 
-        public BooksController(IBookRepository bookRepository)
+        public BooksController(IEfRepository<Book> bookRepository)
         {
             _bookRepository = bookRepository;
         }
@@ -20,7 +20,7 @@ namespace Reads.Controllers
         public ActionResult<IEnumerable<Book>> Get()
         {
             List<Book> books = _bookRepository.GetAll().Result;
-            return Ok(books);
+            return books;
         }
 
         // POST api/books
@@ -56,6 +56,10 @@ namespace Reads.Controllers
                 return BadRequest(ModelState);
             }
             var book = _bookRepository.Get(id).Result;
+            if (book == null)
+            {
+                return BadRequest($"No book found for id: {id}");
+            }
             _bookRepository.Delete(book);
             return Ok();
         }
