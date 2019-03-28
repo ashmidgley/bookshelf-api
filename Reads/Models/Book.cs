@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Reads.Models
 {
     public class Book
     {
+        [Key]
         public int Id { get; set; }
         public int CategoryId { get; set; }
         public string Image { get; set; }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Reads.Models;
@@ -25,7 +23,7 @@ namespace Reads
         public async Task<Category> Get(int id)
         {
             return await _context.Categories
-                .SingleOrDefaultAsync(c => c.Id == id);
+                .SingleOrDefaultAsync(b => b.Id == id);
         }
 
         public void Add(Category category)
