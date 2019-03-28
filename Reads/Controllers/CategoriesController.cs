@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Reads.Models;
+using Reads.Validators;
 
 namespace Reads.Controllers
 {
@@ -8,11 +9,13 @@ namespace Reads.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly IEfRepository<Category> _categoryRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly CategoryValidator _validator;
 
-        public CategoriesController(IEfRepository<Category> categoryRepository)
+        public CategoriesController(ICategoryRepository categoryRepository, CategoryValidator validator)
         {
             _categoryRepository = categoryRepository;
+            _validator = validator;
         }
 
         // GET api/categories
@@ -27,9 +30,10 @@ namespace Reads.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] Category category)
         {
-            if (!ModelState.IsValid)
+            var validation = _validator.Validate(category);
+            if (!validation.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(validation.ToString());
             }
             _categoryRepository.Add(category);
             return Ok();
@@ -39,9 +43,10 @@ namespace Reads.Controllers
         [HttpPut]
         public ActionResult Put([FromBody] Category category)
         {
-            if (!ModelState.IsValid)
+            var validation = _validator.Validate(category);
+            if (!validation.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(validation.ToString());
             }
             _categoryRepository.Update(category);
             return Ok();

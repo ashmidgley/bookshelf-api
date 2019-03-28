@@ -2,11 +2,11 @@
 
 namespace Reads.Models
 {
-    public class Category : Entity
+    public class Category
     {
-        [Required]
+        [Key]
+        public int Id { get; set; }
         public string Description { get; set; }
-        [Required]
         public string Code { get; set; }
     }
 }

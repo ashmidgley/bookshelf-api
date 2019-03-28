@@ -3,23 +3,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Reads.Models
 {
-    public class Book : Entity
+    public class Book
     {
-        [Required]
+        [Key]
+        public int Id { get; set; }
         public int CategoryId { get; set; }
-        [Required]
         public string Image { get; set; }
-        [Required]
         public string Title { get; set; }
-        [Required]
         public string Author { get; set; }
-        [Required]
         public DateTime StartedOn { get; set; }
-        [Required]
         public DateTime FinishedOn { get; set; }
-        [Required]
         public int PageCount { get; set; }
-        [Required]
         public string Summary { get; set; }
         public bool Removed { get; set; }
     }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Reads.Models;
+using Reads.Validators;
 
 namespace Reads.Controllers
 {
@@ -8,11 +9,13 @@ namespace Reads.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly IEfRepository<Book> _bookRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly BookValidator _validator;
 
-        public BooksController(IEfRepository<Book> bookRepository)
+        public BooksController(IBookRepository bookRepository, BookValidator validator)
         {
             _bookRepository = bookRepository;
+            _validator = validator;
         }
 
         // GET api/books
@@ -27,9 +30,10 @@ namespace Reads.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] Book book)
         {
-            if (!ModelState.IsValid)
+            var validation = _validator.Validate(book);
+            if (!validation.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(validation.ToString());
             }
             _bookRepository.Add(book);
             return Ok();
@@ -39,9 +43,10 @@ namespace Reads.Controllers
         [HttpPut]
         public ActionResult Put([FromBody] Book book)
         {
-            if (!ModelState.IsValid)
+            var validation = _validator.Validate(book);
+            if (!validation.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(validation.ToString());
             }
             _bookRepository.Update(book);
             return Ok();

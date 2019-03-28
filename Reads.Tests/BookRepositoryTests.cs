@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using EntityFrameworkCoreMock;
+using FluentAssertions;
 using Reads.Models;
 using Xunit;
 
@@ -14,13 +16,13 @@ namespace Reads.Tests
             new Book { Id = 2, Image = "testing", CategoryId = 1, StartedOn = new DateTime(2019,1,1), FinishedOn = new DateTime(2019,1,11), PageCount = 112, Title = "Testing", Author = "Testing", Summary = "Testing", Removed = false }
         };
 
-        private IEfRepository<Book> TestRepository
+        private IBookRepository TestRepository
         {
             get
             {
                 var dbContextMock = new DbContextMock<ReadsContext>();
                 dbContextMock.CreateDbSetMock(x => x.Books, InitialBooks);
-                return new EfRepository<Book>(dbContextMock.Object);
+                return new BookRepository(dbContextMock.Object);
             }
         }
 
@@ -28,7 +30,7 @@ namespace Reads.Tests
         public void ShouldGetMultipleBooks()
         {
             var books = TestRepository.GetAll().Result;
-            Assert.NotNull(books);
+            books.Should().HaveCount(InitialBooks.Count());
         }
 
         [Fact(DisplayName = "Should not get book.")]

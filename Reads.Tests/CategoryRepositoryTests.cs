@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using EntityFrameworkCoreMock;
+using FluentAssertions;
 using Reads.Models;
 using Xunit;
 
@@ -13,13 +15,13 @@ namespace Reads.Tests
             new Category { Id = 2, Description = "Testing", Code = "testing" },
         };
 
-        private IEfRepository<Category> TestRepository
+        private ICategoryRepository TestRepository
         {
             get
             {
                 var dbContextMock = new DbContextMock<ReadsContext>();
                 dbContextMock.CreateDbSetMock(x => x.Categories, InitialCategories);
-                return new EfRepository<Category>(dbContextMock.Object);
+                return new CategoryRepository(dbContextMock.Object);
             }
         }
 
@@ -27,7 +29,7 @@ namespace Reads.Tests
         public void ShouldGetMultipleBooks()
         {
             var categories = TestRepository.GetAll().Result;
-            Assert.NotNull(categories);
+            categories.Should().HaveCount(InitialCategories.Count());
         }
 
         [Fact(DisplayName = "Should not get category.")]
