@@ -6,7 +6,7 @@ namespace Reads
 {
     public interface ICategoryRepository
     {
-        void Add(Category category);
+        Category Add(Category category);
         void Delete(Category category);
         Task<Category> Get(int id);
         Task<List<Category>> GetAll();

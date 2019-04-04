@@ -26,10 +26,12 @@ namespace Reads
                 .SingleOrDefaultAsync(b => b.Id == id);
         }
 
-        public void Add(Book book)
+        public Book Add(Book book)
         {
             _context.Books.Add(book);
             _context.SaveChangesAsync();
+            _context.Entry(book).GetDatabaseValues();
+            return book;
         }
 
         public void Update(Book book)

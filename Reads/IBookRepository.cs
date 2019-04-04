@@ -6,7 +6,7 @@ namespace Reads
 {
     public interface IBookRepository
     {
-        void Add(Book book);
+        Book Add(Book book);
         void Delete(Book book);
         Task<Book> Get(int id);
         Task<List<Book>> GetAll();
