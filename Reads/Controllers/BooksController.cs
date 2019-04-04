@@ -28,20 +28,20 @@ namespace Reads.Controllers
 
         // POST api/books
         [HttpPost]
-        public ActionResult Post([FromBody] Book book)
+        public ActionResult<Book> Post([FromBody] Book book)
         {
             var validation = _validator.Validate(book);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
-            _bookRepository.Add(book);
-            return Ok();
+            var result = _bookRepository.Add(book);
+            return result;
         }
 
         // PUT api/books
         [HttpPut]
-        public ActionResult Put([FromBody] Book book)
+        public ActionResult<Book> Put([FromBody] Book book)
         {
             var validation = _validator.Validate(book);
             if (!validation.IsValid)
@@ -49,12 +49,12 @@ namespace Reads.Controllers
                 return BadRequest(validation.ToString());
             }
             _bookRepository.Update(book);
-            return Ok();
+            return book;
         }
 
         // DELETE api/books
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<Book> Delete(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +66,7 @@ namespace Reads.Controllers
                 return BadRequest($"No book found for id: {id}");
             }
             _bookRepository.Delete(book);
-            return Ok();
+            return book;
         }
     }
 }

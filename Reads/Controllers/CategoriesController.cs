@@ -28,20 +28,20 @@ namespace Reads.Controllers
 
         // POST api/categories
         [HttpPost]
-        public ActionResult Post([FromBody] Category category)
+        public ActionResult<Category> Post([FromBody] Category category)
         {
             var validation = _validator.Validate(category);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
-            _categoryRepository.Add(category);
-            return Ok();
+            var result = _categoryRepository.Add(category);
+            return result;
         }
 
         // PUT api/categories
         [HttpPut]
-        public ActionResult Put([FromBody] Category category)
+        public ActionResult<Category> Put([FromBody] Category category)
         {
             var validation = _validator.Validate(category);
             if (!validation.IsValid)
@@ -49,12 +49,12 @@ namespace Reads.Controllers
                 return BadRequest(validation.ToString());
             }
             _categoryRepository.Update(category);
-            return Ok();
+            return category;
         }
 
         // DELETE api/categories
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult<Category> Delete(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +66,7 @@ namespace Reads.Controllers
                 return BadRequest($"No category found for id: {id}");
             }
             _categoryRepository.Delete(category);
-            return Ok();
+            return category;
         }
     }
 }

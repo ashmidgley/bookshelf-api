@@ -26,10 +26,12 @@ namespace Reads
                 .SingleOrDefaultAsync(b => b.Id == id);
         }
 
-        public void Add(Category category)
+        public Category Add(Category category)
         {
             _context.Categories.Add(category);
             _context.SaveChangesAsync();
+            _context.Entry(category).GetDatabaseValues();
+            return category;
         }
 
         public void Update(Category category)
