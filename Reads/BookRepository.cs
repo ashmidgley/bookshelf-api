@@ -29,7 +29,7 @@ namespace Reads
         public Book Add(Book book)
         {
             _context.Books.Add(book);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
             _context.Entry(book).GetDatabaseValues();
             return book;
         }
