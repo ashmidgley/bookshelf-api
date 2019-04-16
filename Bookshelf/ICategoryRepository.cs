@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Reads.Models;
+using Bookshelf.Models;
 
-namespace Reads
+namespace Bookshelf
 {
     public interface ICategoryRepository
     {

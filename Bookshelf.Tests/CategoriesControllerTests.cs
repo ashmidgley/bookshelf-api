@@ -4,12 +4,12 @@ using System.Net;
 using EntityFrameworkCoreMock;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Reads.Controllers;
-using Reads.Models;
-using Reads.Validators;
+using Bookshelf.Controllers;
+using Bookshelf.Models;
+using Bookshelf.Validators;
 using Xunit;
 
-namespace Reads.Tests
+namespace Bookshelf.Tests
 {
     public class CategoryControllerTests
     {
@@ -25,7 +25,7 @@ namespace Reads.Tests
         {
             get
             {
-                var dbContextMock = new DbContextMock<ReadsContext>();
+                var dbContextMock = new DbContextMock<BookshelfContext>();
                 dbContextMock.CreateDbSetMock(x => x.Categories, InitialCategories);
                 return new CategoryRepository(dbContextMock.Object);
             }

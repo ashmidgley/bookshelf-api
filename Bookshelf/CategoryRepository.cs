@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Reads.Models;
+using Bookshelf.Models;
 
-namespace Reads
+namespace Bookshelf
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly ReadsContext _context;
+        private readonly BookshelfContext _context;
 
-        public CategoryRepository(ReadsContext context)
+        public CategoryRepository(BookshelfContext context)
         {
             _context = context;
         }

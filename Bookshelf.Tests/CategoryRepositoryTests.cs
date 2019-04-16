@@ -2,10 +2,10 @@
 using System.Linq;
 using EntityFrameworkCoreMock;
 using FluentAssertions;
-using Reads.Models;
+using Bookshelf.Models;
 using Xunit;
 
-namespace Reads.Tests
+namespace Bookshelf.Tests
 {
     public class CategoryRepositoryTests
     {
@@ -19,7 +19,7 @@ namespace Reads.Tests
         {
             get
             {
-                var dbContextMock = new DbContextMock<ReadsContext>();
+                var dbContextMock = new DbContextMock<BookshelfContext>();
                 dbContextMock.CreateDbSetMock(x => x.Categories, InitialCategories);
                 return new CategoryRepository(dbContextMock.Object);
             }

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reads", "Reads\Reads.csproj", "{4E747D63-FACC-4451-9EAC-0D2BEACA31D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bookshelf", "Bookshelf\Bookshelf.csproj", "{4E747D63-FACC-4451-9EAC-0D2BEACA31D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reads.Tests", "Reads.Tests\Reads.Tests.csproj", "{6CEA0206-0064-4869-A130-A7187E9B0903}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookshelf.Tests", "Bookshelf.Tests\Bookshelf.Tests.csproj", "{6CEA0206-0064-4869-A130-A7187E9B0903}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
