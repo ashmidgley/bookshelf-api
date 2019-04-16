@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-namespace Reads
+namespace Bookshelf
 {
     public class Program
     {

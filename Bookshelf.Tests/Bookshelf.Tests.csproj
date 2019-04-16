@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Reads\Reads.csproj" />
+    <ProjectReference Include="..\Bookshelf\Bookshelf.csproj" />
   </ItemGroup>
 
 </Project>

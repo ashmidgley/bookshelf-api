@@ -3,17 +3,13 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Reads;
 
-namespace Reads.Migrations
+namespace Bookshelf.Migrations
 {
-    [DbContext(typeof(ReadsContext))]
-    [Migration("20190321014031_InitialModel")]
-    partial class InitialModel
+    [DbContext(typeof(BookshelfContext))]
+    partial class ReadsContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

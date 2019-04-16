@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Reads.Validators;
+using Bookshelf.Validators;
 
-namespace Reads
+namespace Bookshelf
 {
     public class Startup
     {
@@ -20,7 +20,7 @@ namespace Reads
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ReadsContext>(options => 
+            services.AddDbContext<BookshelfContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -35,7 +35,7 @@ namespace Reads
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<ReadsContext>();
+                var context = serviceScope.ServiceProvider.GetRequiredService<BookshelfContext>();
                 context.Database.Migrate();
             }
 

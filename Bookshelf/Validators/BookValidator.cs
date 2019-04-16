@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Reads.Models;
+using Bookshelf.Models;
 
-namespace Reads.Validators
+namespace Bookshelf.Validators
 {
     public class BookValidator : AbstractValidator<Book>
     {

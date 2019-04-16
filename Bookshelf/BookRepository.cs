@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Reads.Models;
+using Bookshelf.Models;
 
-namespace Reads
+namespace Bookshelf
 {
     public class BookRepository : IBookRepository
     {
-        private readonly ReadsContext _context;
+        private readonly BookshelfContext _context;
 
-        public BookRepository(ReadsContext context)
+        public BookRepository(BookshelfContext context)
         {
             _context = context;
         }

@@ -1,18 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Reads.Models;
+using Bookshelf.Models;
 
-namespace Reads
+namespace Bookshelf
 {
-    public class ReadsContext : DbContext
+    public class BookshelfContext : DbContext
     {
         public virtual DbSet<Book> Books { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
 
-        public ReadsContext(DbContextOptions<ReadsContext> options)
+        public BookshelfContext(DbContextOptions<BookshelfContext> options)
             : base(options)
         { }
 
-        public ReadsContext()
+        public BookshelfContext()
         { }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Reads.Models;
-using Reads.Validators;
+using Bookshelf.Models;
+using Bookshelf.Validators;
 
-namespace Reads.Controllers
+namespace Bookshelf.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
