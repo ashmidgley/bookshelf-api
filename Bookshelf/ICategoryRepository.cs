@@ -6,7 +6,7 @@ namespace Bookshelf
 {
     public interface ICategoryRepository
     {
-        Category Add(Category category);
+        int Add(Category category);
         void Delete(Category category);
         Task<Category> Get(int id);
         Task<List<Category>> GetAll();

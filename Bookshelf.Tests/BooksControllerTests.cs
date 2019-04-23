@@ -47,32 +47,32 @@ namespace Bookshelf.Tests
             }
         }
 
-        //[Fact(DisplayName = "Should post book.")]
-        //public void ShouldPostBook()
-        //{
-        //    var controller = new BooksController(TestRepository, TestValidator);
-        //    var book = new Book
-        //    {
-        //        Image = "testing",
-        //        CategoryId = 1,
-        //        StartedOn = new DateTime(2019, 1, 1),
-        //        FinishedOn = new DateTime(2019, 1, 11),
-        //        PageCount = 112,
-        //        Title = "Testing",
-        //        Author = "Testing",
-        //        Summary = "Testing"
-        //    };
-        //    var response = controller.Post(book);
-        //    book.Id = 3;
-        //    if (response.Value.Equals(book))
-        //    {
-        //        Assert.True(true);
-        //    }
-        //    else
-        //    {
-        //        Assert.False(true, "Response does not match expected value.");
-        //    }
-        //}
+        [Fact(DisplayName = "Should post book.")]
+        public void ShouldPostBook()
+        {
+            var controller = new BooksController(TestRepository, TestValidator);
+            var book = new Book
+            {
+                Image = "testing",
+                CategoryId = 1,
+                StartedOn = new DateTime(2019, 1, 1),
+                FinishedOn = new DateTime(2019, 1, 11),
+                PageCount = 112,
+                Title = "Testing",
+                Author = "Testing",
+                Summary = "Testing"
+            };
+            var response = controller.Post(book);
+            book.Id = 3;
+            if (response.Value.Equals(book))
+            {
+                Assert.True(true);
+            }
+            else
+            {
+                Assert.False(true, "Response does not match expected value.");
+            }
+        }
 
         [Fact(DisplayName = "Should not post book.")]
         public void ShouldNotPostBook()

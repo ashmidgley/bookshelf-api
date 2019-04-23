@@ -35,8 +35,9 @@ namespace Bookshelf.Controllers
             {
                 return BadRequest(validation.ToString());
             }
-            var result = _bookRepository.Add(book);
-            return result;
+            int id = _bookRepository.Add(book);
+            book.Id = id;
+            return book;
         }
 
         // PUT api/books

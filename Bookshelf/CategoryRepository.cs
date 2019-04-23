@@ -26,12 +26,10 @@ namespace Bookshelf
                 .SingleOrDefaultAsync(b => b.Id == id);
         }
 
-        public Category Add(Category category)
+        public int Add(Category category)
         {
             _context.Categories.Add(category);
-            _context.SaveChangesAsync();
-            _context.Entry(category).GetDatabaseValues();
-            return category;
+            return _context.SaveChanges();
         }
 
         public void Update(Category category)

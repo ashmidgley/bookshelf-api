@@ -46,26 +46,26 @@ namespace Bookshelf.Tests
             }
         }
 
-        //[Fact(DisplayName = "Should post category.")]
-        //public void ShouldPostCategory()
-        //{
-        //    var controller = new CategoriesController(TestRepository, TestValidator);
-        //    var category = new Category
-        //    {
-        //        Description = "Testing",
-        //        Code = "testing"
-        //    };
-        //    var response = controller.Post(category);
-        //    category.Id = 3;
-        //    if (response.Value.Equals(category))
-        //    {
-        //        Assert.True(true);
-        //    }
-        //    else
-        //    {
-        //        Assert.False(true, "Response does not match expected value.");
-        //    }
-        //}
+        [Fact(DisplayName = "Should post category.")]
+        public void ShouldPostCategory()
+        {
+            var controller = new CategoriesController(TestRepository, TestValidator);
+            var category = new Category
+            {
+                Description = "Testing",
+                Code = "testing"
+            };
+            var response = controller.Post(category);
+            category.Id = 3;
+            if (response.Value.Equals(category))
+            {
+                Assert.True(true);
+            }
+            else
+            {
+                Assert.False(true, "Response does not match expected value.");
+            }
+        }
 
         [Fact(DisplayName = "Should not post category.")]
         public void ShouldNotPostCategory()
