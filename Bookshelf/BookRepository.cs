@@ -26,12 +26,10 @@ namespace Bookshelf
                 .SingleOrDefaultAsync(b => b.Id == id);
         }
 
-        public Book Add(Book book)
+        public int Add(Book book)
         {
             _context.Books.Add(book);
-            _context.SaveChanges();
-            _context.Entry(book).GetDatabaseValues();
-            return book;
+            return _context.SaveChanges();
         }
 
         public void Update(Book book)

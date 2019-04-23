@@ -6,7 +6,7 @@ namespace Bookshelf
 {
     public interface IBookRepository
     {
-        Book Add(Book book);
+        int Add(Book book);
         void Delete(Book book);
         Task<Book> Get(int id);
         Task<List<Book>> GetAll();
