@@ -29,7 +29,8 @@ namespace Bookshelf
         public int Add(Book book)
         {
             _context.Books.Add(book);
-            return _context.SaveChanges();
+            _context.SaveChanges();
+            return book.Id;
         }
 
         public void Update(Book book)
