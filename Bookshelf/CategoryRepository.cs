@@ -29,7 +29,8 @@ namespace Bookshelf
         public int Add(Category category)
         {
             _context.Categories.Add(category);
-            return _context.SaveChanges();
+            _context.SaveChanges();
+            return category.Id;
         }
 
         public void Update(Category category)
