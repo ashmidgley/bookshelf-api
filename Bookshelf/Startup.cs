@@ -26,8 +26,10 @@ namespace Bookshelf
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddTransient<IBookRepository, BookRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
+            services.AddTransient<IRatingRepository, RatingRepository>();
             services.AddTransient<BookValidator>();
             services.AddTransient<CategoryValidator>();
+            services.AddTransient<RatingValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
