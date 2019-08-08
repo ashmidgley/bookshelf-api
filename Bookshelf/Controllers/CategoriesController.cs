@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Bookshelf.Models;
 using Bookshelf.Validators;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Bookshelf.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase

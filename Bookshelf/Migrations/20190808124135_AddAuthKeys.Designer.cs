@@ -4,14 +4,16 @@ using Bookshelf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Bookshelf.Migrations
+namespace Reads.Migrations
 {
     [DbContext(typeof(BookshelfContext))]
-    partial class ReadsContextModelSnapshot : ModelSnapshot
+    [Migration("20190808124135_AddAuthKeys")]
+    partial class AddAuthKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

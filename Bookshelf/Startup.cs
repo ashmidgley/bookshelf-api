@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Bookshelf.Validators;
+using Bookshelf.Authentication;
 
 namespace Bookshelf
 {
@@ -22,11 +23,20 @@ namespace Bookshelf
         {
             services.AddDbContext<BookshelfContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = ApiKeyAuthenticationOptions.DefaultScheme;
+                options.DefaultChallengeScheme = ApiKeyAuthenticationOptions.DefaultScheme;
+            })
+            .AddApiKeySupport(options => {});
+
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddTransient<IBookRepository, BookRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IRatingRepository, RatingRepository>();
+            services.AddTransient<IApiKeyRepository, ApiKeyRepository>();
             services.AddTransient<BookValidator>();
             services.AddTransient<CategoryValidator>();
             services.AddTransient<RatingValidator>();
@@ -50,6 +60,7 @@ namespace Bookshelf
                 app.UseHsts();
             }
 
+            app.UseAuthentication();
             app.UseCors(builder =>
                 builder
                     .AllowAnyHeader()
