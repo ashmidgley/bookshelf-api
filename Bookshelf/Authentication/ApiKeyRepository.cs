@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bookshelf.Models;
 
-namespace Bookshelf.Authentication {
+namespace Bookshelf
+{
     public class ApiKeyRepository : IApiKeyRepository
     {
         private BookshelfContext _context;

@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Bookshelf.Authentication {
+namespace Bookshelf
+{
     public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
     {
         private readonly IApiKeyRepository _getAllApiKeysQuery;
