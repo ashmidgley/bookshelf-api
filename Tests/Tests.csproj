@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bookshelf\Bookshelf.csproj" />
+    <ProjectReference Include="..\Api\BookshelfApi.csproj" />
   </ItemGroup>
 
 </Project>

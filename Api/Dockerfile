@@ -5,16 +5,16 @@ EXPOSE 443
 
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
-COPY ["Bookshelf.csproj", "/src"]
-RUN dotnet restore "Bookshelf.csproj"
+COPY ["BookshelfApi.csproj", "/src"]
+RUN dotnet restore "BookshelfApi.csproj"
 COPY . .
 WORKDIR /src
-RUN dotnet build "Bookshelf.csproj" -c Release -o /app
+RUN dotnet build "BookshelfApi.csproj" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish "Bookshelf.csproj" -c Release -o /app
+RUN dotnet publish "BookshelfApi.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "Bookshelf.dll"]
+ENTRYPOINT ["dotnet", "BookshelfApi.dll"]
