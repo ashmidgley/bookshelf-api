@@ -3,9 +3,8 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Bookshelf
+namespace Bookshelf.Migrations
 {
     [DbContext(typeof(BookshelfContext))]
     partial class ApiContextModelSnapshot : ModelSnapshot
@@ -18,7 +17,7 @@ namespace Bookshelf
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Api.ApiKey", b =>
+            modelBuilder.Entity("Bookshelf.ApiKey", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,7 +34,7 @@ namespace Bookshelf
                     b.ToTable("ApiKeys");
                 });
 
-            modelBuilder.Entity("Api.Book", b =>
+            modelBuilder.Entity("Bookshelf.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -66,7 +65,7 @@ namespace Bookshelf
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Api.Category", b =>
+            modelBuilder.Entity("Bookshelf.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +80,7 @@ namespace Bookshelf
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Api.Rating", b =>
+            modelBuilder.Entity("Bookshelf.Rating", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
