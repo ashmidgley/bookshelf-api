@@ -3,15 +3,17 @@ using Bookshelf;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Tests
 {
-    public class RatingRepositoryTests
+    public class RatingTests
     {
         private readonly DbContextOptions<BookshelfContext> options;
         private RatingValidator Validator => new RatingValidator();
 
-        public RatingRepositoryTests()
+        public RatingTests()
         {
             options = new DbContextOptionsBuilder<BookshelfContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -20,7 +22,7 @@ namespace Tests
             using (var context = new BookshelfContext(options))
             {
                 context.Ratings.Add(new Rating { Description = "Mild", Code = "🔥" });
-                context.Ratings.Add(new Rating { Description = "Hot", Code = "🔥🔥🔥" });
+                context.Ratings.Add(new Rating { Description = "Medium", Code = "🔥🔥" });
                 context.SaveChanges();
             }
 
@@ -30,33 +32,8 @@ namespace Tests
             }
         }
 
-        /* Repository tests. */
-
         [Test]
-        public void GetAllRepositoryTest()
-        {
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new RatingRepository(context);
-                Assert.AreEqual(2, repository.GetAll().Result.Count);
-            }
-        }
-
-        [Test]
-        public void GetSingleRepositoryTest()
-        {
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new RatingRepository(context);
-                Assert.NotNull(repository.Get(1).Result);
-                Assert.Null(repository.Get(5).Result);
-            }
-        }
-
-        /* Controller tests. */
-
-        [Test]
-        public void GetAllControllerTest()
+        public void GetAllTest()
         {
             using (var context = new BookshelfContext(options))
             {
@@ -68,20 +45,61 @@ namespace Tests
         }
 
         [Test]
-        public void PostControllerTest()
+        public void PostTest()
         {
+            var ratingSuccess = new Rating { Description = "Hot", Code = "🔥🔥🔥" };
+            var ratingFail = new Rating();
             using (var context = new BookshelfContext(options))
             {
                 var repository = new RatingRepository(context);
                 var controller = new RatingsController(repository, Validator);
-                var rating = new Rating
-                {
-                    Description = "Sci-fi",
-                    Code = "🚀"
-                };
-                var response = controller.Post(rating);
-                rating.Id = 3;
-                Assert.AreEqual(rating, response.Value);
+                var responseOne = controller.Post(ratingSuccess);
+                ratingSuccess.Id = 3;
+                Assert.AreEqual(ratingSuccess, responseOne.Value);
+                var responseTwo = controller.Post(ratingFail);
+                Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+                Assert.IsNull(responseTwo.Value);
+            }
+        }
+
+        [Test]
+        public void UpdateTest()
+        {
+            var ratingSuccess = new Rating { Id = 1, Description = "Extra-mild", Code = "🔥" };
+            var ratingFail = new Rating();
+            using (var context = new BookshelfContext(options))
+            {
+                var repository = new RatingRepository(context);
+                var controller = new RatingsController(repository, Validator);
+                var responseOne = controller.Put(ratingSuccess);
+                Assert.AreEqual(ratingSuccess, responseOne.Value);
+                var responseTwo = controller.Put(ratingFail);
+                Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+                Assert.IsNull(responseTwo.Value);
+            }
+        }
+
+        [Test]
+        public void DeleteTest()
+        {
+            int idSuccess = 2;
+            int idFail = 5;
+            using (var context = new BookshelfContext(options))
+            {
+                var repository = new RatingRepository(context);
+                var controller = new RatingsController(repository, Validator);
+                var responseOne = controller.Delete(idSuccess);
+                Assert.AreEqual(idSuccess, responseOne.Value.Id);
+                var responseTwo = controller.Delete(idFail);
+                Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+                Assert.IsNull(responseTwo.Value);
+            }
+            var rating = new Rating { Description = "Medium", Code = "🔥🔥" };
+            using (var context = new BookshelfContext(options))
+            {
+                var repository = new RatingRepository(context);
+                var controller = new RatingsController(repository, Validator);
+                controller.Post(rating);
             }
         }
     }
