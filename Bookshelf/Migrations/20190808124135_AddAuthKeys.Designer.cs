@@ -20,7 +20,7 @@ namespace Bookshelf.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Api.ApiKey", b =>
+            modelBuilder.Entity("Bookshelf.ApiKey", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,7 +37,7 @@ namespace Bookshelf.Migrations
                     b.ToTable("ApiKeys");
                 });
 
-            modelBuilder.Entity("Api.Book", b =>
+            modelBuilder.Entity("Bookshelf.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +68,7 @@ namespace Bookshelf.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Api.Category", b =>
+            modelBuilder.Entity("Bookshelf.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -83,7 +83,7 @@ namespace Bookshelf.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Api.Rating", b =>
+            modelBuilder.Entity("Bookshelf.Rating", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

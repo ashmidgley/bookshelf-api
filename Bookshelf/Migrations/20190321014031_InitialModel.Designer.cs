@@ -20,7 +20,7 @@ namespace Bookshelf.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Api.Book", b =>
+            modelBuilder.Entity("Bookshelf.Book", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,7 +49,7 @@ namespace Bookshelf.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Api.Category", b =>
+            modelBuilder.Entity("Bookshelf.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
