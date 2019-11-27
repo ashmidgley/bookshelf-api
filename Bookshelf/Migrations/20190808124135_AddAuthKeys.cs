@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Reads.Migrations
+namespace Bookshelf.Migrations
 {
     public partial class AddAuthKeys : Migration
     {
