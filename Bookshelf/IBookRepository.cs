@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bookshelf.Models;
 
 namespace Bookshelf
 {

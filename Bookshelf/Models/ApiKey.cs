@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Bookshelf.Models 
+namespace Bookshelf 
 {
     public class ApiKey 
     {

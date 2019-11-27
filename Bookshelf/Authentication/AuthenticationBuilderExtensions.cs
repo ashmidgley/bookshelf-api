@@ -1,7 +1,8 @@
 using System;
 using Microsoft.AspNetCore.Authentication;
 
-namespace Bookshelf.Authentication {
+namespace Bookshelf
+{
     public static class AuthenticationBuilderExtensions
     {
         public static AuthenticationBuilder AddApiKeySupport(this AuthenticationBuilder authenticationBuilder, Action<ApiKeyAuthenticationOptions> options)

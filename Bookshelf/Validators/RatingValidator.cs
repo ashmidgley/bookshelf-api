@@ -1,7 +1,6 @@
 using FluentValidation;
-using Bookshelf.Models;
 
-namespace Bookshelf.Validators
+namespace Bookshelf
 {
     public class RatingValidator : AbstractValidator<Rating>
     {

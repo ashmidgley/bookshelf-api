@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Bookshelf.Models;
-using Bookshelf.Validators;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Bookshelf.Controllers
+namespace Bookshelf
 {
     [Authorize]
     [Route("api/[controller]")]

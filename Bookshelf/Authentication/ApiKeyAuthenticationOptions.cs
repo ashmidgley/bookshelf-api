@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 
-namespace Bookshelf.Authentication {
+namespace Bookshelf
+{
     public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     {
         public const string DefaultScheme = "API Key";
