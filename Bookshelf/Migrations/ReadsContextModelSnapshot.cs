@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 namespace Bookshelf.Migrations
 {
     [DbContext(typeof(BookshelfContext))]
-    partial class ApiContextModelSnapshot : ModelSnapshot
+    partial class BookshelfContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
