@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Bookshelf
+namespace Api
 {
     public interface IApiKeyRepository
     {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Bookshelf
+namespace Api
 {
     public class Rating
     {

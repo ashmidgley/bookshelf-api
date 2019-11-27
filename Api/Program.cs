@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-namespace Bookshelf
+namespace Api
 {
     public class Program
     {

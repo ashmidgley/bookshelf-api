@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 
-namespace Bookshelf
+namespace Api
 {
     public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     {

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bookshelf
+namespace Api
 {
     public class BookRepository : IBookRepository
     {

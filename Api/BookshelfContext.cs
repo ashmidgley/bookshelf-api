@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Bookshelf
+namespace Api
 {
     public class BookshelfContext : DbContext
     {

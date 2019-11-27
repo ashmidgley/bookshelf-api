@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Bookshelf
+namespace Api
 {
     public class RatingValidator : AbstractValidator<Rating>
     {
