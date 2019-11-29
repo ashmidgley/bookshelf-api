@@ -50,16 +50,18 @@ namespace Tests
         {
             var categorySuccess = new Category { Description = "Sci-fi", Code = "🚀" };
             var categoryFail = new Category();
+
             using (var context = new BookshelfContext(options))
             {
                 var repository = new CategoryRepository(context);
                 var controller = new CategoriesController(repository, Validator);
+
                 var responseOne = controller.Post(categorySuccess);
                 categorySuccess.Id = 3;
                 Assert.AreEqual(categorySuccess, responseOne.Value);
+
                 var responseTwo = controller.Post(categoryFail);
                 Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-                Assert.IsNull(responseTwo.Value);
             }
         }
 
@@ -68,15 +70,17 @@ namespace Tests
         {
             var categorySuccess = new Category { Id = 1, Description = "Fiction", Code = "🧟" };
             var categoryFail = new Category();
+
             using (var context = new BookshelfContext(options))
             {
                 var repository = new CategoryRepository(context);
                 var controller = new CategoriesController(repository, Validator);
+
                 var responseOne = controller.Put(categorySuccess);
                 Assert.AreEqual(categorySuccess, responseOne.Value);
+
                 var responseTwo = controller.Put(categoryFail);
                 Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-                Assert.IsNull(responseTwo.Value);
             }
         }
 
@@ -85,15 +89,17 @@ namespace Tests
         {
             int idSuccess = 2;
             int idFail = 5;
+
             using (var context = new BookshelfContext(options))
             {
                 var repository = new CategoryRepository(context);
                 var controller = new CategoriesController(repository, Validator);
+
                 var responseOne = controller.Delete(idSuccess);
                 Assert.AreEqual(idSuccess, responseOne.Value.Id);
+
                 var responseTwo = controller.Delete(idFail);
                 Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-                Assert.IsNull(responseTwo.Value);
             }
         }
     }
