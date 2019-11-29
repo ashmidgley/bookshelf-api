@@ -33,6 +33,7 @@ namespace Tests
         }
 
         [Test]
+        [Order(1)]
         public void GetAllTest()
         {
             using (var context = new BookshelfContext(options))
@@ -93,13 +94,6 @@ namespace Tests
                 var responseTwo = controller.Delete(idFail);
                 Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
                 Assert.IsNull(responseTwo.Value);
-            }
-            var category = new Category { Description = "Non-fiction", Code = "🧠" };
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new CategoryRepository(context);
-                var controller = new CategoriesController(repository, Validator);
-                controller.Post(category);
             }
         }
     }

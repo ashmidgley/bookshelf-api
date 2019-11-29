@@ -57,6 +57,7 @@ namespace Tests
         }
 
         [Test]
+        [Order(1)]
         public void GetAllTest()
         {
             using (var context = new BookshelfContext(options))
@@ -138,23 +139,6 @@ namespace Tests
                 var responseTwo = controller.Delete(idFail);
                 Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
                 Assert.IsNull(responseTwo.Value);
-            }
-            var book = new Book
-            {
-                Image = "choke.png",
-                CategoryId = 1,
-                StartedOn = new DateTime(2019,5,5),
-                FinishedOn = new DateTime(2019,9,27),
-                PageCount = 293,
-                Title = "Choke",
-                Author = "Chuck Palahniuk",
-                Summary = "Victor Mancini, a medical-school dropout, is an antihero for our deranged times..."
-            };
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new BookRepository(context);
-                var controller = new BooksController(repository, Validator);
-                controller.Post(book);
             }
         }
     }
