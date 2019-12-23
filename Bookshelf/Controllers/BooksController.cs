@@ -22,8 +22,7 @@ namespace Bookshelf
         [HttpGet]
         public ActionResult<IEnumerable<Book>> Get()
         {
-            List<Book> books = _bookRepository.GetAll().Result;
-            return books;
+            return _bookRepository.GetAll().Result;
         }
 
         // POST api/books
@@ -35,9 +34,8 @@ namespace Bookshelf
             {
                 return BadRequest(validation.ToString());
             }
-            int id = _bookRepository.Add(book);
-            book.Id = id;
-            return book;
+            var id = _bookRepository.Add(book).Result;
+            return _bookRepository.Get(id).Result;
         }
 
         // PUT api/books
@@ -50,7 +48,7 @@ namespace Bookshelf
                 return BadRequest(validation.ToString());
             }
             _bookRepository.Update(book);
-            return book;
+            return _bookRepository.Get(book.Id).Result;
         }
 
         // DELETE api/books
@@ -62,9 +60,9 @@ namespace Bookshelf
                 return BadRequest(ModelState);
             }
             var book = _bookRepository.Get(id).Result;
-            if (book == null)
+            if (book.Id == default)
             {
-                return BadRequest($"No book found for id: {id}");
+                return BadRequest($"Book with id {id} not found.");
             }
             _bookRepository.Delete(book);
             return book;

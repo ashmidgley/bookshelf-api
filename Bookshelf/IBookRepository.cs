@@ -5,10 +5,10 @@ namespace Bookshelf
 {
     public interface IBookRepository
     {
-        int Add(Book book);
-        void Delete(Book book);
+        Task<int> Add(Book book);
+        Task Delete(Book book);
         Task<Book> Get(int id);
         Task<List<Book>> GetAll();
-        void Update(Book book);
+        Task Update(Book book);
     }
 }

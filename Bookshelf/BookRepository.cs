@@ -22,26 +22,26 @@ namespace Bookshelf
         public async Task<Book> Get(int id)
         {
             return await _context.Books
-                .SingleOrDefaultAsync(b => b.Id == id);
+                .SingleAsync(b => b.Id == id);
         }
 
-        public int Add(Book book)
+        public async Task<int> Add(Book book)
         {
             _context.Books.Add(book);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return book.Id;
         }
 
-        public void Update(Book book)
+        public async Task Update(Book book)
         {
             _context.Books.Update(book);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
-        public void Delete(Book book)
+        public async Task Delete(Book book)
         {
             _context.Books.Remove(book);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
     }
 }

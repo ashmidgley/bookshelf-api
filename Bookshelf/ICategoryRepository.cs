@@ -5,10 +5,10 @@ namespace Bookshelf
 {
     public interface ICategoryRepository
     {
-        int Add(Category category);
-        void Delete(Category category);
+        Task<int> Add(Category category);
+        Task Delete(Category category);
         Task<Category> Get(int id);
         Task<List<Category>> GetAll();
-        void Update(Category category);
+        Task Update(Category category);
     }
 }
