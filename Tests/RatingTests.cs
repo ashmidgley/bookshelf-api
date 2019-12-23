@@ -1,106 +1,105 @@
 using NUnit.Framework;
 using Bookshelf;
-using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using FakeItEasy;
 
 namespace Tests
 {
     public class RatingTests
     {
-        private readonly DbContextOptions<BookshelfContext> options;
         private RatingValidator Validator => new RatingValidator();
-
-        public RatingTests()
+        private readonly List<Rating> TestRatings = new List<Rating>
         {
-            options = new DbContextOptionsBuilder<BookshelfContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            using (var context = new BookshelfContext(options))
-            {
-                context.Ratings.Add(new Rating { Description = "Mild", Code = "🔥" });
-                context.Ratings.Add(new Rating { Description = "Medium", Code = "🔥🔥" });
-                context.SaveChanges();
+            new Rating 
+            { 
+                Description = "Mild",
+                Code = "🔥"
+            },
+            new Rating 
+            { 
+                Description = "Medium",
+                Code = "🔥🔥"
             }
-
-            using (var context = new BookshelfContext(options))
-            {
-                Assert.AreEqual(2, context.Ratings.CountAsync().Result);
-            }
-        }
+        };
+        private readonly Rating TestRating = new Rating
+        { 
+            Description = "Extra-mild",
+            Code = "🔥"
+        };
 
         [Test]
-        [Order(1)]
         public void GetAllTest()
         {
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new RatingRepository(context);
-                var controller = new RatingsController(repository, Validator);
-                var ratings = controller.Get().Value.ToList();
-                Assert.AreEqual(2, ratings.Count);
-            }
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.GetAll()).Returns(TestRatings);
+            var controller = new RatingsController(repository, Validator);
+
+            var ratings = controller.Get().Value.ToList();
+            
+            Assert.AreEqual(TestRatings, ratings);
         }
 
         [Test]
         public void PostTest()
         {
-            var ratingSuccess = new Rating { Description = "Hot", Code = "🔥🔥🔥" };
+            const int id = 1;
+            var ratingSuccess = TestRating;
+            var result = TestRating;
+            result.Id = id;
             var ratingFail = new Rating();
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.Add(ratingSuccess)).Returns(id);
+            A.CallTo(() => repository.Get(id)).Returns(result);
+            var controller = new RatingsController(repository, Validator);
 
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new RatingRepository(context);
-                var controller = new RatingsController(repository, Validator);
+            var responseOne = controller.Post(ratingSuccess);
+            ratingSuccess.Id = id;
+            var responseTwo = controller.Post(ratingFail);
 
-                var responseOne = controller.Post(ratingSuccess);
-                ratingSuccess.Id = 3;
-                Assert.AreEqual(ratingSuccess, responseOne.Value);
-
-                var responseTwo = controller.Post(ratingFail);
-                Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-            }
+            Assert.AreEqual(ratingSuccess, responseOne.Value);
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
         [Test]
         public void UpdateTest()
         {
-            var ratingSuccess = new Rating { Id = 1, Description = "Extra-mild", Code = "🔥" };
+            const int id = 1;
+            var ratingSuccess = TestRating;
+            ratingSuccess.Id = id;
+            ratingSuccess.Description = "Updated description...";
             var ratingFail = new Rating();
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.Get(id)).Returns(ratingSuccess);
+            var controller = new RatingsController(repository, Validator);
 
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new RatingRepository(context);
-                var controller = new RatingsController(repository, Validator);
+            var responseOne = controller.Put(ratingSuccess);
+            var responseTwo = controller.Put(ratingFail);
 
-                var responseOne = controller.Put(ratingSuccess);
-                Assert.AreEqual(ratingSuccess, responseOne.Value);
-
-                var responseTwo = controller.Put(ratingFail);
-                Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-            }
+            Assert.AreEqual(ratingSuccess, responseOne.Value);
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
         [Test]
         public void DeleteTest()
         {
-            int idSuccess = 2;
-            int idFail = 5;
+            const int idSuccess = 1;
+            var result = TestRating;
+            result.Id = idSuccess;
+            const int idFail = 5;
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.Get(idSuccess)).Returns(result);
+            A.CallTo(() => repository.Get(idFail)).Returns(new Rating());
+            var controller = new RatingsController(repository, Validator);
 
-            using (var context = new BookshelfContext(options))
-            {
-                var repository = new RatingRepository(context);
-                var controller = new RatingsController(repository, Validator);
-
-                var responseOne = controller.Delete(idSuccess);
-                Assert.AreEqual(idSuccess, responseOne.Value.Id);
-
-                var responseTwo = controller.Delete(idFail);
-                Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-            }
+            var responseOne = controller.Delete(idSuccess);
+            var responseTwo = controller.Delete(idFail);
+            
+            Assert.AreEqual(result, responseOne.Value);
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+            Assert.AreEqual($"Rating with id {idFail} not found.", ((BadRequestObjectResult)responseTwo.Result).Value);
         }
     }
 }

@@ -31,6 +31,7 @@ namespace Bookshelf
 
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            
             services.AddTransient<IBookRepository, BookRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IRatingRepository, RatingRepository>();
@@ -52,10 +53,6 @@ namespace Bookshelf
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
             }
 
             app.UseAuthentication();

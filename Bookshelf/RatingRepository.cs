@@ -22,26 +22,26 @@ namespace Bookshelf
         public async Task<Rating> Get(int id)
         {
             return await _context.Ratings
-                .SingleOrDefaultAsync(b => b.Id == id);
+                .SingleAsync(r => r.Id == id);
         }
 
-        public int Add(Rating Rating)
+        public async Task<int> Add(Rating Rating)
         {
             _context.Ratings.Add(Rating);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Rating.Id;
         }
 
-        public void Update(Rating Rating)
+        public async Task Update(Rating Rating)
         {
             _context.Ratings.Update(Rating);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
-        public void Delete(Rating Rating)
+        public async Task Delete(Rating Rating)
         {
             _context.Ratings.Remove(Rating);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
     }
 }

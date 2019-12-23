@@ -22,8 +22,7 @@ namespace Bookshelf
         [HttpGet]
         public ActionResult<IEnumerable<Rating>> Get()
         {
-            List<Rating> ratings = _ratingRepository.GetAll().Result;
-            return ratings;
+            return _ratingRepository.GetAll().Result;
         }
 
         // POST api/ratings
@@ -35,9 +34,8 @@ namespace Bookshelf
             {
                 return BadRequest(validation.ToString());
             }
-            int id = _ratingRepository.Add(rating);
-            rating.Id = id;
-            return rating;
+            var id = _ratingRepository.Add(rating).Result;
+            return _ratingRepository.Get(id).Result;
         }
 
         // PUT api/ratings
@@ -50,7 +48,7 @@ namespace Bookshelf
                 return BadRequest(validation.ToString());
             }
             _ratingRepository.Update(rating);
-            return rating;
+            return _ratingRepository.Get(rating.Id).Result;
         }
 
         // DELETE api/ratings
@@ -62,9 +60,9 @@ namespace Bookshelf
                 return BadRequest(ModelState);
             }
             var rating = _ratingRepository.Get(id).Result;
-            if (rating == null)
+            if (rating.Id == default)
             {
-                return BadRequest($"No rating found for id: {id}");
+                return BadRequest($"Rating with id {id} not found.");
             }
             _ratingRepository.Delete(rating);
             return rating;

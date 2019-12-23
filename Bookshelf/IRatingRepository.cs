@@ -5,10 +5,10 @@ namespace Bookshelf
 {
     public interface IRatingRepository
     {
-        int Add(Rating Rating);
-        void Delete(Rating Rating);
+        Task<int> Add(Rating Rating);
+        Task Delete(Rating Rating);
         Task<Rating> Get(int id);
         Task<List<Rating>> GetAll();
-        void Update(Rating Rating);
+        Task Update(Rating Rating);
     }
 }

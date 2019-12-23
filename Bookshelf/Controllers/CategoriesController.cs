@@ -22,8 +22,7 @@ namespace Bookshelf
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            List<Category> categories = _categoryRepository.GetAll().Result;
-            return categories;
+            return _categoryRepository.GetAll().Result;
         }
 
         // POST api/categories
@@ -35,9 +34,8 @@ namespace Bookshelf
             {
                 return BadRequest(validation.ToString());
             }
-            int id = _categoryRepository.Add(category);
-            category.Id = id;
-            return category;
+            int id = _categoryRepository.Add(category).Result;
+            return _categoryRepository.Get(id).Result;
         }
 
         // PUT api/categories
@@ -50,7 +48,7 @@ namespace Bookshelf
                 return BadRequest(validation.ToString());
             }
             _categoryRepository.Update(category);
-            return category;
+            return _categoryRepository.Get(category.Id).Result;
         }
 
         // DELETE api/categories
@@ -62,9 +60,9 @@ namespace Bookshelf
                 return BadRequest(ModelState);
             }
             var category = _categoryRepository.Get(id).Result;
-            if (category == null)
+            if (category.Id == default)
             {
-                return BadRequest($"No category found for id: {id}");
+                return BadRequest($"Category with id {id} not found.");
             }
             _categoryRepository.Delete(category);
             return category;
