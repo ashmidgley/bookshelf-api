@@ -8,7 +8,7 @@ using FakeItEasy;
 
 namespace Tests
 {
-    public class RatingTests
+    public class RatingsControllerTests
     {
         private RatingValidator Validator => new RatingValidator();
         private readonly List<Rating> TestRatings = new List<Rating>
@@ -24,11 +24,12 @@ namespace Tests
                 Code = "🔥🔥"
             }
         };
-        private readonly Rating TestRating = new Rating
+        private readonly Rating RatingSuccess = new Rating
         { 
             Description = "Extra-mild",
             Code = "🔥"
         };
+        private readonly Rating RatingFail = new Rating();
 
         [Test]
         public void GetAllTest()
@@ -46,20 +47,17 @@ namespace Tests
         public void PostTest()
         {
             const int id = 1;
-            var ratingSuccess = TestRating;
-            var result = TestRating;
+            var result = RatingSuccess;
             result.Id = id;
-            var ratingFail = new Rating();
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.Add(ratingSuccess)).Returns(id);
+            A.CallTo(() => repository.Add(RatingSuccess)).Returns(id);
             A.CallTo(() => repository.Get(id)).Returns(result);
             var controller = new RatingsController(repository, Validator);
 
-            var responseOne = controller.Post(ratingSuccess);
-            ratingSuccess.Id = id;
-            var responseTwo = controller.Post(ratingFail);
+            var responseOne = controller.Post(RatingSuccess);
+            var responseTwo = controller.Post(RatingFail);
 
-            Assert.AreEqual(ratingSuccess, responseOne.Value);
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -67,18 +65,17 @@ namespace Tests
         public void UpdateTest()
         {
             const int id = 1;
-            var ratingSuccess = TestRating;
-            ratingSuccess.Id = id;
-            ratingSuccess.Description = "Updated description...";
-            var ratingFail = new Rating();
+            var updatedRating = RatingSuccess;
+            updatedRating.Id = id;
+            updatedRating.Description = "Updated description...";
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.Get(id)).Returns(ratingSuccess);
+            A.CallTo(() => repository.Get(id)).Returns(updatedRating);
             var controller = new RatingsController(repository, Validator);
 
-            var responseOne = controller.Put(ratingSuccess);
-            var responseTwo = controller.Put(ratingFail);
+            var responseOne = controller.Put(updatedRating);
+            var responseTwo = controller.Put(RatingFail);
 
-            Assert.AreEqual(ratingSuccess, responseOne.Value);
+            Assert.AreEqual(updatedRating, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -86,12 +83,11 @@ namespace Tests
         public void DeleteTest()
         {
             const int idSuccess = 1;
-            var result = TestRating;
+            var result = RatingSuccess;
             result.Id = idSuccess;
             const int idFail = 5;
             var repository = A.Fake<IRatingRepository>();
             A.CallTo(() => repository.Get(idSuccess)).Returns(result);
-            A.CallTo(() => repository.Get(idFail)).Returns(new Rating());
             var controller = new RatingsController(repository, Validator);
 
             var responseOne = controller.Delete(idSuccess);

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Tests
 {
-    public class BookTests
+    public class BooksControllerTests
     {        
         private BookValidator Validator => new BookValidator();
         private readonly List<Book> TestBooks = new List<Book>
@@ -36,7 +36,7 @@ namespace Tests
                 Summary = "Victor Mancini, a medical-school dropout, is an antihero for our deranged times..."
             }
         };
-        private readonly Book TestBook = new Book
+        private readonly Book BookSuccess = new Book
         {
             Image = "fight-club.png",
             CategoryId = 2,
@@ -47,6 +47,7 @@ namespace Tests
             Author = "Chucky Pal",
             Summary = "Updated summary..."
         };
+        private readonly Book BookFail = new Book();
 
         [Test]
         public void GetAllTest()
@@ -64,20 +65,17 @@ namespace Tests
         public void PostTest()
         {
             const int id = 1;
-            var bookSuccess = TestBook;
-            var result = TestBook;
+            var result = BookSuccess;
             result.Id = id;
-            var bookFail = new Book();
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.Add(bookSuccess)).Returns(id);
+            A.CallTo(() => repository.Add(BookSuccess)).Returns(id);
             A.CallTo(() => repository.Get(id)).Returns(result);
             var controller = new BooksController(repository, Validator);
 
-            var responseOne = controller.Post(bookSuccess);
-            bookSuccess.Id = id;
-            var responseTwo = controller.Post(bookFail);
+            var responseOne = controller.Post(BookSuccess);
+            var responseTwo = controller.Post(BookFail);
 
-            Assert.AreEqual(bookSuccess, responseOne.Value);
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -85,18 +83,18 @@ namespace Tests
         public void UpdateTest()
         {
             const int id = 1;
-            var bookSuccess = TestBook;
-            bookSuccess.Id = id;
-            bookSuccess.Summary = "Updated summary...";
+            var updatedBook = BookSuccess;
+            updatedBook.Id = id;
+            updatedBook.Summary = "Updated summary...";
             var bookFail = new Book();
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.Get(id)).Returns(bookSuccess);
+            A.CallTo(() => repository.Get(id)).Returns(updatedBook);
             var controller = new BooksController(repository, Validator);
 
-            var responseOne = controller.Put(bookSuccess);
+            var responseOne = controller.Put(updatedBook);
             var responseTwo = controller.Put(bookFail);
 
-            Assert.AreEqual(bookSuccess, responseOne.Value);
+            Assert.AreEqual(updatedBook, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -104,12 +102,11 @@ namespace Tests
         public void DeleteTest()
         {
             const int idSuccess = 1;
-            var result = TestBook;
+            var result = BookSuccess;
             result.Id = idSuccess;
             const int idFail = 5;
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.Get(idSuccess)).Returns(result);
-            A.CallTo(() => repository.Get(idFail)).Returns(new Book());
             var controller = new BooksController(repository, Validator);
             
             var responseOne = controller.Delete(idSuccess);

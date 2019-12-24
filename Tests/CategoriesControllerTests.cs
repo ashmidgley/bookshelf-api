@@ -7,7 +7,7 @@ using FakeItEasy;
 
 namespace Tests
 {
-    public class CategoryTests
+    public class CategoriesControllerTests
     {
         private CategoryValidator Validator => new CategoryValidator();
         private readonly List<Category> TestCategories = new List<Category>
@@ -23,11 +23,12 @@ namespace Tests
                 Code = "🧠"
             }
         };
-        private readonly Category TestCategory = new Category
+        private readonly Category CategorySuccess = new Category
         {
             Description = "Sci-fi",
             Code = "🚀"
         };
+        private readonly Category CategoryFail = new Category();
 
         [Test]
         public void GetAllTest()
@@ -45,20 +46,17 @@ namespace Tests
         public void PostTest()
         {
             const int id = 1;
-            var categorySuccess = TestCategory;
-            var result = TestCategory;
+            var result = CategorySuccess;
             result.Id = id;
-            var categoryFail = new Category();
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.Add(categorySuccess)).Returns(id);
+            A.CallTo(() => repository.Add(CategorySuccess)).Returns(id);
             A.CallTo(() => repository.Get(id)).Returns(result);
             var controller = new CategoriesController(repository, Validator);
 
-            var responseOne = controller.Post(categorySuccess);
-            categorySuccess.Id = id;
-            var responseTwo = controller.Post(categoryFail);
+            var responseOne = controller.Post(CategorySuccess);
+            var responseTwo = controller.Post(CategoryFail);
 
-            Assert.AreEqual(categorySuccess, responseOne.Value);
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -66,18 +64,17 @@ namespace Tests
         public void UpdateTest()
         {
             const int id = 1;
-            var categorySuccess = TestCategory;
-            categorySuccess.Id = id;
-            categorySuccess.Description = "Updated description...";
-            var categoryFail = new Category();
+            var updatedCategory = CategorySuccess;
+            updatedCategory.Id = id;
+            updatedCategory.Description = "Updated description...";
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.Get(id)).Returns(categorySuccess);
+            A.CallTo(() => repository.Get(id)).Returns(updatedCategory);
             var controller = new CategoriesController(repository, Validator);
 
-            var responseOne = controller.Put(categorySuccess);
-            var responseTwo = controller.Put(categoryFail);
+            var responseOne = controller.Put(updatedCategory);
+            var responseTwo = controller.Put(CategoryFail);
 
-            Assert.AreEqual(categorySuccess, responseOne.Value);
+            Assert.AreEqual(updatedCategory, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -85,12 +82,11 @@ namespace Tests
         public void DeleteTest()
         {
             const int idSuccess = 1;
-            var result = TestCategory;
+            var result = CategorySuccess;
             result.Id = idSuccess;
             const int idFail = 5;
             var repository = A.Fake<ICategoryRepository>();
             A.CallTo(() => repository.Get(idSuccess)).Returns(result);
-            A.CallTo(() => repository.Get(idFail)).Returns(new Category());
             var controller = new CategoriesController(repository, Validator);
             
             var responseOne = controller.Delete(idSuccess);
