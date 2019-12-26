@@ -20,9 +20,16 @@ namespace Api
 
         // GET api/ratings
         [HttpGet]
-        public ActionResult<IEnumerable<Rating>> Get()
+        public IEnumerable<Rating> GetAll()
         {
-            return _ratingRepository.GetAll().Result;
+            return _ratingRepository.GetAll();
+        }
+
+        // GET api/ratings/1
+        [HttpGet]
+        public ActionResult<Rating> Get(int id)
+        {
+            return _ratingRepository.Get(id);
         }
 
         // POST api/ratings
@@ -34,8 +41,8 @@ namespace Api
             {
                 return BadRequest(validation.ToString());
             }
-            var id = _ratingRepository.Add(rating).Result;
-            return _ratingRepository.Get(id).Result;
+            var id = _ratingRepository.Add(rating);
+            return _ratingRepository.Get(id);
         }
 
         // PUT api/ratings
@@ -48,7 +55,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             _ratingRepository.Update(rating);
-            return _ratingRepository.Get(rating.Id).Result;
+            return _ratingRepository.Get(rating.Id);
         }
 
         // DELETE api/ratings
@@ -59,12 +66,12 @@ namespace Api
             {
                 return BadRequest(ModelState);
             }
-            var rating = _ratingRepository.Get(id).Result;
+            var rating = _ratingRepository.Get(id);
             if (rating.Id == default)
             {
                 return BadRequest($"Rating with id {id} not found.");
             }
-            _ratingRepository.Delete(rating);
+            _ratingRepository.Delete(rating.Id);
             return rating;
         }
     }

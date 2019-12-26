@@ -38,7 +38,7 @@ namespace Tests
             A.CallTo(() => repository.GetAll()).Returns(TestRatings);
             var controller = new RatingsController(repository, Validator);
 
-            var ratings = controller.Get().Value.ToList();
+            var ratings = controller.GetAll();
             
             Assert.AreEqual(TestRatings, ratings);
         }
