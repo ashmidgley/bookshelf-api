@@ -20,9 +20,9 @@ namespace Api
 
         // GET api/categories
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> Get()
+        public IEnumerable<Category> Get()
         {
-            return _categoryRepository.GetAll().Result;
+            return _categoryRepository.GetAll();
         }
 
         // POST api/categories
@@ -34,8 +34,8 @@ namespace Api
             {
                 return BadRequest(validation.ToString());
             }
-            int id = _categoryRepository.Add(category).Result;
-            return _categoryRepository.Get(id).Result;
+            int id = _categoryRepository.Add(category);
+            return _categoryRepository.Get(id);
         }
 
         // PUT api/categories
@@ -48,7 +48,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             _categoryRepository.Update(category);
-            return _categoryRepository.Get(category.Id).Result;
+            return _categoryRepository.Get(category.Id);
         }
 
         // DELETE api/categories
@@ -59,12 +59,12 @@ namespace Api
             {
                 return BadRequest(ModelState);
             }
-            var category = _categoryRepository.Get(id).Result;
+            var category = _categoryRepository.Get(id);
             if (category.Id == default)
             {
                 return BadRequest($"Category with id {id} not found.");
             }
-            _categoryRepository.Delete(category);
+            _categoryRepository.Delete(category.Id);
             return category;
         }
     }
