@@ -20,9 +20,16 @@ namespace Api
 
         // GET api/categories
         [HttpGet]
-        public IEnumerable<Category> Get()
+        public IEnumerable<Category> GetAll()
         {
             return _categoryRepository.GetAll();
+        }
+
+        // GET api/categories/1
+        [HttpGet]
+        public ActionResult<Category> Get(int id)
+        {
+            return _categoryRepository.Get(id);
         }
 
         // POST api/categories

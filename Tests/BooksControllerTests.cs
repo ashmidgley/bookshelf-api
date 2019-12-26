@@ -63,7 +63,7 @@ namespace Tests
             A.CallTo(() => repository.GetAll()).Returns(TestBooks);
             var controller = new BooksController(repository, BookValidator, DtoValidator);
             
-            var books = controller.Get();
+            var books = controller.GetAll();
             
             Assert.AreEqual(TestBooks, books);
         }

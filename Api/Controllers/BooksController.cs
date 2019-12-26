@@ -22,9 +22,16 @@ namespace Api
 
         // GET api/books
         [HttpGet]
-        public IEnumerable<BookDto> Get()
+        public IEnumerable<BookDto> GetAll()
         {
             return _bookRepository.GetAll();
+        }
+
+        // GET api/books/1
+        [HttpGet]
+        public ActionResult<BookDto> Get(int id)
+        {
+            return _bookRepository.Get(id);
         }
 
         // POST api/books
