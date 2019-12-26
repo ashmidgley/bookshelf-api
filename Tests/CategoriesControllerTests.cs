@@ -37,7 +37,7 @@ namespace Tests
             A.CallTo(() => repository.GetAll()).Returns(TestCategories);
             var controller = new CategoriesController(repository, Validator);
 
-            var categories = controller.Get().Value;
+            var categories = controller.GetAll();
             
             Assert.AreEqual(TestCategories, categories);
         }

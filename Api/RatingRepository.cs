@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Api
 {
@@ -13,35 +12,37 @@ namespace Api
             _context = context;
         }
 
-        public async Task<List<Rating>> GetAll()
+        public IEnumerable<Rating> GetAll()
         {
-            return await _context.Ratings
-                .ToListAsync();
+            return  _context.Ratings
+                .ToList();
         }
 
-        public async Task<Rating> Get(int id)
+        public Rating Get(int id)
         {
-            return await _context.Ratings
-                .SingleAsync(r => r.Id == id);
+            return _context.Ratings
+                .Single(r => r.Id == id);
         }
 
-        public async Task<int> Add(Rating Rating)
+        public int Add(Rating Rating)
         {
             _context.Ratings.Add(Rating);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return Rating.Id;
         }
 
-        public async Task Update(Rating Rating)
+        public void Update(Rating Rating)
         {
             _context.Ratings.Update(Rating);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task Delete(Rating Rating)
+        public void Delete(int id)
         {
-            _context.Ratings.Remove(Rating);
-            await _context.SaveChangesAsync();
+            var rating = _context.Ratings
+                .Single(r => r.Id == id);
+            _context.Ratings.Remove(rating);
+            _context.SaveChanges();
         }
     }
 }

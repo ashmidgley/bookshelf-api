@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Api
 {
@@ -13,35 +12,37 @@ namespace Api
             _context = context;
         }
 
-        public async Task<List<Category>> GetAll()
+        public IEnumerable<Category> GetAll()
         {
-            return await _context.Categories
-                .ToListAsync();
+            return _context.Categories
+                .ToList();
         }
 
-        public async Task<Category> Get(int id)
+        public Category Get(int id)
         {
-            return await _context.Categories
-                .SingleAsync(c => c.Id == id);
+            return _context.Categories
+                .Single(c => c.Id == id);
         }
 
-        public async Task<int> Add(Category category)
+        public int Add(Category category)
         {
             _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return category.Id;
         }
 
-        public async Task Update(Category category)
+        public void Update(Category category)
         {
             _context.Categories.Update(category);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task Delete(Category category)
+        public void Delete(int id)
         {
+            var category = _context.Categories
+                .Single(c => c.Id == id);
             _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 }

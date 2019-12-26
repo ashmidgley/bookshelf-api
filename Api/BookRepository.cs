@@ -1,47 +1,52 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Api
 {
     public class BookRepository : IBookRepository
     {
         private readonly BookshelfContext _context;
+        private readonly IBookHelper _helper;
 
-        public BookRepository(BookshelfContext context)
+        public BookRepository(BookshelfContext context, IBookHelper helper)
         {
             _context = context;
+            _helper = helper;
         }
 
-        public async Task<List<Book>> GetAll()
+        public IEnumerable<BookDto> GetAll()
         {
-            return await _context.Books
-                .ToListAsync();
+            return _context.Books
+                .Select(b => _helper.ToBookDto(b));
         }
 
-        public async Task<Book> Get(int id)
+        public BookDto Get(int id)
         {
-            return await _context.Books
-                .SingleAsync(b => b.Id == id);
+            var book = _context.Books
+                .Single(b => b.Id == id);
+            return _helper.ToBookDto(book);
         }
 
-        public async Task<int> Add(Book book)
+        public int Add(Book book)
         {
             _context.Books.Add(book);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return book.Id;
         }
 
-        public async Task Update(Book book)
+        public void Update(BookDto dto)
         {
+            var book = _helper.ToBook(dto);
             _context.Books.Update(book);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task Delete(Book book)
+        public void Delete(int id)
         {
+            var book = _context.Books
+                .Single(b => b.Id == id);
             _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 }
