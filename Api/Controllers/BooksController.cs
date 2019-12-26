@@ -29,6 +29,7 @@ namespace Api
 
         // GET api/books/1
         [HttpGet]
+        [Route("{id}")]
         public ActionResult<BookDto> Get(int id)
         {
             return _bookRepository.Get(id);

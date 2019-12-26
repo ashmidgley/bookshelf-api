@@ -27,6 +27,7 @@ namespace Api
 
         // GET api/ratings/1
         [HttpGet]
+        [Route("{id}")]
         public ActionResult<Rating> Get(int id)
         {
             return _ratingRepository.Get(id);

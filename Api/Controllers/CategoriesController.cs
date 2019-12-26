@@ -27,6 +27,7 @@ namespace Api
 
         // GET api/categories/1
         [HttpGet]
+        [Route("{id}")]
         public ActionResult<Category> Get(int id)
         {
             return _categoryRepository.Get(id);
