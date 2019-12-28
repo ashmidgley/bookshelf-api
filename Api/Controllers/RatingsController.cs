@@ -18,19 +18,20 @@ namespace Api
             _validator = validator;
         }
 
-        // GET api/ratings
-        [HttpGet]
-        public IEnumerable<Rating> GetAll()
-        {
-            return _ratingRepository.GetAll();
-        }
-
         // GET api/ratings/1
         [HttpGet]
-        [Route("{id}")]
-        public ActionResult<Rating> Get(int id)
+        [Route("{ratingId}")]
+        public ActionResult<Rating> Get(int ratingId)
         {
-            return _ratingRepository.Get(id);
+            return _ratingRepository.GetRating(ratingId);
+        }
+
+        // GET api/ratings/user/1
+        [HttpGet]
+        [Route("user/{userId}")]
+        public IEnumerable<Rating> GetUserRatings(int userId)
+        {
+            return _ratingRepository.GetUserRatings(userId);
         }
 
         // POST api/ratings
@@ -43,7 +44,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             var id = _ratingRepository.Add(rating);
-            return _ratingRepository.Get(id);
+            return _ratingRepository.GetRating(id);
         }
 
         // PUT api/ratings
@@ -56,7 +57,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             _ratingRepository.Update(rating);
-            return _ratingRepository.Get(rating.Id);
+            return _ratingRepository.GetRating(rating.Id);
         }
 
         // DELETE api/ratings
@@ -67,7 +68,7 @@ namespace Api
             {
                 return BadRequest(ModelState);
             }
-            var rating = _ratingRepository.Get(id);
+            var rating = _ratingRepository.GetRating(id);
             if (rating.Id == default)
             {
                 return BadRequest($"Rating with id {id} not found.");

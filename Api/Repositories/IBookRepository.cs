@@ -4,8 +4,8 @@ namespace Api
 {
     public interface IBookRepository
     {
-        BookDto Get(int id);
-        IEnumerable<BookDto> GetAll();
+        IEnumerable<BookDto> GetUserBooks(int userId);
+        BookDto GetBook(int id);
         int Add(Book book);
         void Update(BookDto dto);
         void Delete(int id);

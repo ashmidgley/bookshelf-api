@@ -12,13 +12,13 @@ namespace Api
             _context = context;
         }
 
-        public IEnumerable<Rating> GetAll()
+        public IEnumerable<Rating> GetUserRatings(int userId)
         {
             return  _context.Ratings
-                .ToList();
+                .Where(r => r.UserId == userId);
         }
 
-        public Rating Get(int id)
+        public Rating GetRating(int id)
         {
             return _context.Ratings
                 .Single(r => r.Id == id);

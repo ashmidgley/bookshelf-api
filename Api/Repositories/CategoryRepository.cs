@@ -12,13 +12,13 @@ namespace Api
             _context = context;
         }
 
-        public IEnumerable<Category> GetAll()
+        public IEnumerable<Category> GetUserCategories(int userId)
         {
             return _context.Categories
-                .ToList();
+                .Where(c => c.UserId == userId);
         }
 
-        public Category Get(int id)
+        public Category GetCategory(int id)
         {
             return _context.Categories
                 .Single(c => c.Id == id);

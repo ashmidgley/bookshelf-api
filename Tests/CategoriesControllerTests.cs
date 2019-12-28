@@ -14,11 +14,15 @@ namespace Tests
         {
             new Category 
             {
+                Id = 1,
+                UserId = 1,
                 Description = "Fiction",
                 Code = "🧟"
             },
             new Category 
             { 
+                Id = 2,
+                UserId = 1,
                 Description = "Non-fiction",
                 Code = "🧠"
             }
@@ -33,11 +37,12 @@ namespace Tests
         [Test]
         public void GetAllTest()
         {
+            const int userId = 1;
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.GetAll()).Returns(TestCategories);
+            A.CallTo(() => repository.GetUserCategories(userId)).Returns(TestCategories);
             var controller = new CategoriesController(repository, Validator);
 
-            var categories = controller.GetAll();
+            var categories = controller.GetUserCategories(userId);
             
             Assert.AreEqual(TestCategories, categories);
         }
@@ -50,7 +55,7 @@ namespace Tests
             result.Id = id;
             var repository = A.Fake<ICategoryRepository>();
             A.CallTo(() => repository.Add(CategorySuccess)).Returns(id);
-            A.CallTo(() => repository.Get(id)).Returns(result);
+            A.CallTo(() => repository.GetCategory(id)).Returns(result);
             var controller = new CategoriesController(repository, Validator);
 
             var responseOne = controller.Post(CategorySuccess);
@@ -68,7 +73,7 @@ namespace Tests
             updatedCategory.Id = id;
             updatedCategory.Description = "Updated description...";
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.Get(id)).Returns(updatedCategory);
+            A.CallTo(() => repository.GetCategory(id)).Returns(updatedCategory);
             var controller = new CategoriesController(repository, Validator);
 
             var responseOne = controller.Put(updatedCategory);
@@ -86,7 +91,7 @@ namespace Tests
             result.Id = idSuccess;
             const int idFail = 5;
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.Get(idSuccess)).Returns(result);
+            A.CallTo(() => repository.GetCategory(idSuccess)).Returns(result);
             var controller = new CategoriesController(repository, Validator);
             
             var responseOne = controller.Delete(idSuccess);
