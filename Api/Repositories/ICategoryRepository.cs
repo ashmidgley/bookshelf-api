@@ -4,8 +4,8 @@ namespace Api
 {
     public interface ICategoryRepository
     {
-        IEnumerable<Category> GetAll();
-        Category Get(int id);
+        IEnumerable<Category> GetUserCategories(int userId);
+        Category GetCategory(int id);
         int Add(Category category);
         void Update(Category category);
         void Delete(int id);

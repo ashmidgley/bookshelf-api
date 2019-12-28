@@ -20,19 +20,20 @@ namespace Api
             _dtoValidator = dtoValidator;
         }
 
-        // GET api/books
-        [HttpGet]
-        public IEnumerable<BookDto> GetAll()
-        {
-            return _bookRepository.GetAll();
-        }
-
         // GET api/books/1
         [HttpGet]
-        [Route("{id}")]
-        public ActionResult<BookDto> Get(int id)
+        [Route("{bookId}")]
+        public ActionResult<BookDto> GetBook(int bookId)
         {
-            return _bookRepository.Get(id);
+            return _bookRepository.GetBook(bookId);
+        }
+
+        // GET api/books/user/1
+        [HttpGet]
+        [Route("user/{userId}")]
+        public IEnumerable<BookDto> GetUserBooks(int userId)
+        {
+            return _bookRepository.GetUserBooks(userId);
         }
 
         // POST api/books
@@ -45,7 +46,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             var id = _bookRepository.Add(book);
-            return _bookRepository.Get(id);
+            return _bookRepository.GetBook(id);
         }
 
         // PUT api/books
@@ -58,7 +59,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             _bookRepository.Update(dto);
-            return _bookRepository.Get(dto.Id);
+            return _bookRepository.GetBook(dto.Id);
         }
 
         // DELETE api/books
@@ -69,7 +70,7 @@ namespace Api
             {
                 return BadRequest(ModelState);
             }
-            var dto = _bookRepository.Get(id);
+            var dto = _bookRepository.GetBook(id);
             if (dto.Id == default)
             {
                 return BadRequest($"Book with id {id} not found.");

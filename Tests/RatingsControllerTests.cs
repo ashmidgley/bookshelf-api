@@ -34,11 +34,12 @@ namespace Tests
         [Test]
         public void GetAllTest()
         {
+            const int userId = 1;
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.GetAll()).Returns(TestRatings);
+            A.CallTo(() => repository.GetUserRatings(userId)).Returns(TestRatings);
             var controller = new RatingsController(repository, Validator);
 
-            var ratings = controller.GetAll();
+            var ratings = controller.GetUserRatings(userId);
             
             Assert.AreEqual(TestRatings, ratings);
         }
@@ -51,7 +52,7 @@ namespace Tests
             result.Id = id;
             var repository = A.Fake<IRatingRepository>();
             A.CallTo(() => repository.Add(RatingSuccess)).Returns(id);
-            A.CallTo(() => repository.Get(id)).Returns(result);
+            A.CallTo(() => repository.GetRating(id)).Returns(result);
             var controller = new RatingsController(repository, Validator);
 
             var responseOne = controller.Post(RatingSuccess);
@@ -69,7 +70,7 @@ namespace Tests
             updatedRating.Id = id;
             updatedRating.Description = "Updated description...";
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.Get(id)).Returns(updatedRating);
+            A.CallTo(() => repository.GetRating(id)).Returns(updatedRating);
             var controller = new RatingsController(repository, Validator);
 
             var responseOne = controller.Put(updatedRating);
@@ -87,7 +88,7 @@ namespace Tests
             result.Id = idSuccess;
             const int idFail = 5;
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.Get(idSuccess)).Returns(result);
+            A.CallTo(() => repository.GetRating(idSuccess)).Returns(result);
             var controller = new RatingsController(repository, Validator);
 
             var responseOne = controller.Delete(idSuccess);

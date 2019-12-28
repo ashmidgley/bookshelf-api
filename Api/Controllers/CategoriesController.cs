@@ -18,19 +18,20 @@ namespace Api
             _validator = validator;
         }
 
-        // GET api/categories
-        [HttpGet]
-        public IEnumerable<Category> GetAll()
-        {
-            return _categoryRepository.GetAll();
-        }
-
         // GET api/categories/1
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<Category> Get(int id)
+        public ActionResult<Category> GetCategory(int id)
         {
-            return _categoryRepository.Get(id);
+            return _categoryRepository.GetCategory(id);
+        }
+
+        // GET api/categories/user/1
+        [HttpGet]
+        [Route("user/{userId}")]
+        public IEnumerable<Category> GetUserCategories(int userId)
+        {
+            return _categoryRepository.GetUserCategories(userId);
         }
 
         // POST api/categories
@@ -43,7 +44,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             int id = _categoryRepository.Add(category);
-            return _categoryRepository.Get(id);
+            return _categoryRepository.GetCategory(id);
         }
 
         // PUT api/categories
@@ -56,7 +57,7 @@ namespace Api
                 return BadRequest(validation.ToString());
             }
             _categoryRepository.Update(category);
-            return _categoryRepository.Get(category.Id);
+            return _categoryRepository.GetCategory(category.Id);
         }
 
         // DELETE api/categories
@@ -67,7 +68,7 @@ namespace Api
             {
                 return BadRequest(ModelState);
             }
-            var category = _categoryRepository.Get(id);
+            var category = _categoryRepository.GetCategory(id);
             if (category.Id == default)
             {
                 return BadRequest($"Category with id {id} not found.");

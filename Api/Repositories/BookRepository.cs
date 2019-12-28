@@ -14,13 +14,14 @@ namespace Api
             _helper = helper;
         }
 
-        public IEnumerable<BookDto> GetAll()
+        public IEnumerable<BookDto> GetUserBooks(int userId)
         {
             return _context.Books
+                .Where(b => b.UserId == userId)
                 .Select(b => _helper.ToBookDto(b));
         }
 
-        public BookDto Get(int id)
+        public BookDto GetBook(int id)
         {
             var book = _context.Books
                 .Single(b => b.Id == id);

@@ -7,6 +7,7 @@ namespace Api
             return new BookDto
             {
                 Id = book.Id,
+                UserId = book.UserId,
                 CategoryId = book.CategoryId,
                 RatingId = book.RatingId,
                 Image = book.Image,
@@ -26,6 +27,7 @@ namespace Api
             return new Book
             {
                 Id = dto.Id,
+                UserId = dto.UserId,
                 CategoryId = dto.CategoryId,
                 RatingId = dto.RatingId,
                 Image = dto.Image,
