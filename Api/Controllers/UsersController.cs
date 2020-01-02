@@ -18,7 +18,7 @@ namespace Api
 
         // GET api/users
         [HttpGet]
-        public IEnumerable<User> GetAll()
+        public IEnumerable<UserDto> GetAll()
         {
             return _userRepository.GetAll();
         }
@@ -26,7 +26,7 @@ namespace Api
         // GET api/users/1
         [HttpGet]
         [Route("{id}")]
-        public ActionResult<User> Get(int id)
+        public ActionResult<UserDto> Get(int id)
         {
             return _userRepository.GetUser(id);
         }

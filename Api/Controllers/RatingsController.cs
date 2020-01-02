@@ -28,6 +28,7 @@ namespace Api
 
         // GET api/ratings/user/1
         [HttpGet]
+        [AllowAnonymous]
         [Route("user/{userId}")]
         public IEnumerable<Rating> GetUserRatings(int userId)
         {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api
 {
   [Route("api/[controller]")]
-  public class TokenController : Controller
+  public class TokenController : ControllerBase
   {
         private readonly ITokenRepository _tokenRepository;
         private readonly ITokenHelper _tokenHelper;
@@ -25,10 +25,10 @@ namespace Api
             {
               return Unauthorized();
             }
-            var user = _userRepository.GetUser(login.Username);
             return new TokenDto 
             { 
-                Token = _tokenHelper.BuildToken(user)
+                Token = _tokenHelper.BuildToken(),
+                User = _userRepository.GetUser(login.Username)
             };
         }
     }

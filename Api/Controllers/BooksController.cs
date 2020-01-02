@@ -30,6 +30,7 @@ namespace Api
 
         // GET api/books/user/1
         [HttpGet]
+        [AllowAnonymous]
         [Route("user/{userId}")]
         public IEnumerable<BookDto> GetUserBooks(int userId)
         {
