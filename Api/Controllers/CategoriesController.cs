@@ -28,6 +28,7 @@ namespace Api
 
         // GET api/categories/user/1
         [HttpGet]
+        [AllowAnonymous]
         [Route("user/{userId}")]
         public IEnumerable<Category> GetUserCategories(int userId)
         {

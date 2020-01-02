@@ -12,21 +12,24 @@ namespace Api
             _context = context;
         }
 
-        public IEnumerable<User> GetAll()
+        public IEnumerable<UserDto> GetAll()
         {
             return _context.Users
+                .Select(u => new UserDto { Id = u.Id, Email = u.Email })
                 .ToList();
         }
 
-        public User GetUser(string email)
+        public UserDto GetUser(string email)
         {
             return _context.Users
+                .Select(u => new UserDto { Id = u.Id, Email = u.Email })
                 .Single(u => u.Email.Equals(email));
         }
 
-        public User GetUser(int id)
+        public UserDto GetUser(int id)
         {
             return _context.Users
+                .Select(u => new UserDto { Id = u.Id, Email = u.Email })
                 .Single(u => u.Id == id);
         }
     }

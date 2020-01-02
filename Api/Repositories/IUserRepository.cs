@@ -4,8 +4,8 @@ namespace Api
 {
     public interface IUserRepository
     {
-        IEnumerable<User> GetAll();
-        User GetUser(string email);
-        User GetUser(int id);
+        IEnumerable<UserDto> GetAll();
+        UserDto GetUser(string email);
+        UserDto GetUser(int id);
     }
 }

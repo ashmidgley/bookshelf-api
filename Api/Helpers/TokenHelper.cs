@@ -15,7 +15,7 @@ namespace Api
             _config = config;
         }
 
-        public string BuildToken(User user)
+        public string BuildToken()
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
