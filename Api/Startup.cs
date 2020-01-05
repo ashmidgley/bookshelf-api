@@ -47,9 +47,8 @@ namespace Api
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IRatingRepository, RatingRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<ITokenRepository, TokenRepository>();
             services.AddTransient<IBookHelper, BookHelper>();
-            services.AddTransient<ITokenHelper, TokenHelper>();
+            services.AddTransient<IUserHelper, UserHelper>();
             services.AddTransient<BookValidator>();
             services.AddTransient<BookDtoValidator>();
             services.AddTransient<CategoryValidator>();
