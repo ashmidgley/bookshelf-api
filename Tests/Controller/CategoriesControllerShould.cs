@@ -7,7 +7,7 @@ using FakeItEasy;
 
 namespace Tests
 {
-    public class CategoriesControllerTests
+    public class CategoriesControllerShould
     {
         private CategoryValidator Validator => new CategoryValidator();
         private readonly List<Category> TestCategories = new List<Category>
@@ -35,7 +35,7 @@ namespace Tests
         private readonly Category CategoryFail = new Category();
 
         [Test]
-        public void GetAllTest()
+        public void ReturnAllCategories()
         {
             const int userId = 1;
             var repository = A.Fake<ICategoryRepository>();
@@ -48,7 +48,7 @@ namespace Tests
         }
 
         [Test]
-        public void PostTest()
+        public void CreateNewCategory()
         {
             const int id = 1;
             var result = CategorySuccess;
@@ -66,7 +66,7 @@ namespace Tests
         }
 
         [Test]
-        public void UpdateTest()
+        public void UpdateExistingCategory()
         {
             const int id = 1;
             var updatedCategory = CategorySuccess;
@@ -84,7 +84,7 @@ namespace Tests
         }
 
         [Test]
-        public void DeleteTest()
+        public void DeleteCategory()
         {
             const int idSuccess = 1;
             var result = CategorySuccess;
