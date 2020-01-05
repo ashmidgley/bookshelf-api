@@ -6,29 +6,80 @@ namespace Tests
 {
     public class UsersControllerShould
     {
-        [Test]
-        public void ReturnTokenDto_WhenAuthorizedUserCallsLogin()
+        LoginDtoValidator _loginValidator => new LoginDtoValidator();
+        LoginDto model = new LoginDto
         {
-            var login = new LoginDto
-            {
-                Username = "Mike Tyson",
-                Password = "password"
-            };
-            var user = new UserDto
-            {
-                Id = 1,
-                Email = "Mike Tyson"
-            };
+            Email = "Mike Tyson",
+            Password = "password"
+        };
+        UserDto userSuccess = new UserDto
+        {
+            Id = 1,
+            Email = "Mike Tyson"
+        };
+
+        [Test]
+        public void ReturnTokenAndUser_WhenAuthorizedUserCallsLogin()
+        {
             var userHelper = A.Fake<IUserHelper>();
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userHelper.BuildToken()).Returns("token");
             A.CallTo(() => userRepository.Authenticate(A<LoginDto>.Ignored)).Returns(true);
-            A.CallTo(() => userRepository.GetUser(A<string>.Ignored)).Returns(user);
-            var usersController = new UsersController(userRepository, userHelper);
+            A.CallTo(() => userHelper.BuildToken()).Returns("token");
+            A.CallTo(() => userRepository.GetUser(A<string>.Ignored)).Returns(userSuccess);
+            var usersController = new UsersController(userRepository, userHelper, _loginValidator);
 
-            var response = usersController.Login(login);
+            var response = usersController.Login(model);
 
-            Assert.IsInstanceOf<TokenDto>(response.Value);
+            Assert.NotNull(response.Value.Token);
+            Assert.NotNull(response.Value.User);
+            Assert.Null(response.Value.Error);
+        }
+
+        [Test]
+        public void ReturnError_WhenUnauthorizedUserCallsLogin()
+        {
+            var userHelper = A.Fake<IUserHelper>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.Authenticate(A<LoginDto>.Ignored)).Returns(false);
+            var usersController = new UsersController(userRepository, userHelper, _loginValidator);
+
+            var response = usersController.Login(model);
+
+            Assert.Null(response.Value.Token);
+            Assert.Null(response.Value.User);
+            Assert.AreEqual("Incorrect credentials. Please try again.", response.Value.Error);
+        }
+
+        [Test]
+        public void ReturnTokenAndUser_WhenRegisterModelCorrect()
+        {
+            var userHelper = A.Fake<IUserHelper>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(false);
+            A.CallTo(() => userHelper.BuildToken()).Returns("token");
+            A.CallTo(() => userRepository.GetUser(A<string>.Ignored)).Returns(userSuccess);
+            var usersController = new UsersController(userRepository, userHelper, _loginValidator);
+
+            var response = usersController.Register(model);
+
+            Assert.NotNull(response.Value.Token);
+            Assert.NotNull(response.Value.User);
+            Assert.Null(response.Value.Error);
+        }
+
+        [Test]
+        public void ReturnError_WhenRegisteringUsernameAlreadyExists()
+        {
+            var userHelper = A.Fake<IUserHelper>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(true);
+            var usersController = new UsersController(userRepository, userHelper, _loginValidator);
+
+            var response = usersController.Register(model);
+
+            Assert.Null(response.Value.Token);
+            Assert.Null(response.Value.User);
+            Assert.AreEqual("Email already in use. Please try another.", response.Value.Error);
         }
     }
 }
