@@ -11,11 +11,13 @@ namespace Api
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
+        private readonly LoginDtoValidator _loginValidator;
 
-        public UsersController(IUserRepository userRepository, IUserHelper userHelper)
+        public UsersController(IUserRepository userRepository, IUserHelper userHelper, LoginDtoValidator loginValidator)
         {
             _userRepository = userRepository;
             _userHelper = userHelper;
+            _loginValidator = loginValidator;
         }
 
         // GET api/users
@@ -38,14 +40,22 @@ namespace Api
         [Route("login")]
         public ActionResult<TokenDto> Login([FromBody]LoginDto login)
         {
+            var validation = _loginValidator.Validate(login);
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.ToString());
+            }
             if (!_userRepository.Authenticate(login))
             {
-                return Unauthorized();
+                return new TokenDto
+                {
+                    Error = "Incorrect credentials. Please try again."
+                };
             }
             return new TokenDto 
             { 
                 Token = _userHelper.BuildToken(),
-                User = _userRepository.GetUser(login.Username)
+                User = _userRepository.GetUser(login.Email)
             };
         }
 
@@ -54,9 +64,17 @@ namespace Api
         [Route("register")]
         public ActionResult<TokenDto> Register(LoginDto login)
         {
-            if(_userRepository.UserPresent(login.Username)) 
+            var validation = _loginValidator.Validate(login);
+            if (!validation.IsValid)
             {
-                return Unauthorized();
+                return BadRequest(validation.ToString());
+            }
+            if(_userRepository.UserPresent(login.Email)) 
+            {
+                return new TokenDto
+                {
+                    Error = "Email already in use. Please try another."
+                };
             }
             var id = _userRepository.Add(login);
             return new TokenDto 

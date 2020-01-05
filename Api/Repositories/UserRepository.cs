@@ -39,7 +39,7 @@ namespace Api
         {
             var user = new User
             {
-                Email = login.Username,
+                Email = login.Email,
                 PasswordHash = _userHelper.HashPassword(login.Password),
             };
             _context.Users.Add(user);
@@ -50,9 +50,9 @@ namespace Api
         public bool Authenticate(LoginDto login)
         {
             var user = _context.Users
-                .SingleOrDefault(u => u.Email.Equals(login.Username));
+                .SingleOrDefault(u => u.Email.Equals(login.Email));
 
-            if(user.Id == default)
+            if(user == default)
             {
                 return false;
             }
