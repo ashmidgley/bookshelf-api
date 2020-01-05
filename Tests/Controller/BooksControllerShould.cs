@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Tests
 {
-    public class BooksControllerTests
+    public class BooksControllerShould
     {        
         private BookValidator BookValidator => new BookValidator();
         private BookDtoValidator DtoValidator => new BookDtoValidator();
@@ -59,7 +59,7 @@ namespace Tests
         private readonly BookDto BookFail = new BookDto();
 
         [Test]
-        public void GetAllTest()
+        public void ReturnAllBooks()
         {
             const int userId = 1;
             var repository = A.Fake<IBookRepository>();
@@ -72,7 +72,7 @@ namespace Tests
         }
 
         [Test]
-        public void PostTest()
+        public void AddNewBook()
         {
             var bookSuccess = new Book
             {
@@ -99,7 +99,7 @@ namespace Tests
         }
 
         [Test]
-        public void UpdateTest()
+        public void UpdateExistingBook()
         {
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetBook(BookSuccess.Id)).Returns(BookSuccess);
@@ -113,7 +113,7 @@ namespace Tests
         }
 
         [Test]
-        public void DeleteTest()
+        public void DeleteBook()
         {
             const int idFail = 5;
             var repository = A.Fake<IBookRepository>();

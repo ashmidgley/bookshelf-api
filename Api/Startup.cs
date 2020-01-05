@@ -47,13 +47,13 @@ namespace Api
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IRatingRepository, RatingRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<ITokenRepository, TokenRepository>();
             services.AddTransient<IBookHelper, BookHelper>();
-            services.AddTransient<ITokenHelper, TokenHelper>();
+            services.AddTransient<IUserHelper, UserHelper>();
             services.AddTransient<BookValidator>();
             services.AddTransient<BookDtoValidator>();
             services.AddTransient<CategoryValidator>();
             services.AddTransient<RatingValidator>();
+            services.AddTransient<LoginDtoValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

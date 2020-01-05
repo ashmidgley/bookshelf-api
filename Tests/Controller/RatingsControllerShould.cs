@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using Api;
-using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using FakeItEasy;
 
 namespace Tests
 {
-    public class RatingsControllerTests
+    public class RatingsControllerShould
     {
         private RatingValidator Validator => new RatingValidator();
         private readonly List<Rating> TestRatings = new List<Rating>
@@ -32,7 +31,7 @@ namespace Tests
         private readonly Rating RatingFail = new Rating();
 
         [Test]
-        public void GetAllTest()
+        public void GetAllRatings()
         {
             const int userId = 1;
             var repository = A.Fake<IRatingRepository>();
@@ -45,7 +44,7 @@ namespace Tests
         }
 
         [Test]
-        public void PostTest()
+        public void CreateNewRating()
         {
             const int id = 1;
             var result = RatingSuccess;
@@ -63,7 +62,7 @@ namespace Tests
         }
 
         [Test]
-        public void UpdateTest()
+        public void UpdateExistingRating()
         {
             const int id = 1;
             var updatedRating = RatingSuccess;
@@ -81,7 +80,7 @@ namespace Tests
         }
 
         [Test]
-        public void DeleteTest()
+        public void DeleteRating()
         {
             const int idSuccess = 1;
             var result = RatingSuccess;
