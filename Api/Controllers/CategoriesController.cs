@@ -108,7 +108,7 @@ namespace Api
 
             _categoryRepository.Delete(category.Id);
             
-            return category;
+            return current;
         }
     }
 }

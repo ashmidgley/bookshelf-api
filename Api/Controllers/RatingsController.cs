@@ -109,7 +109,7 @@ namespace Api
 
             _ratingRepository.Delete(rating.Id);
 
-            return _ratingRepository.GetRating(rating.Id);
+            return current;
         }
     }
 }

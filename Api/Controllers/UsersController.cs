@@ -73,8 +73,7 @@ namespace Api
 
             return new TokenDto 
             { 
-                Token = _userHelper.BuildToken(user),
-                User = user
+                Token = _userHelper.BuildToken(user)
             };
         }
 
@@ -103,8 +102,7 @@ namespace Api
 
             return new TokenDto 
             { 
-                Token = _userHelper.BuildToken(user),
-                User = user
+                Token = _userHelper.BuildToken(user)
             };
         }
     }

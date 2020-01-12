@@ -111,7 +111,7 @@ namespace Api
 
             _bookRepository.Delete(dto.Id);
             
-            return _bookRepository.GetBook(dto.Id);
+            return current;
         }
     }
 }

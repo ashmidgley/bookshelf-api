@@ -22,6 +22,7 @@ namespace Api
             var claims = new[]
             {
                 new Claim("Id", user.Id.ToString()),
+                new Claim("Email", user.Email),
                 new Claim("IsAdmin", user.IsAdmin.ToString())
             };
 

@@ -31,7 +31,6 @@ namespace Tests
             var response = usersController.Login(model);
 
             Assert.NotNull(response.Value.Token);
-            Assert.NotNull(response.Value.User);
             Assert.Null(response.Value.Error);
         }
 
@@ -46,7 +45,6 @@ namespace Tests
             var response = usersController.Login(model);
 
             Assert.Null(response.Value.Token);
-            Assert.Null(response.Value.User);
             Assert.AreEqual("Incorrect credentials. Please try again.", response.Value.Error);
         }
 
@@ -63,7 +61,6 @@ namespace Tests
             var response = usersController.Register(model);
 
             Assert.NotNull(response.Value.Token);
-            Assert.NotNull(response.Value.User);
             Assert.Null(response.Value.Error);
         }
 
@@ -78,7 +75,6 @@ namespace Tests
             var response = usersController.Register(model);
 
             Assert.Null(response.Value.Token);
-            Assert.Null(response.Value.User);
             Assert.AreEqual("Email already in use. Please try another.", response.Value.Error);
         }
     }
