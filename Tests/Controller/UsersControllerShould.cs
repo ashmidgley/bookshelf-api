@@ -24,7 +24,7 @@ namespace Tests
             var userHelper = A.Fake<IUserHelper>();
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.Authenticate(A<LoginDto>.Ignored)).Returns(true);
-            A.CallTo(() => userHelper.BuildToken()).Returns("token");
+            A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns("token");
             A.CallTo(() => userRepository.GetUser(A<string>.Ignored)).Returns(userSuccess);
             var usersController = new UsersController(userRepository, userHelper, _loginValidator);
 
@@ -56,7 +56,7 @@ namespace Tests
             var userHelper = A.Fake<IUserHelper>();
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(false);
-            A.CallTo(() => userHelper.BuildToken()).Returns("token");
+            A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns("token");
             A.CallTo(() => userRepository.GetUser(A<string>.Ignored)).Returns(userSuccess);
             var usersController = new UsersController(userRepository, userHelper, _loginValidator);
 

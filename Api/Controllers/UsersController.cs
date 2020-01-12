@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,18 +21,32 @@ namespace Api
             _loginValidator = loginValidator;
         }
 
-        // GET api/users
         [HttpGet]
-        public IEnumerable<UserDto> GetAll()
+        public ActionResult<List<UserDto>> GetAll()
         {
-            return _userRepository.GetAll();
+            var currentUser = HttpContext.User;
+            bool admin = bool.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("IsAdmin")).Value);
+
+            if(!admin)
+            {
+                return Unauthorized();
+            }
+            
+            return _userRepository.GetAll().ToList();
         }
 
-        // GET api/users/1
         [HttpGet]
         [Route("{id}")]
         public ActionResult<UserDto> Get(int id)
         {
+            var currentUser = HttpContext.User;
+            bool admin = bool.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("IsAdmin")).Value);
+
+            if(!admin)
+            {
+                return Unauthorized();
+            }
+
             return _userRepository.GetUser(id);
         }
 
@@ -45,6 +60,7 @@ namespace Api
             {
                 return BadRequest(validation.ToString());
             }
+
             if (!_userRepository.Authenticate(login))
             {
                 return new TokenDto
@@ -52,10 +68,13 @@ namespace Api
                     Error = "Incorrect credentials. Please try again."
                 };
             }
+
+            var user = _userRepository.GetUser(login.Email);
+
             return new TokenDto 
             { 
-                Token = _userHelper.BuildToken(),
-                User = _userRepository.GetUser(login.Email)
+                Token = _userHelper.BuildToken(user),
+                User = user
             };
         }
 
@@ -65,10 +84,12 @@ namespace Api
         public ActionResult<TokenDto> Register(LoginDto login)
         {
             var validation = _loginValidator.Validate(login);
+
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+
             if(_userRepository.UserPresent(login.Email)) 
             {
                 return new TokenDto
@@ -76,11 +97,14 @@ namespace Api
                     Error = "Email already in use. Please try another."
                 };
             }
+
             var id = _userRepository.Add(login);
+            var user = _userRepository.GetUser(id);
+
             return new TokenDto 
             { 
-                Token = _userHelper.BuildToken(),
-                User = _userRepository.GetUser(id)
+                Token = _userHelper.BuildToken(user),
+                User = user
             };
         }
     }

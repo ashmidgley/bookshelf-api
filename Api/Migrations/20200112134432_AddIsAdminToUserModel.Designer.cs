@@ -4,14 +4,16 @@ using Api;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Api.Migrations
 {
     [DbContext(typeof(BookshelfContext))]
-    partial class BookshelfContextModelSnapshot : ModelSnapshot
+    [Migration("20200112134432_AddIsAdminToUserModel")]
+    partial class AddIsAdminToUserModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,11 +33,15 @@ namespace Api.Migrations
 
                     b.Property<DateTime>("FinishedOn");
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<string>("Image");
 
                     b.Property<int>("PageCount");
 
                     b.Property<int>("RatingId");
+
+                    b.Property<bool>("Removed");
+
+                    b.Property<DateTime>("StartedOn");
 
                     b.Property<string>("Summary");
 

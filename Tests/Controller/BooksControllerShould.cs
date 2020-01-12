@@ -18,9 +18,8 @@ namespace Tests
             { 
                 Id = 1,
                 UserId = 1,
-                Image = "fight-club.png",
+                ImageUrl = "fight-club.png",
                 CategoryId = 1,
-                StartedOn = new DateTime(2019,1,1),
                 FinishedOn = new DateTime(2019,4,12),
                 Year = 2019,
                 PageCount = 224,
@@ -32,9 +31,8 @@ namespace Tests
             {
                 Id = 2,
                 UserId = 1,
-                Image = "choke.png",
+                ImageUrl = "choke.png",
                 CategoryId = 1,
-                StartedOn = new DateTime(2019,5,5),
                 FinishedOn = new DateTime(2019,9,27),
                 Year = 2019,
                 PageCount = 293,
@@ -46,9 +44,8 @@ namespace Tests
         private readonly BookDto BookSuccess = new BookDto
         {
             Id = 1,
-            Image = "fight-club.png",
+            ImageUrl = "fight-club.png",
             CategoryId = 2,
-            StartedOn = new DateTime(2019,1,1),
             FinishedOn = new DateTime(2019,4,12),
             Year = 2019,
             PageCount = 500,
@@ -76,9 +73,8 @@ namespace Tests
         {
             var bookSuccess = new Book
             {
-                Image = "fight-club.png",
+                ImageUrl = "fight-club.png",
                 CategoryId = 2,
-                StartedOn = new DateTime(2019,1,1),
                 FinishedOn = new DateTime(2019,4,12),
                 PageCount = 500,
                 Title = "Fight Club",
@@ -115,17 +111,17 @@ namespace Tests
         [Test]
         public void DeleteBook()
         {
-            const int idFail = 5;
+            var result = BookSuccess;
+            result.Id = 1;
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.GetBook(BookSuccess.Id)).Returns(BookSuccess);
+            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
             var controller = new BooksController(repository, BookValidator, DtoValidator);
-            
-            var responseOne = controller.Delete(BookSuccess.Id);
-            var responseTwo = controller.Delete(idFail);
 
-            Assert.AreEqual(BookSuccess, responseOne.Value);
+            var responseOne = controller.Delete(BookSuccess);
+            var responseTwo = controller.Delete(BookFail);
+            
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-            Assert.AreEqual($"Book with id {idFail} not found.", ((BadRequestObjectResult)responseTwo.Result).Value);
         }
     }
 }

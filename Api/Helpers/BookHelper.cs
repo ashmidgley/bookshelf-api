@@ -10,15 +10,13 @@ namespace Api
                 UserId = book.UserId,
                 CategoryId = book.CategoryId,
                 RatingId = book.RatingId,
-                Image = book.Image,
+                ImageUrl = book.ImageUrl,
                 Title = book.Title,
                 Author = book.Author,
-                StartedOn = book.StartedOn,
                 FinishedOn = book.FinishedOn,
                 Year = book.FinishedOn.Year,
                 PageCount = book.PageCount,
-                Summary = book.Summary,
-                Removed = book.Removed
+                Summary = book.Summary
             };
         }
 
@@ -30,14 +28,12 @@ namespace Api
                 UserId = dto.UserId,
                 CategoryId = dto.CategoryId,
                 RatingId = dto.RatingId,
-                Image = dto.Image,
+                ImageUrl = dto.ImageUrl,
                 Title = dto.Title,
                 Author = dto.Author,
-                StartedOn = dto.StartedOn,
                 FinishedOn = dto.FinishedOn,
                 PageCount = dto.PageCount,
-                Summary = dto.Summary,
-                Removed = dto.Removed
+                Summary = dto.Summary
             };
         }
     }

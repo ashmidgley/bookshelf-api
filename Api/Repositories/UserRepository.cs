@@ -8,30 +8,30 @@ namespace Api
         private readonly BookshelfContext _context;
         private readonly IUserHelper _userHelper;
 
-        public UserRepository(BookshelfContext context, IUserHelper helper)
+        public UserRepository(BookshelfContext context, IUserHelper userHelper)
         {
             _context = context;
-            _userHelper = helper;
+            _userHelper = userHelper;
         }
 
         public IEnumerable<UserDto> GetAll()
         {
             return _context.Users
-                .Select(u => new UserDto { Id = u.Id, Email = u.Email })
+                .Select(u => _userHelper.ToUserDto(u))
                 .ToList();
         }
 
         public UserDto GetUser(string email)
         {
             return _context.Users
-                .Select(u => new UserDto { Id = u.Id, Email = u.Email })
+                .Select(u => _userHelper.ToUserDto(u))
                 .Single(u => u.Email.Equals(email));
         }
 
         public UserDto GetUser(int id)
         {
             return _context.Users
-                .Select(u => new UserDto { Id = u.Id, Email = u.Email })
+                .Select(u => _userHelper.ToUserDto(u))
                 .Single(u => u.Id == id);
         }
 
