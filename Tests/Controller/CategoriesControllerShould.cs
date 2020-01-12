@@ -86,20 +86,17 @@ namespace Tests
         [Test]
         public void DeleteCategory()
         {
-            const int idSuccess = 1;
             var result = CategorySuccess;
-            result.Id = idSuccess;
-            const int idFail = 5;
+            result.Id = 1;
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.GetCategory(idSuccess)).Returns(result);
+            A.CallTo(() => repository.GetCategory(A<int>.Ignored)).Returns(result);
             var controller = new CategoriesController(repository, Validator);
-            
-            var responseOne = controller.Delete(idSuccess);
-            var responseTwo = controller.Delete(idFail);
 
+            var responseOne = controller.Delete(CategorySuccess);
+            var responseTwo = controller.Delete(CategoryFail);
+            
             Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-            Assert.AreEqual($"Category with id {idFail} not found.", ((BadRequestObjectResult)responseTwo.Result).Value);
         }
     }
 }

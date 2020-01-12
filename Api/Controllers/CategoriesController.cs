@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace Api
 {
@@ -18,7 +19,6 @@ namespace Api
             _validator = validator;
         }
 
-        // GET api/categories/1
         [HttpGet]
         [Route("{id}")]
         public ActionResult<Category> GetCategory(int id)
@@ -26,7 +26,6 @@ namespace Api
             return _categoryRepository.GetCategory(id);
         }
 
-        // GET api/categories/user/1
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
@@ -35,47 +34,81 @@ namespace Api
             return _categoryRepository.GetUserCategories(userId);
         }
 
-        // POST api/categories
         [HttpPost]
         public ActionResult<Category> Post([FromBody] Category category)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != category.UserId)
+            {
+                return Unauthorized();
+            }
+
             var validation = _validator.Validate(category);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+
             int id = _categoryRepository.Add(category);
+            
             return _categoryRepository.GetCategory(id);
         }
 
-        // PUT api/categories
         [HttpPut]
         public ActionResult<Category> Put([FromBody] Category category)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != category.UserId)
+            {
+                return Unauthorized();
+            }
+
             var validation = _validator.Validate(category);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+
+            var current = _categoryRepository.GetCategory(category.Id);
+            if(current.Id == default)
+            {
+                return BadRequest($"Category with id {current.Id} not found.");
+            }
+
             _categoryRepository.Update(category);
+            
             return _categoryRepository.GetCategory(category.Id);
         }
 
-        // DELETE api/categories
-        [HttpDelete("{id}")]
-        public ActionResult<Category> Delete(int id)
+        [HttpDelete]
+        public ActionResult<Category> Delete([FromBody] Category category)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != category.UserId)
+            {
+                return Unauthorized();
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var category = _categoryRepository.GetCategory(id);
-            if (category.Id == default)
+
+            var current = _categoryRepository.GetCategory(category.Id);
+            if(current.Id == default)
             {
-                return BadRequest($"Category with id {id} not found.");
+                return BadRequest($"Category with id {current.Id} not found.");
             }
+
             _categoryRepository.Delete(category.Id);
-            return category;
+            
+            return current;
         }
     }
 }

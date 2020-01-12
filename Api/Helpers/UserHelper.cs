@@ -1,5 +1,6 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -16,11 +17,19 @@ namespace Api
             _config = config;
         }
 
-        public string BuildToken()
+        public string BuildToken(UserDto user)
         {
+            var claims = new[]
+            {
+                new Claim("Id", user.Id.ToString()),
+                new Claim("Email", user.Email),
+                new Claim("IsAdmin", user.IsAdmin.ToString())
+            };
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Issuer"], expires: DateTime.Now.AddMinutes(30), signingCredentials: creds);
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Issuer"], claims, expires: DateTime.Now.AddMinutes(30), signingCredentials: creds);
+            
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
@@ -61,6 +70,16 @@ namespace Api
                 }
             }
             return true;
+        }
+
+        public UserDto ToUserDto(User user)
+        {
+            return new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                IsAdmin = user.IsAdmin
+            };
         }
     }
 }

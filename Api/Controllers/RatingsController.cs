@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace Api
 {
@@ -18,7 +19,6 @@ namespace Api
             _validator = validator;
         }
 
-        // GET api/ratings/1
         [HttpGet]
         [Route("{ratingId}")]
         public ActionResult<Rating> Get(int ratingId)
@@ -26,7 +26,6 @@ namespace Api
             return _ratingRepository.GetRating(ratingId);
         }
 
-        // GET api/ratings/user/1
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
@@ -35,47 +34,82 @@ namespace Api
             return _ratingRepository.GetUserRatings(userId);
         }
 
-        // POST api/ratings
         [HttpPost]
         public ActionResult<Rating> Post([FromBody] Rating rating)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+            
+            if(userId != rating.UserId)
+            {
+                return Unauthorized();
+            }
+
             var validation = _validator.Validate(rating);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+
             var id = _ratingRepository.Add(rating);
+
             return _ratingRepository.GetRating(id);
         }
 
-        // PUT api/ratings
         [HttpPut]
         public ActionResult<Rating> Put([FromBody] Rating rating)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != rating.UserId)
+            {
+                return Unauthorized();
+            }
+
             var validation = _validator.Validate(rating);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+
+            var current = _ratingRepository.GetRating(rating.Id);
+            if(current.Id == default)
+            {
+                return BadRequest($"Rating with id {current.Id} not found.");
+            }
+
             _ratingRepository.Update(rating);
+
             return _ratingRepository.GetRating(rating.Id);
         }
 
-        // DELETE api/ratings
-        [HttpDelete("{id}")]
-        public ActionResult<Rating> Delete(int id)
+        [HttpDelete]
+        public ActionResult<Rating> Delete([FromBody] Rating rating)
         {
-            if (!ModelState.IsValid)
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != rating.UserId)
             {
-                return BadRequest(ModelState);
+                return Unauthorized();
             }
-            var rating = _ratingRepository.GetRating(id);
-            if (rating.Id == default)
+
+            var validation = _validator.Validate(rating);
+            if (!validation.IsValid)
             {
-                return BadRequest($"Rating with id {id} not found.");
+                return BadRequest(validation.ToString());
             }
+
+            var current = _ratingRepository.GetRating(rating.Id);
+            if(current.Id == default)
+            {
+                return BadRequest($"Rating with id {current.Id} not found.");
+            }
+
             _ratingRepository.Delete(rating.Id);
-            return rating;
+
+            return current;
         }
     }
 }

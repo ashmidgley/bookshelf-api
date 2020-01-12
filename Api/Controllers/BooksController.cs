@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace Api
 {
@@ -20,7 +21,6 @@ namespace Api
             _dtoValidator = dtoValidator;
         }
 
-        // GET api/books/1
         [HttpGet]
         [Route("{bookId}")]
         public ActionResult<BookDto> GetBook(int bookId)
@@ -28,7 +28,6 @@ namespace Api
             return _bookRepository.GetBook(bookId);
         }
 
-        // GET api/books/user/1
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
@@ -37,47 +36,82 @@ namespace Api
             return _bookRepository.GetUserBooks(userId);
         }
 
-        // POST api/books
         [HttpPost]
         public ActionResult<BookDto> Post([FromBody] Book book)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != book.UserId)
+            {
+                return Unauthorized();
+            }
+
             var validation = _bookValidator.Validate(book);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+
             var id = _bookRepository.Add(book);
+            
             return _bookRepository.GetBook(id);
         }
 
-        // PUT api/books
         [HttpPut]
         public ActionResult<BookDto> Put([FromBody] BookDto dto)
         {
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != dto.UserId)
+            {
+                return Unauthorized();
+            }
+
             var validation = _dtoValidator.Validate(dto);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
+            
+            var current = _bookRepository.GetBook(dto.Id);
+            if(current.Id == default)
+            {
+                return BadRequest($"Book with id {current.Id} not found.");
+            }
+
             _bookRepository.Update(dto);
+            
             return _bookRepository.GetBook(dto.Id);
         }
 
-        // DELETE api/books
-        [HttpDelete("{id}")]
-        public ActionResult<BookDto> Delete(int id)
+        [HttpDelete]
+        public ActionResult<BookDto> Delete([FromBody] BookDto dto)
         {
-            if (!ModelState.IsValid)
+            var currentUser = HttpContext.User;
+            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+
+            if(userId != dto.UserId)
             {
-                return BadRequest(ModelState);
+                return Unauthorized();
             }
-            var dto = _bookRepository.GetBook(id);
-            if (dto.Id == default)
+
+            var validation = _dtoValidator.Validate(dto);
+            if (!validation.IsValid)
             {
-                return BadRequest($"Book with id {id} not found.");
+                return BadRequest(validation.ToString());
             }
+
+            var current = _bookRepository.GetBook(dto.Id);
+            if(current.Id == default)
+            {
+                return BadRequest($"Book with id {current.Id} not found.");
+            }
+
             _bookRepository.Delete(dto.Id);
-            return dto;
+            
+            return current;
         }
     }
 }
