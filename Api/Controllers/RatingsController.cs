@@ -84,9 +84,15 @@ namespace Api
             return _ratingRepository.GetRating(rating.Id);
         }
 
-        [HttpDelete]
-        public ActionResult<Rating> Delete([FromBody] Rating rating)
+        [HttpDelete("{id}")]
+        public ActionResult<Rating> Delete(int id)
         {
+            var rating = _ratingRepository.GetRating(id);
+            if(rating.Id == default)
+            {
+                return BadRequest($"Rating with id {rating.Id} not found.");
+            }
+            
             var currentUser = HttpContext.User;
             int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
 
@@ -95,21 +101,9 @@ namespace Api
                 return Unauthorized();
             }
 
-            var validation = _validator.Validate(rating);
-            if (!validation.IsValid)
-            {
-                return BadRequest(validation.ToString());
-            }
+            _ratingRepository.Delete(id);
 
-            var current = _ratingRepository.GetRating(rating.Id);
-            if(current.Id == default)
-            {
-                return BadRequest($"Rating with id {current.Id} not found.");
-            }
-
-            _ratingRepository.Delete(rating.Id);
-
-            return current;
+            return rating;
         }
     }
 }

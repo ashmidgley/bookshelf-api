@@ -111,14 +111,15 @@ namespace Tests
         [Test]
         public void DeleteBook()
         {
+            const int id = 1;
             var result = BookSuccess;
-            result.Id = 1;
+            result.Id = id;
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+            A.CallTo(() => repository.GetBook(id)).Returns(result);
             var controller = new BooksController(repository, BookValidator, DtoValidator);
 
-            var responseOne = controller.Delete(BookSuccess);
-            var responseTwo = controller.Delete(BookFail);
+            var responseOne = controller.Delete(id);
+            var responseTwo = controller.Delete(5);
             
             Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
