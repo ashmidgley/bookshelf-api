@@ -86,32 +86,26 @@ namespace Api
             return _bookRepository.GetBook(dto.Id);
         }
 
-        [HttpDelete]
-        public ActionResult<BookDto> Delete([FromBody] BookDto dto)
+        [HttpDelete("{id}")]
+        public ActionResult<BookDto> Delete(int id)
         {
+            var book = _bookRepository.GetBook(id);
+            if(book.Id == default)
+            {
+                return BadRequest($"Book with id {book.Id} not found.");
+            }
+
             var currentUser = HttpContext.User;
             int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != dto.UserId)
+            
+            if(userId != book.UserId)
             {
                 return Unauthorized();
             }
 
-            var validation = _dtoValidator.Validate(dto);
-            if (!validation.IsValid)
-            {
-                return BadRequest(validation.ToString());
-            }
-
-            var current = _bookRepository.GetBook(dto.Id);
-            if(current.Id == default)
-            {
-                return BadRequest($"Book with id {current.Id} not found.");
-            }
-
-            _bookRepository.Delete(dto.Id);
+            _bookRepository.Delete(id);
             
-            return current;
+            return book;
         }
     }
 }

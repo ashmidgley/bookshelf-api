@@ -84,9 +84,15 @@ namespace Api
             return _categoryRepository.GetCategory(category.Id);
         }
 
-        [HttpDelete]
-        public ActionResult<Category> Delete([FromBody] Category category)
+        [HttpDelete("{id}")]
+        public ActionResult<Category> Delete(int id)
         {
+            var category = _categoryRepository.GetCategory(id);
+            if(category.Id == default)
+            {
+                return BadRequest($"Category with id {category.Id} not found.");
+            }
+
             var currentUser = HttpContext.User;
             int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
 
@@ -95,20 +101,9 @@ namespace Api
                 return Unauthorized();
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var current = _categoryRepository.GetCategory(category.Id);
-            if(current.Id == default)
-            {
-                return BadRequest($"Category with id {current.Id} not found.");
-            }
-
             _categoryRepository.Delete(category.Id);
             
-            return current;
+            return category;
         }
     }
 }

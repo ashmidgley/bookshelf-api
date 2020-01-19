@@ -82,14 +82,15 @@ namespace Tests
         [Test]
         public void DeleteRating()
         {
+            const int id = 1;
             var result = RatingSuccess;
-            result.Id = 1;
+            result.Id = id;
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.GetRating(A<int>.Ignored)).Returns(result);
+            A.CallTo(() => repository.GetRating(id)).Returns(result);
             var controller = new RatingsController(repository, Validator);
 
-            var responseOne = controller.Delete(RatingSuccess);
-            var responseTwo = controller.Delete(RatingFail);
+            var responseOne = controller.Delete(id);
+            var responseTwo = controller.Delete(5);
             
             Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
