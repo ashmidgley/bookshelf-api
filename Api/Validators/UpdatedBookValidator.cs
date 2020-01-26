@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace Api
 {
-    public class BookDtoValidator : AbstractValidator<BookDto>
+    public class UpdatedBookValidator : AbstractValidator<BookDto>
     {
-        public BookDtoValidator()
+        public UpdatedBookValidator()
         {
             RuleFor(dto => dto.CategoryId).NotNull();
             RuleFor(dto => dto.RatingId).NotNull();

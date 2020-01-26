@@ -11,14 +11,17 @@ namespace Api
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
-        private readonly BookValidator _bookValidator;
-        private readonly BookDtoValidator _dtoValidator;
+        private readonly IBookHelper _bookHelper;
+        private readonly NewBookValidator _newBookValidator;
+        private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, BookValidator bookValidator, BookDtoValidator dtoValidator)
+        public BooksController(IBookRepository bookRepository, IBookHelper bookHelper, NewBookValidator newBookValidator,
+            UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
-            _bookValidator = bookValidator;
-            _dtoValidator = dtoValidator;
+            _bookHelper = bookHelper;
+            _newBookValidator = newBookValidator;
+            _updatedBookValidator = updatedBookValidator;
         }
 
         [HttpGet]
@@ -37,24 +40,25 @@ namespace Api
         }
 
         [HttpPost]
-        public ActionResult<BookDto> Post([FromBody] Book book)
+        public ActionResult<BookDto> Post([FromBody] NewBookDto newBook)
         {
             var currentUser = HttpContext.User;
             int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
 
-            if(userId != book.UserId)
+            if(userId != newBook.UserId)
             {
                 return Unauthorized();
             }
 
-            var validation = _bookValidator.Validate(book);
+            var validation = _newBookValidator.Validate(newBook);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
 
+            var book = _bookHelper.PullOpenLibraryData(newBook).Result;
             var id = _bookRepository.Add(book);
-            
+
             return _bookRepository.GetBook(id);
         }
 
@@ -69,7 +73,7 @@ namespace Api
                 return Unauthorized();
             }
 
-            var validation = _dtoValidator.Validate(dto);
+            var validation = _updatedBookValidator.Validate(dto);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
