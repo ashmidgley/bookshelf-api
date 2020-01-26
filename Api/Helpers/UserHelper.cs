@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -11,10 +12,45 @@ namespace Api
     public class UserHelper : IUserHelper
     {
         private IConfiguration _config;
-
-        public UserHelper(IConfiguration config)
+        private ICategoryRepository _categoryRepository;
+        private IRatingRepository _ratingRepository;
+        private readonly List<Category> _defaultCategories = new List<Category>
+        {
+            new Category
+            {
+                Description = "Fiction",
+                Code = "🧟"
+            },
+            new Category
+            {
+                Description = "Non-fiction",
+                Code = "🧠"
+            }
+        };
+        private readonly List<Rating> _defaultRatings = new List<Rating>
+        {
+            new Rating
+            {
+                Description = "Bronze",
+                Code = "🥉"
+            },
+            new Rating
+            {
+                Description = "Silver",
+                Code = "🥈"
+            },
+            new Rating
+            {
+                Description = "Gold",
+                Code = "🥇"
+            }
+        };
+        
+        public UserHelper(IConfiguration config, ICategoryRepository categoryRepository, IRatingRepository ratingRepository)
         {
             _config = config;
+            _categoryRepository = categoryRepository;
+            _ratingRepository = ratingRepository;
         }
 
         public string BuildToken(UserDto user)
@@ -80,6 +116,21 @@ namespace Api
                 Email = user.Email,
                 IsAdmin = user.IsAdmin
             };
+        }
+        
+        public void Register(int userId)
+        {
+            foreach(var category in _defaultCategories)
+            {
+                category.UserId = userId;
+                _categoryRepository.Add(category);
+            }
+
+            foreach(var rating in _defaultRatings)
+            {
+                rating.UserId = userId;
+                _ratingRepository.Add(rating);
+            }
         }
     }
 }

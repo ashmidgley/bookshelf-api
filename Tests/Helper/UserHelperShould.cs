@@ -14,7 +14,7 @@ namespace Tests
         {
             var salt = Convert.FromBase64String(saltString);
             var configuration = A.Fake<IConfiguration>();
-            var userHelper = new UserHelper(configuration);
+            var userHelper = new UserHelper(configuration, null, null);
 
             return userHelper.HashPassword(input, salt);
         }
@@ -25,7 +25,7 @@ namespace Tests
         {
             var salt = Convert.FromBase64String(saltString);
             var configuration = A.Fake<IConfiguration>();
-            var userHelper = new UserHelper(configuration);
+            var userHelper = new UserHelper(configuration, null, null);
 
             return userHelper.PasswordsMatch(password, passwordHash, salt);
         }

@@ -98,6 +98,7 @@ namespace Api
             }
 
             var id = _userRepository.Add(login);
+            _userHelper.Register(id);
             var user = _userRepository.GetUser(id);
 
             return new TokenDto 

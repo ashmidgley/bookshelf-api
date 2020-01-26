@@ -10,8 +10,8 @@ namespace Tests
 {
     public class BooksControllerShould
     {        
-        private BookValidator BookValidator => new BookValidator();
-        private BookDtoValidator DtoValidator => new BookDtoValidator();
+        private NewBookValidator NewBookValidator => new NewBookValidator();
+        private UpdatedBookValidator UpdatedBookValidator => new UpdatedBookValidator();
         private readonly List<BookDto> TestBooks = new List<BookDto>
         {
             new BookDto
@@ -61,7 +61,8 @@ namespace Tests
             const int userId = 1;
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetUserBooks(userId)).Returns(TestBooks);
-            var controller = new BooksController(repository, BookValidator, DtoValidator);
+            var helper = A.Fake<IBookHelper>();
+            var controller = new BooksController(repository, helper, NewBookValidator, UpdatedBookValidator);
             
             var books = controller.GetUserBooks(userId);
             
@@ -71,24 +72,23 @@ namespace Tests
         [Test]
         public void AddNewBook()
         {
-            var bookSuccess = new Book
+            var bookSuccess = new NewBookDto
             {
-                ImageUrl = "fight-club.png",
+                ISBN = "fight-club.png",
+                UserId = 1,
                 CategoryId = 2,
-                FinishedOn = new DateTime(2019,4,12),
-                PageCount = 500,
-                Title = "Fight Club",
-                Author = "Chucky Pal",
-                Summary = "Updated summary..."
+                RatingId = 1,
+                FinishedOn = new DateTime(2019,4,12)
             };
             var bookFail = new Book();
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.Add(bookSuccess)).Returns(BookSuccess.Id);
+            A.CallTo(() => repository.Add(A<Book>.Ignored)).Returns(BookSuccess.Id);
             A.CallTo(() => repository.GetBook(BookSuccess.Id)).Returns(BookSuccess);
-            var controller = new BooksController(repository, BookValidator, DtoValidator);
+            var helper = A.Fake<IBookHelper>();
+            var controller = new BooksController(repository, helper, NewBookValidator, UpdatedBookValidator);
 
             var responseOne = controller.Post(bookSuccess);
-            var responseTwo = controller.Post(bookFail);
+            var responseTwo = controller.Post(new NewBookDto());
 
             Assert.AreEqual(BookSuccess, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
@@ -99,7 +99,8 @@ namespace Tests
         {
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetBook(BookSuccess.Id)).Returns(BookSuccess);
-            var controller = new BooksController(repository, BookValidator, DtoValidator);
+            var helper = A.Fake<IBookHelper>();
+            var controller = new BooksController(repository, helper, NewBookValidator, UpdatedBookValidator);
 
             var responseOne = controller.Put(BookSuccess);
             var responseTwo = controller.Put(BookFail);
@@ -116,7 +117,8 @@ namespace Tests
             result.Id = id;
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetBook(id)).Returns(result);
-            var controller = new BooksController(repository, BookValidator, DtoValidator);
+            var helper = A.Fake<IBookHelper>();
+            var controller = new BooksController(repository, helper, NewBookValidator, UpdatedBookValidator);
 
             var responseOne = controller.Delete(id);
             var responseTwo = controller.Delete(5);
