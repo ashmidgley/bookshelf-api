@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Bookshelf.Core
+namespace Bookshelf.DataFetcher
 {
     public class OpenLibraryDetails
     {
