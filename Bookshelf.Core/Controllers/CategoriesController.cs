@@ -11,11 +11,13 @@ namespace Bookshelf.Core
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IUserHelper _userHelper;
         private readonly CategoryValidator _validator;
 
-        public CategoriesController(ICategoryRepository categoryRepository, CategoryValidator validator)
+        public CategoriesController(ICategoryRepository categoryRepository, IUserHelper userHelper, CategoryValidator validator)
         {
             _categoryRepository = categoryRepository;
+            _userHelper = userHelper;
             _validator = validator;
         }
 
@@ -37,10 +39,7 @@ namespace Bookshelf.Core
         [HttpPost]
         public ActionResult<Category> Post([FromBody] Category category)
         {
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != category.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, category.UserId))
             {
                 return Unauthorized();
             }
@@ -59,10 +58,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<Category> Put([FromBody] Category category)
         {
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != category.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, category.UserId))
             {
                 return Unauthorized();
             }
@@ -93,10 +89,7 @@ namespace Bookshelf.Core
                 return BadRequest($"Category with id {category.Id} not found.");
             }
 
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != category.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, category.UserId))
             {
                 return Unauthorized();
             }

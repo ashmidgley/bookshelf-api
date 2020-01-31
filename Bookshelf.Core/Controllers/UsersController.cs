@@ -24,10 +24,7 @@ namespace Bookshelf.Core
         [HttpGet]
         public ActionResult<List<UserDto>> GetAll()
         {
-            var currentUser = HttpContext.User;
-            bool admin = bool.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("IsAdmin")).Value);
-
-            if(!admin)
+            if(!_userHelper.IsAdmin(HttpContext.User))
             {
                 return Unauthorized();
             }
@@ -39,10 +36,7 @@ namespace Bookshelf.Core
         [Route("{id}")]
         public ActionResult<UserDto> Get(int id)
         {
-            var currentUser = HttpContext.User;
-            bool admin = bool.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("IsAdmin")).Value);
-
-            if(!admin)
+            if(!_userHelper.IsAdmin(HttpContext.User))
             {
                 return Unauthorized();
             }
