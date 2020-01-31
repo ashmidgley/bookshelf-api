@@ -2,12 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace Bookshelf.DataFetcher
 {
-    public class BookDto
+    public class GoogleBooksDto
     {
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
-        [JsonPropertyName("author")]
-        public string Author { get; set; }
         [JsonPropertyName("pageCount")]
         public int PageCount { get; set; }
         [JsonPropertyName("imageUrl")]
