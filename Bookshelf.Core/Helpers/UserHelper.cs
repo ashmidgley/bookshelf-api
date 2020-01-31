@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -64,7 +65,7 @@ namespace Bookshelf.Core
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Issuer"], claims, expires: DateTime.Now.AddMinutes(30), signingCredentials: creds);
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Issuer"], claims, expires: DateTime.Now.AddDays(2), signingCredentials: creds);
             
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
@@ -131,6 +132,16 @@ namespace Bookshelf.Core
                 rating.UserId = userId;
                 _ratingRepository.Add(rating);
             }
+        }
+
+        public bool IsAdmin(ClaimsPrincipal currentUser)
+        {
+            return bool.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("IsAdmin")).Value);
+        }
+
+        public bool MatchingUsers(ClaimsPrincipal currentUser, int userId)
+        {
+            return int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value) == userId;
         }
     }
 }

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace Bookshelf.Core
 {
     public interface IUserHelper
@@ -7,5 +9,7 @@ namespace Bookshelf.Core
         bool PasswordsMatch(string password, string passwordHash, byte[] salt = null);
         UserDto ToUserDto(User user);
         void Register(int userId);
+        bool IsAdmin(ClaimsPrincipal currentUser);
+        bool MatchingUsers(ClaimsPrincipal currentUser, int userId);
     }
 }

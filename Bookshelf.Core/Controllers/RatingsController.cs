@@ -11,11 +11,13 @@ namespace Bookshelf.Core
     public class RatingsController : ControllerBase
     {
         private readonly IRatingRepository _ratingRepository;
+        private readonly IUserHelper _userHelper;
         private readonly RatingValidator _validator;
 
-        public RatingsController(IRatingRepository ratingRepository, RatingValidator validator)
+        public RatingsController(IRatingRepository ratingRepository, IUserHelper userHelper, RatingValidator validator)
         {
             _ratingRepository = ratingRepository;
+            _userHelper = userHelper;
             _validator = validator;
         }
 
@@ -37,10 +39,7 @@ namespace Bookshelf.Core
         [HttpPost]
         public ActionResult<Rating> Post([FromBody] Rating rating)
         {
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-            
-            if(userId != rating.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, rating.UserId))
             {
                 return Unauthorized();
             }
@@ -59,10 +58,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<Rating> Put([FromBody] Rating rating)
         {
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != rating.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, rating.UserId))
             {
                 return Unauthorized();
             }
@@ -93,10 +89,7 @@ namespace Bookshelf.Core
                 return BadRequest($"Rating with id {rating.Id} not found.");
             }
             
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != rating.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, rating.UserId))
             {
                 return Unauthorized();
             }

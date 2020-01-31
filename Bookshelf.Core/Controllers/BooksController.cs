@@ -13,15 +13,17 @@ namespace Bookshelf.Core
         private readonly IBookRepository _bookRepository;
         private readonly IBookHelper _bookHelper;
         private readonly ISearchHelper _searchHelper;
+        private readonly IUserHelper _userHelper;
         private readonly NewBookValidator _newBookValidator;
         private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, IBookHelper bookHelper, ISearchHelper searchHelper, 
+        public BooksController(IBookRepository bookRepository, IBookHelper bookHelper, ISearchHelper searchHelper, IUserHelper userHelper,
             NewBookValidator newBookValidator, UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
             _bookHelper = bookHelper;
             _searchHelper = searchHelper;
+            _userHelper = userHelper;
             _newBookValidator = newBookValidator;
             _updatedBookValidator = updatedBookValidator;
         }
@@ -44,10 +46,7 @@ namespace Bookshelf.Core
         [HttpPost]
         public ActionResult<BookDto> Post([FromBody] NewBookDto newBook)
         {
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != newBook.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, newBook.UserId))
             {
                 return Unauthorized();
             }
@@ -67,10 +66,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<BookDto> Put([FromBody] BookDto dto)
         {
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
-
-            if(userId != dto.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, dto.UserId))
             {
                 return Unauthorized();
             }
@@ -104,7 +100,7 @@ namespace Bookshelf.Core
             var currentUser = HttpContext.User;
             int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
             
-            if(userId != book.UserId)
+            if(!_userHelper.MatchingUsers(HttpContext.User, book.UserId))
             {
                 return Unauthorized();
             }
