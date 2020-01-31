@@ -6,7 +6,8 @@ namespace Bookshelf.Core
     {
         public NewBookValidator()
         {
-            RuleFor(book => book.ISBN).NotNull();
+            RuleFor(book => book.Title).NotNull();
+            RuleFor(book => book.Author).NotNull();
             RuleFor(book => book.UserId).NotNull();
             RuleFor(book => book.CategoryId).NotNull();
             RuleFor(book => book.RatingId).NotNull();
