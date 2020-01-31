@@ -49,6 +49,7 @@ namespace Bookshelf.Core
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBookHelper, BookHelper>();
             services.AddTransient<IUserHelper, UserHelper>();
+            services.AddTransient<ISearchHelper, SearchHelper>();
             services.AddTransient<NewBookValidator>();
             services.AddTransient<UpdatedBookValidator>();
             services.AddTransient<CategoryValidator>();

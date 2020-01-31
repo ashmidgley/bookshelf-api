@@ -12,14 +12,16 @@ namespace Bookshelf.Core
     {
         private readonly IBookRepository _bookRepository;
         private readonly IBookHelper _bookHelper;
+        private readonly ISearchHelper _searchHelper;
         private readonly NewBookValidator _newBookValidator;
         private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, IBookHelper bookHelper, NewBookValidator newBookValidator,
-            UpdatedBookValidator updatedBookValidator)
+        public BooksController(IBookRepository bookRepository, IBookHelper bookHelper, ISearchHelper searchHelper, 
+            NewBookValidator newBookValidator, UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
             _bookHelper = bookHelper;
+            _searchHelper = searchHelper;
             _newBookValidator = newBookValidator;
             _updatedBookValidator = updatedBookValidator;
         }
@@ -56,7 +58,7 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            var book = _bookHelper.PullOpenLibraryData(newBook).Result;
+            var book = _searchHelper.PullGoogleBooksData(newBook).Result;
             var id = _bookRepository.Add(book);
 
             return _bookRepository.GetBook(id);
