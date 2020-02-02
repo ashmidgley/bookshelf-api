@@ -39,7 +39,7 @@ namespace Bookshelf.Core
         [HttpPost]
         public ActionResult<Category> Post([FromBody] Category category)
         {
-            if(!_userHelper.MatchingUsers(HttpContext.User, category.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
             {
                 return Unauthorized();
             }
@@ -50,7 +50,7 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            int id = _categoryRepository.Add(category);
+            var id = _categoryRepository.Add(category);
             
             return _categoryRepository.GetCategory(id);
         }
@@ -58,7 +58,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<Category> Put([FromBody] Category category)
         {
-            if(!_userHelper.MatchingUsers(HttpContext.User, category.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
             {
                 return Unauthorized();
             }
@@ -89,7 +89,7 @@ namespace Bookshelf.Core
                 return BadRequest($"Category with id {category.Id} not found.");
             }
 
-            if(!_userHelper.MatchingUsers(HttpContext.User, category.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
             {
                 return Unauthorized();
             }

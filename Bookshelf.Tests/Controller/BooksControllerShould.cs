@@ -5,111 +5,113 @@ using System.Collections.Generic;
 using FakeItEasy;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
-namespace Tests
+namespace Bookshelf.Tests
 {
+    [TestFixture]
     public class BooksControllerShould
     {        
-        private NewBookValidator NewBookValidator => new NewBookValidator();
-        private UpdatedBookValidator UpdatedBookValidator => new UpdatedBookValidator();
-        private readonly List<BookDto> TestBooks = new List<BookDto>
-        {
-            new BookDto
-            { 
-                Id = 1,
-                UserId = 1,
-                ImageUrl = "fight-club.png",
-                CategoryId = 1,
-                FinishedOn = new DateTime(2019,4,12),
-                Year = 2019,
-                PageCount = 224,
-                Title = "Fight Club",
-                Author = "Chuck Palahniuk",
-                Summary = "Chuck Palahniuk showed himself to be his generation’s most visionary satirist in this, his first book..."
-            },
-            new BookDto
-            {
-                Id = 2,
-                UserId = 1,
-                ImageUrl = "choke.png",
-                CategoryId = 1,
-                FinishedOn = new DateTime(2019,9,27),
-                Year = 2019,
-                PageCount = 293,
-                Title = "Choke",
-                Author = "Chuck Palahniuk",
-                Summary = "Victor Mancini, a medical-school dropout, is an antihero for our deranged times..."
-            }
-        };
-        private readonly BookDto BookSuccess = new BookDto
-        {
-            Id = 1,
-            ImageUrl = "fight-club.png",
-            CategoryId = 2,
-            FinishedOn = new DateTime(2019,4,12),
-            Year = 2019,
-            PageCount = 500,
-            Title = "Fight Club",
-            Author = "Chucky Pal",
-            Summary = "Updated summary..."
-        };
-        private readonly BookDto BookFail = new BookDto();
+        private NewBookValidator _newBookValidator => new NewBookValidator();
+        private UpdatedBookValidator _updatedBookValidator => new UpdatedBookValidator();
 
         [Test]
-        public void ReturnAllBooks()
+        public void ReturnBook()
         {
-            const int userId = 1;
+            var result = new BookDto();
+
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.GetUserBooks(userId)).Returns(TestBooks);
-            var bookHelper = A.Fake<IBookHelper>();
-            var searchHelper = A.Fake<ISearchHelper>();
-            var controller = new BooksController(repository, bookHelper, searchHelper, NewBookValidator, UpdatedBookValidator);
+            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+
+            var controller = new BooksController(repository, null, null, null, _newBookValidator, _updatedBookValidator);
             
-            var books = controller.GetUserBooks(userId);
+            var response = controller.GetBook(1);
             
-            Assert.AreEqual(TestBooks, books);
+            Assert.AreEqual(result, response.Value);
+        }
+
+        [Test]
+        public void ReturnUserBooks()
+        {
+            var result = new List<BookDto>();
+
+            var repository = A.Fake<IBookRepository>();
+            A.CallTo(() => repository.GetUserBooks(A<int>.Ignored)).Returns(result);
+
+            var controller = new BooksController(repository, null, null, null, _newBookValidator, _updatedBookValidator);
+            
+            var response = controller.GetUserBooks(1);
+            
+            Assert.AreEqual(result, response);
         }
 
         [Test]
         public void AddNewBook()
         {
-            var bookSuccess = new NewBookDto
+            var newBook = new NewBookDto
             {
-                Title = "Fight Club",
-                Author = "Chuck Palahnuik",
+                Title = "Test",
+                Author = "Test",
                 UserId = 1,
                 CategoryId = 2,
                 RatingId = 1,
-                FinishedOn = new DateTime(2019,4,12)
+                FinishedOn = DateTime.Now
             };
-            var bookFail = new Book();
-            var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.Add(A<Book>.Ignored)).Returns(BookSuccess.Id);
-            A.CallTo(() => repository.GetBook(BookSuccess.Id)).Returns(BookSuccess);
-            var bookHelper = A.Fake<IBookHelper>();
-            var searchHelper = A.Fake<ISearchHelper>();
-            var controller = new BooksController(repository, bookHelper, searchHelper, NewBookValidator, UpdatedBookValidator);
 
-            var responseOne = controller.Post(bookSuccess);
+            var result = new BookDto();
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+
+            var searchHelper = A.Fake<ISearchHelper>();
+            A.CallTo(() => searchHelper.PullGoogleBooksData(A<NewBookDto>.Ignored)).Returns(new Book());
+
+            var repository = A.Fake<IBookRepository>();
+            A.CallTo(() => repository.Add(A<Book>.Ignored)).Returns(1);
+            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+
+            var controller = new BooksController(repository, null, searchHelper, userHelper, _newBookValidator, _updatedBookValidator);
+
+            var responseOne = controller.Post(newBook);
             var responseTwo = controller.Post(new NewBookDto());
 
-            Assert.AreEqual(BookSuccess, responseOne.Value);
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
         [Test]
         public void UpdateExistingBook()
         {
+            var updatedBook = new BookDto
+            {
+                Id = 1,
+                UserId = 1,
+                CategoryId = 2,
+                RatingId = 1,
+                Title = "Test",
+                Author = "Test",
+                FinishedOn = DateTime.Now,
+                ImageUrl = "test.png",
+                Year = 2019,
+                PageCount = 111,
+                Summary = "test"
+            };
+
+            var result = new BookDto();
+            result.Id = 1;
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+
             var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.GetBook(BookSuccess.Id)).Returns(BookSuccess);
-            var bookHelper = A.Fake<IBookHelper>();
-            var searchHelper = A.Fake<ISearchHelper>();
-            var controller = new BooksController(repository, bookHelper, searchHelper, NewBookValidator, UpdatedBookValidator);
+            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+           
+            var controller = new BooksController(repository, null, null, userHelper, _newBookValidator, _updatedBookValidator);
 
-            var responseOne = controller.Put(BookSuccess);
-            var responseTwo = controller.Put(BookFail);
+            var responseOne = controller.Put(updatedBook);
+            var responseTwo = controller.Put(new BookDto());
 
-            Assert.AreEqual(BookSuccess, responseOne.Value);
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -117,13 +119,16 @@ namespace Tests
         public void DeleteBook()
         {
             const int id = 1;
-            var result = BookSuccess;
+            var result = new BookDto();
             result.Id = id;
+
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetBook(id)).Returns(result);
-            var bookHelper = A.Fake<IBookHelper>();
-            var searchHelper = A.Fake<ISearchHelper>();
-            var controller = new BooksController(repository, bookHelper, searchHelper, NewBookValidator, UpdatedBookValidator);
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+
+            var controller = new BooksController(repository, null, null, userHelper, _newBookValidator, _updatedBookValidator);
 
             var responseOne = controller.Delete(id);
             var responseTwo = controller.Delete(5);

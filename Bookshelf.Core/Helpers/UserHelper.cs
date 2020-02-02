@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -134,13 +135,15 @@ namespace Bookshelf.Core
             }
         }
 
-        public bool IsAdmin(ClaimsPrincipal currentUser)
+        public bool IsAdmin(HttpContext context)
         {
+            var currentUser = context.User;
             return bool.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("IsAdmin")).Value);
         }
 
-        public bool MatchingUsers(ClaimsPrincipal currentUser, int userId)
+        public bool MatchingUsers(HttpContext context, int userId)
         {
+            var currentUser = context.User;
             return int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value) == userId;
         }
     }
