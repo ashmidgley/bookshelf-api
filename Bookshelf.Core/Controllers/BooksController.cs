@@ -46,7 +46,7 @@ namespace Bookshelf.Core
         [HttpPost]
         public ActionResult<BookDto> Post([FromBody] NewBookDto newBook)
         {
-            if(!_userHelper.MatchingUsers(HttpContext.User, newBook.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, newBook.UserId))
             {
                 return Unauthorized();
             }
@@ -66,7 +66,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<BookDto> Put([FromBody] BookDto dto)
         {
-            if(!_userHelper.MatchingUsers(HttpContext.User, dto.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, dto.UserId))
             {
                 return Unauthorized();
             }
@@ -96,11 +96,8 @@ namespace Bookshelf.Core
             {
                 return BadRequest($"Book with id {book.Id} not found.");
             }
-
-            var currentUser = HttpContext.User;
-            int userId = int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
             
-            if(!_userHelper.MatchingUsers(HttpContext.User, book.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, book.UserId))
             {
                 return Unauthorized();
             }

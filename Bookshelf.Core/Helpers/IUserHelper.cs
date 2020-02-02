@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Bookshelf.Core
 {
@@ -9,7 +9,7 @@ namespace Bookshelf.Core
         bool PasswordsMatch(string password, string passwordHash, byte[] salt = null);
         UserDto ToUserDto(User user);
         void Register(int userId);
-        bool IsAdmin(ClaimsPrincipal currentUser);
-        bool MatchingUsers(ClaimsPrincipal currentUser, int userId);
+        bool IsAdmin(HttpContext context);
+        bool MatchingUsers(HttpContext context, int userId);
     }
 }

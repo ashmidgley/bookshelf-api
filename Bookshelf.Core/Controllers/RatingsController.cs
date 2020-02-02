@@ -39,7 +39,7 @@ namespace Bookshelf.Core
         [HttpPost]
         public ActionResult<Rating> Post([FromBody] Rating rating)
         {
-            if(!_userHelper.MatchingUsers(HttpContext.User, rating.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
             {
                 return Unauthorized();
             }
@@ -58,7 +58,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<Rating> Put([FromBody] Rating rating)
         {
-            if(!_userHelper.MatchingUsers(HttpContext.User, rating.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
             {
                 return Unauthorized();
             }
@@ -89,7 +89,7 @@ namespace Bookshelf.Core
                 return BadRequest($"Rating with id {rating.Id} not found.");
             }
             
-            if(!_userHelper.MatchingUsers(HttpContext.User, rating.UserId))
+            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
             {
                 return Unauthorized();
             }

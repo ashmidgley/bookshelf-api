@@ -4,11 +4,11 @@ using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using System;
 
-namespace Tests
+namespace Bookshelf.Tests
 {
+    [TestFixture]
     public class UserHelperShould
     {
-
         [TestCase("password", "1vEjmwXiHmO98JoEdYcDaQ==", ExpectedResult = "1vEjmwXiHmO98JoEdYcDaY9cJUmKiqXkRihgnJ88NZO7QlTK")]
         public string ReturnHashedPassword(string input, string saltString)
         {

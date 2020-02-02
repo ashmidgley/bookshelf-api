@@ -2,60 +2,55 @@ using NUnit.Framework;
 using Bookshelf.Core;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using FakeItEasy;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
-namespace Tests
+namespace Bookshelf.Tests
 {
+    [TestFixture]
     public class RatingsControllerShould
     {
-        private RatingValidator Validator => new RatingValidator();
-        private readonly List<Rating> TestRatings = new List<Rating>
-        {
-            new Rating 
-            { 
-                Description = "Mild",
-                Code = "🔥"
-            },
-            new Rating 
-            { 
-                Description = "Medium",
-                Code = "🔥🔥"
-            }
-        };
-        private readonly Rating RatingSuccess = new Rating
-        { 
-            Description = "Extra-mild",
-            Code = "🔥"
-        };
-        private readonly Rating RatingFail = new Rating();
+        private RatingValidator _ratingValidator => new RatingValidator();
 
         [Test]
         public void GetAllRatings()
         {
-            const int userId = 1;
-            var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.GetUserRatings(userId)).Returns(TestRatings);
-            var controller = new RatingsController(repository, Validator);
+            var result = new List<Rating>();
 
-            var ratings = controller.GetUserRatings(userId);
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.GetUserRatings(A<int>.Ignored)).Returns(result);
+
+            var controller = new RatingsController(repository, null, _ratingValidator);
+
+            var ratings = controller.GetUserRatings(1);
             
-            Assert.AreEqual(TestRatings, ratings);
+            Assert.AreEqual(result, ratings);
         }
 
         [Test]
         public void CreateNewRating()
         {
-            const int id = 1;
-            var result = RatingSuccess;
-            result.Id = id;
-            var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.Add(RatingSuccess)).Returns(id);
-            A.CallTo(() => repository.GetRating(id)).Returns(result);
-            var controller = new RatingsController(repository, Validator);
+            var newRating = new Rating
+            {
+                UserId = 1,
+                Description = "Test",
+                Code = "Test"
+            };
 
-            var responseOne = controller.Post(RatingSuccess);
-            var responseTwo = controller.Post(RatingFail);
+            var result = new Rating();
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.Add(A<Rating>.Ignored)).Returns(1);
+            A.CallTo(() => repository.GetRating(A<int>.Ignored)).Returns(result);
+            
+            var controller = new RatingsController(repository, userHelper, _ratingValidator);
+
+            var responseOne = controller.Post(newRating);
+            var responseTwo = controller.Post(new Rating());
 
             Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
@@ -65,17 +60,29 @@ namespace Tests
         public void UpdateExistingRating()
         {
             const int id = 1;
-            var updatedRating = RatingSuccess;
-            updatedRating.Id = id;
-            updatedRating.Description = "Updated description...";
+            var newRating = new Rating
+            {
+                Id = id,
+                UserId = 1,
+                Description = "Test",
+                Code = "Test"
+            };
+
+            var result = new Rating();
+            result.Id = id;
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.GetRating(id)).Returns(updatedRating);
-            var controller = new RatingsController(repository, Validator);
+            A.CallTo(() => repository.GetRating(id)).Returns(result);
+            
+            var controller = new RatingsController(repository, userHelper, _ratingValidator);
 
-            var responseOne = controller.Put(updatedRating);
-            var responseTwo = controller.Put(RatingFail);
+            var responseOne = controller.Put(newRating);
+            var responseTwo = controller.Put(new Rating());
 
-            Assert.AreEqual(updatedRating, responseOne.Value);
+            Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
 
@@ -83,11 +90,16 @@ namespace Tests
         public void DeleteRating()
         {
             const int id = 1;
-            var result = RatingSuccess;
+            var result = new Rating();
             result.Id = id;
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+
             var repository = A.Fake<IRatingRepository>();
             A.CallTo(() => repository.GetRating(id)).Returns(result);
-            var controller = new RatingsController(repository, Validator);
+            
+            var controller = new RatingsController(repository, userHelper, _ratingValidator);
 
             var responseOne = controller.Delete(id);
             var responseTwo = controller.Delete(5);

@@ -24,7 +24,7 @@ namespace Bookshelf.Core
         [HttpGet]
         public ActionResult<List<UserDto>> GetAll()
         {
-            if(!_userHelper.IsAdmin(HttpContext.User))
+            if(!_userHelper.IsAdmin(HttpContext))
             {
                 return Unauthorized();
             }
@@ -36,7 +36,7 @@ namespace Bookshelf.Core
         [Route("{id}")]
         public ActionResult<UserDto> Get(int id)
         {
-            if(!_userHelper.IsAdmin(HttpContext.User))
+            if(!_userHelper.IsAdmin(HttpContext))
             {
                 return Unauthorized();
             }
