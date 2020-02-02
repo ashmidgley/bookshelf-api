@@ -14,7 +14,22 @@ namespace Bookshelf.Tests
         private CategoryValidator _categoryValidator => new CategoryValidator();
 
         [Test]
-        public void ReturnAllCategories()
+        public void ReturnCategory()
+        {
+            var result = new Category();
+
+            var repository = A.Fake<ICategoryRepository>();
+            A.CallTo(() => repository.GetCategory(A<int>.Ignored)).Returns(result);
+            
+            var controller = new CategoriesController(repository, null, _categoryValidator);
+
+            var response = controller.GetCategory(1);
+
+            Assert.AreEqual(result, response.Value);
+        }
+
+        [Test]
+        public void ReturnUserCategories()
         {
             var result = new List<Category>();
             
@@ -23,9 +38,9 @@ namespace Bookshelf.Tests
 
             var controller = new CategoriesController(repository, null, _categoryValidator);
 
-            var categories = controller.GetUserCategories(1);
+            var response = controller.GetUserCategories(1);
             
-            Assert.AreEqual(result, categories);
+            Assert.AreEqual(result, response);
         }
 
         [Test]

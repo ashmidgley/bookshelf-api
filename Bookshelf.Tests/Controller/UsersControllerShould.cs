@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Net;
 using Bookshelf.Core;
 using FakeItEasy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NUnit.Framework;
 
@@ -10,6 +12,42 @@ namespace Bookshelf.Tests
     public class UsersControllerShould
     {
         LoginDtoValidator _loginValidator => new LoginDtoValidator();
+
+        [Test]
+        public void ReturnsAllUsers_WhenCallerAdmin()
+        {
+            var result = new List<UserDto>();
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.GetAll()).Returns(result);
+
+            var usersController = new UsersController(userRepository, userHelper, _loginValidator);
+
+            var response = usersController.GetAll();
+
+            Assert.AreEqual(result, response.Value);
+        }
+
+        [Test]
+        public void ReturnUser_WhenCallerAdmin()
+        {
+            var result = new UserDto();
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.GetUser(A<int>.Ignored)).Returns(result);
+
+            var usersController = new UsersController(userRepository, userHelper, _loginValidator);
+
+            var response = usersController.Get(1);
+
+            Assert.AreEqual(result, response.Value);
+        }
 
         [Test]
         public void ReturnToken_WhenAuthorizedUserCallsLogin()

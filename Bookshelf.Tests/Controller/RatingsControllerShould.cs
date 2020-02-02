@@ -14,7 +14,22 @@ namespace Bookshelf.Tests
         private RatingValidator _ratingValidator => new RatingValidator();
 
         [Test]
-        public void GetAllRatings()
+        public void GetRating()
+        {
+            var result = new Rating();
+
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.GetRating(A<int>.Ignored)).Returns(result);
+
+            var controller = new RatingsController(repository, null, _ratingValidator);
+
+            var response = controller.Get(1);
+            
+            Assert.AreEqual(result, response.Value);
+        }
+
+        [Test]
+        public void GetUserRatings()
         {
             var result = new List<Rating>();
 

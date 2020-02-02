@@ -16,7 +16,22 @@ namespace Bookshelf.Tests
         private UpdatedBookValidator _updatedBookValidator => new UpdatedBookValidator();
 
         [Test]
-        public void ReturnAllBooks()
+        public void ReturnBook()
+        {
+            var result = new BookDto();
+
+            var repository = A.Fake<IBookRepository>();
+            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+
+            var controller = new BooksController(repository, null, null, null, _newBookValidator, _updatedBookValidator);
+            
+            var response = controller.GetBook(1);
+            
+            Assert.AreEqual(result, response.Value);
+        }
+
+        [Test]
+        public void ReturnUserBooks()
         {
             var result = new List<BookDto>();
 
@@ -25,9 +40,9 @@ namespace Bookshelf.Tests
 
             var controller = new BooksController(repository, null, null, null, _newBookValidator, _updatedBookValidator);
             
-            var books = controller.GetUserBooks(1);
+            var response = controller.GetUserBooks(1);
             
-            Assert.AreEqual(result, books);
+            Assert.AreEqual(result, response);
         }
 
         [Test]
