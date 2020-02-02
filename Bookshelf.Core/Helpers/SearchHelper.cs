@@ -17,9 +17,22 @@ namespace Bookshelf.Core
             _config = config;
         }
 
-         public async Task<Book> PullGoogleBooksData(NewBookDto book)
+        public async Task<Book> PullGoogleBooksData(NewBookDto book)
         {
-            var result = new Book
+            var result = CreateInitialBook(book);
+            var search = await SearchGoogleBooks(book.Title.ToLower(), book.Author.ToLower());
+
+            if(search.TotalItems > 0)
+            {
+                result = SetBonusItems(result, search);
+            }
+
+            return result;
+        }
+
+        private Book CreateInitialBook(NewBookDto book)
+        {
+            return new Book
             {
                 Title = book.Title,
                 Author = book.Author,
@@ -29,27 +42,6 @@ namespace Bookshelf.Core
                 FinishedOn = book.FinishedOn,
                 ImageUrl = _config["DefaultCover"]
             };
-
-            var search = await SearchGoogleBooks(book.Title.ToLower(), book.Author.ToLower());
-
-            if(search.TotalItems > 0)
-            {
-                var volume = search.Items.First().VolumeInfo;
-                result.PageCount = volume.PageCount;
-                
-                if(volume.ImageLinks.Small != null)
-                {
-                    result.ImageUrl = volume.ImageLinks.Small;
-                }
-                else if(volume.ImageLinks.Thumbnail != null)
-                {
-                    result.ImageUrl = volume.ImageLinks.Thumbnail;
-                }
-
-                result.Summary = volume.Description;
-            }
-
-            return result;
         }
 
         private async Task<GoogleBookSearch> SearchGoogleBooks(string title, string author)
@@ -59,6 +51,25 @@ namespace Bookshelf.Core
             var url = $"{apiUrl}/volumes?q={title}+inauthor:{author}&{_queryParams}&key={apiKey}";
             var json = await _client.GetStringAsync(url);
             return JsonSerializer.Deserialize<GoogleBookSearch>(json);
+        }
+
+        private Book SetBonusItems(Book result, GoogleBookSearch search)
+        {
+            var volume = search.Items.First().VolumeInfo;
+            result.PageCount = volume.PageCount;
+            
+            if(volume.ImageLinks.Small != null)
+            {
+                result.ImageUrl = volume.ImageLinks.Small;
+            }
+            else if(volume.ImageLinks.Thumbnail != null)
+            {
+                result.ImageUrl = volume.ImageLinks.Thumbnail;
+            }
+
+            result.Summary = volume.Description;
+
+            return result;
         }
     }
 }
