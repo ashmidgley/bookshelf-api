@@ -56,6 +56,12 @@ namespace Bookshelf.Core
         private Book SetBonusItems(Book result, GoogleBookSearch search)
         {
             var volume = search.Items.First().VolumeInfo;
+            result.Title = volume.Title;
+            if(volume.Subtitle != null) {
+                result.Title += $" {volume.Subtitle}";
+            }
+
+            result.Author = volume.Authors[0];
             result.PageCount = volume.PageCount;
             
             if(volume.ImageLinks.Small != null)
