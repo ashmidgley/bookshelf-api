@@ -6,6 +6,7 @@ using FakeItEasy;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace Bookshelf.Tests
 {
@@ -46,7 +47,7 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void AddNewBook()
+        public async Task AddNewBook()
         {
             var newBook = new NewBookDto
             {
@@ -72,8 +73,8 @@ namespace Bookshelf.Tests
 
             var controller = new BooksController(repository, null, searchHelper, userHelper, _newBookValidator, _updatedBookValidator);
 
-            var responseOne = controller.Post(newBook);
-            var responseTwo = controller.Post(new NewBookDto());
+            var responseOne = await controller.Post(newBook);
+            var responseTwo = await controller.Post(new NewBookDto());
 
             Assert.AreEqual(result, responseOne.Value);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
