@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bookshelf.Core
 {
@@ -44,7 +44,7 @@ namespace Bookshelf.Core
         }
 
         [HttpPost]
-        public ActionResult<BookDto> Post([FromBody] NewBookDto newBook)
+        public async Task<ActionResult<BookDto>> Post([FromBody] NewBookDto newBook)
         {
             if(!_userHelper.MatchingUsers(HttpContext, newBook.UserId))
             {
@@ -57,7 +57,7 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            var book = _searchHelper.PullGoogleBooksData(newBook).Result;
+            var book = await _searchHelper.PullGoogleBooksData(newBook);
             var id = _bookRepository.Add(book);
 
             return _bookRepository.GetBook(id);
