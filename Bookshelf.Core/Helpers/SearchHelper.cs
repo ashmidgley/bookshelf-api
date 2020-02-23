@@ -2,6 +2,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.Extensions.Configuration;
 
 namespace Bookshelf.Core
@@ -48,7 +49,9 @@ namespace Bookshelf.Core
         {
             var apiUrl = _config["GoogleBooks:Url"];
             var apiKey = _config["GoogleBooks:Key"];
-            var url = $"{apiUrl}/volumes?q={title}+inauthor:{author}&{_queryParams}&key={apiKey}";
+            var encodedTitle = HttpUtility.UrlEncode(title);
+            var encodedAuthor = HttpUtility.UrlEncode(author);
+            var url = $"{apiUrl}/volumes?q={encodedTitle}+inauthor:{encodedAuthor}&{_queryParams}&key={apiKey}";
             var json = await _client.GetStringAsync(url);
             return JsonSerializer.Deserialize<GoogleBookSearch>(json);
         }
