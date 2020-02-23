@@ -69,10 +69,9 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            var current = _categoryRepository.GetCategory(category.Id);
-            if(current.Id == default)
+            if(!_categoryRepository.CategoryExists(category.Id))
             {
-                return BadRequest($"Category with id {current.Id} not found.");
+                return BadRequest($"Category with id {category.Id} not found.");
             }
 
             _categoryRepository.Update(category);

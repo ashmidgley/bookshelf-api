@@ -10,5 +10,6 @@ namespace Bookshelf.Core
         int Add(Rating Rating);
         void Update(Rating Rating);
         void Delete(int id);
+        bool RatingExists(int id);
     }
 }

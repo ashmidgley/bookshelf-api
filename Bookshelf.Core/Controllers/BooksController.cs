@@ -77,10 +77,9 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
             
-            var current = _bookRepository.GetBook(dto.Id);
-            if(current.Id == default)
+            if(!_bookRepository.BookExists(dto.Id))
             {
-                return BadRequest($"Book with id {current.Id} not found.");
+                return BadRequest($"Book with id {dto.Id} not found.");
             }
 
             _bookRepository.Update(dto);

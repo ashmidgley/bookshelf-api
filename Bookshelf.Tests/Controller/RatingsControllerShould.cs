@@ -90,7 +90,8 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
             var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.GetRating(id)).Returns(result);
+            A.CallTo(() => repository.RatingExists(A<int>.Ignored)).Returns(true);
+            A.CallTo(() => repository.GetRating(A<int>.Ignored)).Returns(result);
             
             var controller = new RatingsController(repository, userHelper, _ratingValidator);
 

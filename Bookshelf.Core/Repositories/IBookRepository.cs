@@ -9,5 +9,6 @@ namespace Bookshelf.Core
         int Add(Book book);
         void Update(BookDto dto);
         void Delete(int id);
+        bool BookExists(int id);
     }
 }

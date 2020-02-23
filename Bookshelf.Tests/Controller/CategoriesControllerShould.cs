@@ -90,7 +90,8 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
             var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.GetCategory(id)).Returns(result);
+            A.CallTo(() => repository.CategoryExists(A<int>.Ignored)).Returns(true);
+            A.CallTo(() => repository.GetCategory(A<int>.Ignored)).Returns(result);
             
             var controller = new CategoriesController(repository, userHelper, _categoryValidator);
 

@@ -105,6 +105,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
             var repository = A.Fake<IBookRepository>();
+            A.CallTo(() => repository.BookExists(A<int>.Ignored)).Returns(true);
             A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
            
             var controller = new BooksController(repository, null, null, userHelper, _newBookValidator, _updatedBookValidator);
