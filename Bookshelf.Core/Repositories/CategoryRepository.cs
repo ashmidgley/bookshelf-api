@@ -44,5 +44,11 @@ namespace Bookshelf.Core
             _context.Categories.Remove(category);
             _context.SaveChanges();
         }
+
+        public bool CategoryExists(int id)
+        {
+            return _context.Categories
+                .Any(x => x.Id == id);
+        }
     }
 }

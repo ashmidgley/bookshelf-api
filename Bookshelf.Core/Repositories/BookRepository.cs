@@ -49,5 +49,11 @@ namespace Bookshelf.Core
             _context.Books.Remove(book);
             _context.SaveChanges();
         }
+
+        public bool BookExists(int id)
+        {
+            return _context.Books
+                .Any(x => x.Id == id);
+        }
     }
 }

@@ -69,10 +69,9 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            var current = _ratingRepository.GetRating(rating.Id);
-            if(current.Id == default)
+            if(!_ratingRepository.RatingExists(rating.Id))
             {
-                return BadRequest($"Rating with id {current.Id} not found.");
+                return BadRequest($"Rating with id {rating.Id} not found.");
             }
 
             _ratingRepository.Update(rating);

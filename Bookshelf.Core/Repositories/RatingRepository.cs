@@ -44,5 +44,11 @@ namespace Bookshelf.Core
             _context.Ratings.Remove(rating);
             _context.SaveChanges();
         }
+
+        public bool RatingExists(int id)
+        {
+            return _context.Ratings
+                .Any(x => x.Id == id);
+        }
     }
 }
