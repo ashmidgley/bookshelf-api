@@ -11,7 +11,7 @@ namespace Bookshelf.Core
     {
         private IConfiguration _config;
         private readonly HttpClient _client = new HttpClient();
-        private readonly string _queryParams = "printType=books&orderBy=relevance&maxResults=1";
+        private readonly string _queryParams = "orderBy=relevance&maxResults=1";
         
         public SearchHelper(IConfiguration config)
         {
@@ -67,13 +67,13 @@ namespace Bookshelf.Core
             result.Author = volume.Authors[0];
             result.PageCount = volume.PageCount;
             
-            if(volume.ImageLinks.Small != null)
-            {
-                result.ImageUrl = volume.ImageLinks.Small;
-            }
-            else if(volume.ImageLinks.Thumbnail != null)
+            if(volume.ImageLinks.Thumbnail != null)
             {
                 result.ImageUrl = volume.ImageLinks.Thumbnail;
+            }
+            else if(volume.ImageLinks.SmallThumbnail != null)
+            {
+                result.ImageUrl = volume.ImageLinks.SmallThumbnail;
             }
 
             result.Summary = volume.Description;
