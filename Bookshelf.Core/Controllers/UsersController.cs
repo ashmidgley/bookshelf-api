@@ -13,12 +13,15 @@ namespace Bookshelf.Core
         private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
         private readonly LoginDtoValidator _loginValidator;
+        private readonly UserDtoValidator _userValidator;
 
-        public UsersController(IUserRepository userRepository, IUserHelper userHelper, LoginDtoValidator loginValidator)
+        public UsersController(IUserRepository userRepository, IUserHelper userHelper, LoginDtoValidator loginValidator,
+            UserDtoValidator userValidator)
         {
             _userRepository = userRepository;
             _userHelper = userHelper;
             _loginValidator = loginValidator;
+            _userValidator = userValidator;
         }
 
         [HttpGet]
@@ -99,6 +102,49 @@ namespace Bookshelf.Core
             { 
                 Token = _userHelper.BuildToken(user)
             };
+        }
+
+        [HttpPut]
+        public ActionResult<UserDto> Update(UserDto user)
+        {
+            if(!_userHelper.IsAdmin(HttpContext))
+            {
+                return Unauthorized();
+            }
+
+            var validation = _userValidator.Validate(user);
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.ToString());
+            }
+
+            if(!_userRepository.UserPresent(user.Id))
+            {
+                return BadRequest($"User with id {user.Id} not found.");
+            }
+
+            _userRepository.Update(user);
+
+            return _userRepository.GetUser(user.Id);
+        }
+
+        [HttpDelete]
+        public ActionResult<UserDto> Delete(int id)
+        {
+            var user = _userRepository.GetUser(id);
+            if(user.Id == default)
+            {
+                return BadRequest($"Rating with id {user.Id} not found.");
+            }
+            
+            if(!_userHelper.IsAdmin(HttpContext))
+            {
+                return Unauthorized();
+            }
+
+            _userRepository.Delete(id);
+
+            return user;
         }
     }
 }

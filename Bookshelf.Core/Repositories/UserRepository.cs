@@ -59,10 +59,36 @@ namespace Bookshelf.Core
             return _userHelper.PasswordsMatch(login.Password, user.PasswordHash);
         }
 
+        public bool UserPresent(int id)
+        {
+            return _context.Users
+                .Any(u => u.Id == id);
+        }
+
         public bool UserPresent(string email)
         {
             return _context.Users
                 .Any(u => u.Email.Equals(email));
+        }
+
+        public void Update(UserDto user)
+        {
+            var currentUser = _context.Users
+                .Single(x => x.Id == user.Id);
+
+            currentUser.Email = user.Email;
+            currentUser.IsAdmin = user.IsAdmin;
+
+            _context.SaveChanges();
+        }
+
+        public void Delete(int id)
+        {
+            var user = _context.Users
+                .Single(x => x.Id == id);
+
+            _context.Users.Remove(user);
+            _context.SaveChanges();
         }
     }
 }
