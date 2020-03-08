@@ -8,6 +8,9 @@ namespace Bookshelf.Core
         UserDto GetUser(string email);
         UserDto GetUser(int id);
         int Add(LoginDto login);
+        void Update(UserDto user);
+        void Delete(int id);
+        bool UserPresent(int id);
         bool UserPresent(string email);
         bool Authenticate(LoginDto login);
     }

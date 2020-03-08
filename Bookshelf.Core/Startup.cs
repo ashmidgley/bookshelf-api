@@ -55,6 +55,7 @@ namespace Bookshelf.Core
             services.AddTransient<CategoryValidator>();
             services.AddTransient<RatingValidator>();
             services.AddTransient<LoginDtoValidator>();
+            services.AddTransient<UserDtoValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
