@@ -128,6 +128,42 @@ namespace Bookshelf.Core
             return _userRepository.GetUser(user.Id);
         }
 
+        [HttpPut]
+        [Route("email")]
+        public ActionResult<UserDto> UpdateEmail(UserUpdateDto user)
+        {
+            if(!_userHelper.MatchingUsers(HttpContext, user.Id))
+            {
+               return Unauthorized(); 
+            }
+            
+            if(_userRepository.UserPresent(user.Email))
+            {
+                return BadRequest($"Email {user.Email} is already in use.");
+            }
+
+            var currentUser = _userRepository.GetUser(user.Id);
+            currentUser.Email = user.Email;
+            _userRepository.Update(currentUser);
+
+            return _userRepository.GetUser(user.Id);
+        }
+
+        [HttpPut]
+        [Route("password")]
+        public ActionResult<UserDto> UpdatePassword(UserUpdateDto user)
+        {
+            if(!_userHelper.MatchingUsers(HttpContext, user.Id))
+            {
+               return Unauthorized(); 
+            }
+
+            var passwordHash = _userHelper.HashPassword(user.Password);
+            _userRepository.UpdatePasswordHash(user.Id, passwordHash);
+
+            return _userRepository.GetUser(user.Id);
+        }
+
         [HttpDelete]
         public ActionResult<UserDto> Delete(int id)
         {

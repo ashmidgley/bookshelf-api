@@ -90,5 +90,12 @@ namespace Bookshelf.Core
             _context.Users.Remove(user);
             _context.SaveChanges();
         }
+
+        public void UpdatePasswordHash(int id, string passwordHash)
+        {
+            var user = _context.Users.Single(x => x.Id == id);
+            user.PasswordHash = passwordHash;
+            _context.SaveChanges();
+        }
     }
 }
