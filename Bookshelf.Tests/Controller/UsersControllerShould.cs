@@ -174,6 +174,86 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public void UpdateEmail()
+        {
+            var updatedUser = new UserUpdateDto
+            {
+                Id = 1,
+                Email = "test"
+            };
+
+            var user = new UserDto
+            {
+                Id = 1,
+                Email = "test"
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(false);
+            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(user);
+
+            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+
+            var responseOne = userController.UpdateEmail(updatedUser);
+
+            Assert.AreEqual(updatedUser.Email, responseOne.Value.Email);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenEmailExisting()
+        {
+            var updatedUser = new UserUpdateDto
+            {
+                Id = 1,
+                Email = "existing"
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(true);
+
+            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+
+            var response = userController.UpdateEmail(updatedUser);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Email {updatedUser.Email} is already in use.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void UpdatePassword()
+        {
+            var updatedUser = new UserUpdateDto
+            {
+                Id = 1,
+                Password = "test"
+            };
+
+            var user = new UserDto
+            {
+                Id = 1
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(user);
+
+            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+
+            var response = userController.UpdatePassword(updatedUser);
+
+            A.CallTo(() => userRepository.UpdatePasswordHash(updatedUser.Id, A<string>.Ignored)).MustHaveHappened();
+            Assert.AreEqual(updatedUser.Id, response.Value.Id);
+        }
+
+        [Test]
         public void DeleteUser()
         {
             var expected = new UserDto
