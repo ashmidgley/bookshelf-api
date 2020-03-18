@@ -199,11 +199,11 @@ namespace Bookshelf.Tests
 
             var responseOne = userController.UpdateEmail(updatedUser);
 
-            Assert.AreEqual(updatedUser.Email, responseOne.Value.Email);
+            Assert.AreEqual(updatedUser.Email, responseOne.Value.User.Email);
         }
 
         [Test]
-        public void ReturnBadRequest_WhenEmailExisting()
+        public void ReturnErrorMessage_WhenEmailExisting()
         {
             var updatedUser = new UserUpdateDto
             {
@@ -221,8 +221,7 @@ namespace Bookshelf.Tests
 
             var response = userController.UpdateEmail(updatedUser);
 
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
-            Assert.AreEqual($"Email {updatedUser.Email} is already in use.", ((BadRequestObjectResult)response.Result).Value);
+            Assert.AreEqual($"Email {updatedUser.Email} is already in use.", response.Value.Error);
         }
 
         [Test]

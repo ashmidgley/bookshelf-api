@@ -130,7 +130,7 @@ namespace Bookshelf.Core
 
         [HttpPut]
         [Route("email")]
-        public ActionResult<UserDto> UpdateEmail(UserUpdateDto user)
+        public ActionResult<EmailUpdateDto> UpdateEmail(UserUpdateDto user)
         {
             if(!_userHelper.MatchingUsers(HttpContext, user.Id))
             {
@@ -139,16 +139,22 @@ namespace Bookshelf.Core
             
             if(_userRepository.UserPresent(user.Email))
             {
-                return BadRequest($"Email {user.Email} is already in use.");
+                return  new EmailUpdateDto
+                {
+                    Error = $"Email {user.Email} is already in use."
+                };
             }
 
             var currentUser = _userRepository.GetUser(user.Id);
             currentUser.Email = user.Email;
             _userRepository.Update(currentUser);
 
-            return _userRepository.GetUser(user.Id);
+            return new EmailUpdateDto
+            {
+                User = _userRepository.GetUser(user.Id)
+            };
         }
-
+        
         [HttpPut]
         [Route("password")]
         public ActionResult<UserDto> UpdatePassword(UserUpdateDto user)
