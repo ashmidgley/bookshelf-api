@@ -6,57 +6,46 @@ namespace Bookshelf.Core
     public class UserRepository : IUserRepository
     {
         private readonly BookshelfContext _context;
-        private readonly IUserHelper _userHelper;
 
-        public UserRepository(BookshelfContext context, IUserHelper userHelper)
+        public UserRepository(BookshelfContext context)
         {
             _context = context;
-            _userHelper = userHelper;
         }
 
         public IEnumerable<UserDto> GetAll()
         {
             return _context.Users
-                .Select(u => _userHelper.ToUserDto(u))
+                .Select(u => ToUserDto(u))
                 .ToList();
         }
 
         public UserDto GetUser(string email)
         {
             return _context.Users
-                .Select(u => _userHelper.ToUserDto(u))
+                .Select(u => ToUserDto(u))
                 .Single(u => u.Email.Equals(email));
         }
 
         public UserDto GetUser(int id)
         {
             return _context.Users
-                .Select(u => _userHelper.ToUserDto(u))
+                .Select(u => ToUserDto(u))
                 .Single(u => u.Id == id);
         }
 
-        public int Add(LoginDto login)
+        public string GetPasswordHash(string email)
         {
-            var user = new User
-            {
-                Email = login.Email,
-                PasswordHash = _userHelper.HashPassword(login.Password),
-            };
+            var user = _context.Users
+                .Single(u => u.Email.Equals(email));
+
+            return user.PasswordHash;
+        }
+
+        public int Add(User user)
+        {
             _context.Users.Add(user);
             _context.SaveChanges();
             return user.Id;
-        }
-
-        public bool Authenticate(LoginDto login)
-        {
-            var user = _context.Users
-                .SingleOrDefault(u => u.Email.Equals(login.Email));
-
-            if(user == default)
-            {
-                return false;
-            }
-            return _userHelper.PasswordsMatch(login.Password, user.PasswordHash);
         }
 
         public bool UserPresent(int id)
@@ -96,6 +85,16 @@ namespace Bookshelf.Core
             var user = _context.Users.Single(x => x.Id == id);
             user.PasswordHash = passwordHash;
             _context.SaveChanges();
+        }
+
+        private UserDto ToUserDto(User user)
+        {
+            return new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                IsAdmin = user.IsAdmin
+            };
         }
     }
 }

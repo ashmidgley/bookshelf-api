@@ -15,7 +15,7 @@ namespace Bookshelf.Tests
         public string ReturnHashedPassword(string input, string saltString)
         {
             var salt = Convert.FromBase64String(saltString);
-            var userHelper = new UserHelper(null, null, null);
+            var userHelper = new UserHelper(null, null, null, null, null);
 
             return userHelper.HashPassword(input, salt);
         }
@@ -25,7 +25,7 @@ namespace Bookshelf.Tests
         public bool CheckPasswordsMatch(string password, string passwordHash, string saltString)
         {
             var salt = Convert.FromBase64String(saltString);
-            var userHelper = new UserHelper(null, null, null);
+            var userHelper = new UserHelper(null, null, null, null, null);
 
             return userHelper.PasswordsMatch(password, passwordHash, salt);
         }
@@ -36,7 +36,7 @@ namespace Bookshelf.Tests
             var categoryRepository = A.Fake<ICategoryRepository>();
             var ratingRepository = A.Fake<IRatingRepository>();
 
-            var userHelper = new UserHelper(null, categoryRepository, ratingRepository);
+            var userHelper = new UserHelper(null, null, null, categoryRepository, ratingRepository);
 
             userHelper.Register(1);
             
@@ -56,7 +56,7 @@ namespace Bookshelf.Tests
             var context = A.Fake<HttpContext>();
             context.User = new System.Security.Claims.ClaimsPrincipal(new ClaimsIdentity(claims));
 
-            var userHelper = new UserHelper(null, null, null);
+            var userHelper = new UserHelper(null, null, null, null, null);
 
             return userHelper.IsAdmin(context);
         }
@@ -73,7 +73,7 @@ namespace Bookshelf.Tests
             var context = A.Fake<HttpContext>();
             context.User = new System.Security.Claims.ClaimsPrincipal(new ClaimsIdentity(claims));
 
-            var userHelper = new UserHelper(null, null, null);
+            var userHelper = new UserHelper(null, null, null, null, null);
 
             return userHelper.MatchingUsers(context, 1);
         }

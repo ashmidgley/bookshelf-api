@@ -9,6 +9,7 @@ namespace Bookshelf.Core
         int Add(Category category);
         void Update(Category category);
         void Delete(int id);
+        void DeleteUserCategories(int userId);
         bool CategoryExists(int id);
     }
 }

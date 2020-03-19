@@ -14,6 +14,8 @@ namespace Bookshelf.Core
     public class UserHelper : IUserHelper
     {
         private IConfiguration _config;
+        private IUserRepository _userRepository;
+        private IBookRepository _bookRepository;
         private ICategoryRepository _categoryRepository;
         private IRatingRepository _ratingRepository;
         private readonly List<Category> _defaultCategories = new List<Category>
@@ -48,9 +50,12 @@ namespace Bookshelf.Core
             }
         };
         
-        public UserHelper(IConfiguration config, ICategoryRepository categoryRepository, IRatingRepository ratingRepository)
+        public UserHelper(IConfiguration config, IUserRepository userRepository, IBookRepository bookRepository,
+            ICategoryRepository categoryRepository, IRatingRepository ratingRepository)
         {
             _config = config;
+            _userRepository = userRepository;
+            _bookRepository = bookRepository;
             _categoryRepository = categoryRepository;
             _ratingRepository = ratingRepository;
         }
@@ -109,16 +114,6 @@ namespace Bookshelf.Core
             }
             return true;
         }
-
-        public UserDto ToUserDto(User user)
-        {
-            return new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                IsAdmin = user.IsAdmin
-            };
-        }
         
         public void Register(int userId)
         {
@@ -145,6 +140,14 @@ namespace Bookshelf.Core
         {
             var currentUser = context.User;
             return int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value) == userId;
+        }
+
+        public void DeleteUser(int userId)
+        {
+            _userRepository.Delete(userId);
+            _ratingRepository.DeleteUserRatings(userId);
+            _categoryRepository.DeleteUserCategories(userId);
+            _bookRepository.DeleteUserBooks(userId);
         }
     }
 }
