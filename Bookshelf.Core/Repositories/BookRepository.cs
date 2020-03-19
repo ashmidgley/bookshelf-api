@@ -50,6 +50,15 @@ namespace Bookshelf.Core
             _context.SaveChanges();
         }
 
+        public void DeleteUserBooks(int userId)
+        {
+            var books = _context.Books
+                .Where(b => b.UserId == userId);
+
+            _context.Books.RemoveRange(books);
+            _context.SaveChanges();
+        }
+
         public bool BookExists(int id)
         {
             return _context.Books

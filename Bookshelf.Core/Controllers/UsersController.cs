@@ -58,11 +58,19 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            if (!_userRepository.Authenticate(login))
+            if(!_userRepository.UserPresent(login.Email))
             {
                 return new TokenDto
                 {
-                    Error = "Incorrect credentials. Please try again."
+                    Error = "Incorrect email address. Please try again."
+                };
+            }
+
+            if (!_userHelper.PasswordsMatch(login.Password, _userRepository.GetPasswordHash(login.Email)))
+            {
+                return new TokenDto
+                {
+                    Error = "Incorrect password. Please try again."
                 };
             }
 
@@ -94,7 +102,13 @@ namespace Bookshelf.Core
                 };
             }
 
-            var id = _userRepository.Add(login);
+            var newUser = new User
+            {
+                Email = login.Email,
+                PasswordHash = _userHelper.HashPassword(login.Password),
+            };
+
+            var id = _userRepository.Add(newUser);
             _userHelper.Register(id);
             var user = _userRepository.GetUser(id);
 
@@ -179,12 +193,12 @@ namespace Bookshelf.Core
                 return BadRequest($"Rating with id {user.Id} not found.");
             }
             
-            if(!_userHelper.IsAdmin(HttpContext))
+            if(!_userHelper.IsAdmin(HttpContext) && !_userHelper.MatchingUsers(HttpContext, id))
             {
                 return Unauthorized();
             }
 
-            _userRepository.Delete(id);
+            _userHelper.DeleteUser(id);
 
             return user;
         }

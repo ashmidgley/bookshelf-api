@@ -50,5 +50,14 @@ namespace Bookshelf.Core
             return _context.Ratings
                 .Any(x => x.Id == id);
         }
+
+        public void DeleteUserRatings(int userId)
+        {
+            var ratings = _context.Ratings
+                .Where(r => r.UserId == userId);
+
+            _context.Ratings.RemoveRange(ratings);
+            _context.SaveChanges();
+        }
     }
 }

@@ -65,9 +65,10 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.Authenticate(A<LoginDto>.Ignored)).Returns(true);
+            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(true);
 
             var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(true);
             A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns("test");
 
             var usersController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
@@ -80,7 +81,7 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void ReturnError_WhenUnauthorizedUserCallsLogin()
+        public void ReturnError_WhenUnauthorizedEmailCallsLogin()
         {
             var login = new LoginDto
             {
@@ -89,13 +90,13 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.Authenticate(A<LoginDto>.Ignored)).Returns(false);
+            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(false);
             var usersController = new UsersController(userRepository, null, _loginValidator, _userValidator);
 
             var response = usersController.Login(login);
 
             Assert.Null(response.Value.Token);
-            Assert.AreEqual("Incorrect credentials. Please try again.", response.Value.Error);
+            Assert.AreEqual("Incorrect email address. Please try again.", response.Value.Error);
         }
 
         [Test]
@@ -261,7 +262,8 @@ namespace Bookshelf.Tests
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, 1)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.GetUser(1)).Returns(expected);
@@ -269,9 +271,10 @@ namespace Bookshelf.Tests
             var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
 
             var responseOne = userController.Delete(1);
-            var responseTwo = userController.Delete(2);
+            A.CallTo(() => userHelper.DeleteUser(1)).MustHaveHappened();
+            Assert.AreEqual(expected.Id, responseOne.Value.Id);
 
-            Assert.AreEqual(expected, responseOne.Value);
+            var responseTwo = userController.Delete(2);
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
         }
     }
