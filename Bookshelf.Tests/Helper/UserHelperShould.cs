@@ -77,5 +77,66 @@ namespace Bookshelf.Tests
 
             return userHelper.MatchingUsers(context, 1);
         }
+
+        [TestCase("411a5eae-f119-47be-8d1e-16e3258ecacb", ExpectedResult = true)]
+        [TestCase("fe16fe74-ebad-47d1-848d-1b7991119007", ExpectedResult = false)]
+        public bool CheckIfPasswordResetTokenMatches(string input)
+        {
+            var token = new Guid(input);
+            var user = new UserDto
+            {
+                PasswordResetToken = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb"),
+                PasswordResetExpiry = DateTime.Now.AddDays(1)
+            };
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+
+            return userHelper.ValidResetToken(user, token);
+        }
+
+        [Test]
+        public void ReturnTrue_WhenPasswordResetExpiryValid()
+        {
+            var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
+            var user = new UserDto
+            {
+                PasswordResetToken = token,
+                PasswordResetExpiry = DateTime.Now.AddDays(1)
+            };
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+
+            Assert.IsTrue(userHelper.ValidResetToken(user, token));
+        }
+
+        [Test]
+        public void ReturnFalse_WhenPasswordResetExpiryInvalid()
+        {
+            var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
+            var user = new UserDto
+            {
+                PasswordResetToken = token,
+                PasswordResetExpiry = DateTime.Now.AddDays(-1)
+            };
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+
+            Assert.IsFalse(userHelper.ValidResetToken(user, token));
+        }
+
+        [Test]
+        public void ReturnFalse_WhenPasswordResetExpiryNull()
+        {
+            var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
+            var user = new UserDto
+            {
+                PasswordResetToken = token,
+                PasswordResetExpiry = null
+            };
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+
+            Assert.IsFalse(userHelper.ValidResetToken(user, token));
+        }
     }
 }

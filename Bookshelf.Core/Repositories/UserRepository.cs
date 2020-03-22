@@ -90,16 +90,6 @@ namespace Bookshelf.Core
             _context.SaveChanges();
         }
 
-        private UserDto ToUserDto(User user)
-        {
-            return new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                IsAdmin = user.IsAdmin
-            };
-        }
-
         public void SetPasswordResetFields(int id, Guid resetToken, DateTime expiryDate)
         {
             var user = _context.Users
@@ -109,6 +99,18 @@ namespace Bookshelf.Core
             user.PasswordResetExpiry = expiryDate;
 
             _context.SaveChanges();
+        }
+
+        private static UserDto ToUserDto(User user)
+        {
+            return new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                IsAdmin = user.IsAdmin,
+                PasswordResetToken = user.PasswordResetToken,
+                PasswordResetExpiry = user.PasswordResetExpiry
+            };
         }
     }
 }

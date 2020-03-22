@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Http;
 
 namespace Bookshelf.Core
@@ -11,5 +12,6 @@ namespace Bookshelf.Core
         bool IsAdmin(HttpContext context);
         bool MatchingUsers(HttpContext context, int userId);
         void DeleteUser(int userId);
+        bool ValidResetToken(UserDto user, Guid token);
     }
 }

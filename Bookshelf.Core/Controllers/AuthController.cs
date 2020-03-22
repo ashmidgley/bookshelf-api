@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bookshelf.Core
@@ -84,6 +85,19 @@ namespace Bookshelf.Core
             { 
                 Token = _userHelper.BuildToken(user)
             };
+        }
+
+        [HttpGet]
+        [Route("reset-token-valid/{userId}/{token}")]
+        public ActionResult<bool> ResetTokenValid(int userId, Guid token)
+        {
+            if(!_userRepository.UserPresent(userId))
+            {
+                return false;
+            }
+
+            var user = _userRepository.GetUser(userId);
+            return _userHelper.ValidResetToken(user, token);
         }
     }
 }
