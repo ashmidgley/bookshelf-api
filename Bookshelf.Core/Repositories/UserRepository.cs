@@ -22,6 +22,7 @@ namespace Bookshelf.Core
         public UserDto GetUser(string email)
         {
             return _context.Users
+                .ToList()
                 .Select(u => ToUserDto(u))
                 .Single(u => u.Email.Equals(email));
         }
