@@ -12,16 +12,13 @@ namespace Bookshelf.Core
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
-        private readonly LoginDtoValidator _loginValidator;
-        private readonly UserDtoValidator _userValidator;
+        private readonly UserDtoValidator _userDtoValidator;
 
-        public UsersController(IUserRepository userRepository, IUserHelper userHelper, LoginDtoValidator loginValidator,
-            UserDtoValidator userValidator)
+        public UsersController(IUserRepository userRepository, IUserHelper userHelper, UserDtoValidator userDtoValidator)
         {
             _userRepository = userRepository;
             _userHelper = userHelper;
-            _loginValidator = loginValidator;
-            _userValidator = userValidator;
+            _userDtoValidator = userDtoValidator;
         }
 
         [HttpGet]
@@ -47,77 +44,6 @@ namespace Bookshelf.Core
             return _userRepository.GetUser(id);
         }
 
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("login")]
-        public ActionResult<TokenDto> Login([FromBody]LoginDto login)
-        {
-            var validation = _loginValidator.Validate(login);
-            if (!validation.IsValid)
-            {
-                return BadRequest(validation.ToString());
-            }
-
-            if(!_userRepository.UserPresent(login.Email))
-            {
-                return new TokenDto
-                {
-                    Error = "Incorrect email address. Please try again."
-                };
-            }
-
-            if (!_userHelper.PasswordsMatch(login.Password, _userRepository.GetPasswordHash(login.Email)))
-            {
-                return new TokenDto
-                {
-                    Error = "Incorrect password. Please try again."
-                };
-            }
-
-            var user = _userRepository.GetUser(login.Email);
-
-            return new TokenDto 
-            { 
-                Token = _userHelper.BuildToken(user)
-            };
-        }
-
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("register")]
-        public ActionResult<TokenDto> Register(LoginDto login)
-        {
-            var validation = _loginValidator.Validate(login);
-
-            if (!validation.IsValid)
-            {
-                return BadRequest(validation.ToString());
-            }
-
-            if(_userRepository.UserPresent(login.Email)) 
-            {
-                return new TokenDto
-                {
-                    Error = "Email already in use. Please try another."
-                };
-            }
-
-            var newUser = new User
-            {
-                Email = login.Email,
-                PasswordHash = _userHelper.HashPassword(login.Password),
-            };
-
-            var id = _userRepository.Add(newUser);
-            _userHelper.Register(id);
-            var user = _userRepository.GetUser(id);
-
-            return new TokenDto 
-            { 
-                Token = _userHelper.BuildToken(user)
-            };
-        }
-
         [HttpPut]
         public ActionResult<UserDto> Update(UserDto user)
         {
@@ -126,7 +52,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
-            var validation = _userValidator.Validate(user);
+            var validation = _userDtoValidator.Validate(user);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());

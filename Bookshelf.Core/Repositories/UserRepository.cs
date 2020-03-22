@@ -31,6 +31,7 @@ namespace Bookshelf.Core
         public UserDto GetUser(int id)
         {
             return _context.Users
+                .ToList()
                 .Select(u => ToUserDto(u))
                 .Single(u => u.Id == id);
         }
