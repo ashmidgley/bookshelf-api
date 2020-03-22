@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Bookshelf.Core
@@ -14,5 +15,6 @@ namespace Bookshelf.Core
         void Delete(int id);
         bool UserPresent(int id);
         bool UserPresent(string email);
+        void SetPasswordResetFields(int id, Guid resetToken, DateTime expiryDate);
     }
 }

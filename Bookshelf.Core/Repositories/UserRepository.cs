@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -96,6 +97,17 @@ namespace Bookshelf.Core
                 Email = user.Email,
                 IsAdmin = user.IsAdmin
             };
+        }
+
+        public void SetPasswordResetFields(int id, Guid resetToken, DateTime expiryDate)
+        {
+            var user = _context.Users
+                .Single(u => u.Id == id);
+            
+            user.PasswordResetToken = resetToken;
+            user.PasswordResetExpiry = expiryDate;
+
+            _context.SaveChanges();
         }
     }
 }
