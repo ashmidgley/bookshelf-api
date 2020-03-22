@@ -11,8 +11,7 @@ namespace Bookshelf.Tests
     [TestFixture]
     public class UsersControllerShould
     {
-        LoginDtoValidator _loginValidator => new LoginDtoValidator();
-        UserDtoValidator _userValidator => new UserDtoValidator();
+        UserDtoValidator _userDtoValidator => new UserDtoValidator();
 
         [Test]
         public void ReturnsAllUsers_WhenCallerAdmin()
@@ -25,7 +24,7 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.GetAll()).Returns(result);
 
-            var usersController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var usersController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var response = usersController.GetAll();
 
@@ -43,109 +42,11 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.GetUser(A<int>.Ignored)).Returns(result);
 
-            var usersController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var usersController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var response = usersController.Get(1);
 
             Assert.AreEqual(result, response.Value);
-        }
-
-        [Test]
-        public void ReturnToken_WhenAuthorizedUserCallsLogin()
-        {
-            var login = new LoginDto
-            {
-                Email = "test@gmail.com",
-                Password = "test"
-            };
-
-            var result = new TokenDto
-            {
-                Token = "test"
-            };
-
-            var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(true);
-
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(true);
-            A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns("test");
-
-            var usersController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
-
-            var responseOne = usersController.Login(login);
-            var responseTwo = usersController.Login(new LoginDto());
-
-            Assert.AreEqual(result.Token, responseOne.Value.Token);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-        }
-
-        [Test]
-        public void ReturnError_WhenUnauthorizedEmailCallsLogin()
-        {
-            var login = new LoginDto
-            {
-                Email = "test@gmail.com",
-                Password = "test"
-            };
-
-            var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(false);
-            var usersController = new UsersController(userRepository, null, _loginValidator, _userValidator);
-
-            var response = usersController.Login(login);
-
-            Assert.Null(response.Value.Token);
-            Assert.AreEqual("Incorrect email address. Please try again.", response.Value.Error);
-        }
-
-        [Test]
-        public void ReturnToken_WhenRegisterModelCorrect()
-        {
-            var register = new LoginDto
-            {
-                Email = "test@gmail.com",
-                Password = "test"
-            };
-
-            var result = new TokenDto
-            {
-                Token = "test"
-            };
-
-            var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(false);
-            
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns("test");
-
-            var usersController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
-
-            var responseOne = usersController.Register(register);
-            var responseTwo = usersController.Register(new LoginDto());
-
-            Assert.AreEqual(result.Token, responseOne.Value.Token);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
-        }
-
-        [Test]
-        public void ReturnError_WhenRegisteringUsernameAlreadyExists()
-        {
-            var register = new LoginDto
-            {
-                Email = "test@gmail.com",
-                Password = "test"
-            };
-
-            var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(true);
-
-            var usersController = new UsersController(userRepository, null, _loginValidator, _userValidator);
-
-            var response = usersController.Register(register);
-
-            Assert.Null(response.Value.Token);
-            Assert.AreEqual("Email already in use. Please try another.", response.Value.Error);
         }
 
         [Test]
@@ -165,7 +66,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userRepository.UserPresent(A<int>.Ignored)).Returns(true);
             A.CallTo(() => userRepository.GetUser(A<int>.Ignored)).Returns(updatedUser);
 
-            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var responseOne = userController.Update(updatedUser);
             var responseTwo = userController.Update(new UserDto());
@@ -196,7 +97,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(false);
             A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(user);
 
-            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var responseOne = userController.UpdateEmail(updatedUser);
 
@@ -218,7 +119,7 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(true);
 
-            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var response = userController.UpdateEmail(updatedUser);
 
@@ -245,7 +146,7 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(user);
 
-            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var response = userController.UpdatePassword(updatedUser);
 
@@ -268,7 +169,7 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.GetUser(1)).Returns(expected);
 
-            var userController = new UsersController(userRepository, userHelper, _loginValidator, _userValidator);
+            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
 
             var responseOne = userController.Delete(1);
             A.CallTo(() => userHelper.DeleteUser(1)).MustHaveHappened();

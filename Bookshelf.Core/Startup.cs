@@ -50,6 +50,7 @@ namespace Bookshelf.Core
             services.AddTransient<IBookHelper, BookHelper>();
             services.AddTransient<IUserHelper, UserHelper>();
             services.AddTransient<ISearchHelper, SearchHelper>();
+            services.AddTransient<IEmailHelper, EmailHelper>();
             services.AddTransient<NewBookValidator>();
             services.AddTransient<UpdatedBookValidator>();
             services.AddTransient<CategoryValidator>();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,6 +23,7 @@ namespace Bookshelf.Core
         public UserDto GetUser(string email)
         {
             return _context.Users
+                .ToList()
                 .Select(u => ToUserDto(u))
                 .Single(u => u.Email.Equals(email));
         }
@@ -29,6 +31,7 @@ namespace Bookshelf.Core
         public UserDto GetUser(int id)
         {
             return _context.Users
+                .ToList()
                 .Select(u => ToUserDto(u))
                 .Single(u => u.Id == id);
         }
@@ -87,13 +90,26 @@ namespace Bookshelf.Core
             _context.SaveChanges();
         }
 
-        private UserDto ToUserDto(User user)
+        public void SetPasswordResetFields(int id, Guid resetToken, DateTime expiryDate)
+        {
+            var user = _context.Users
+                .Single(u => u.Id == id);
+            
+            user.PasswordResetToken = resetToken;
+            user.PasswordResetExpiry = expiryDate;
+
+            _context.SaveChanges();
+        }
+
+        private static UserDto ToUserDto(User user)
         {
             return new UserDto
             {
                 Id = user.Id,
                 Email = user.Email,
-                IsAdmin = user.IsAdmin
+                IsAdmin = user.IsAdmin,
+                PasswordResetToken = user.PasswordResetToken,
+                PasswordResetExpiry = user.PasswordResetExpiry
             };
         }
     }

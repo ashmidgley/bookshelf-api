@@ -9,6 +9,7 @@ namespace Bookshelf.Tests
     public class SearchHelperShould
     {
         [Test]
+        [Explicit]
         public void SearchGoogleBooks()
         {
             var theMartian = new NewBookDto

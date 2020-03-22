@@ -149,5 +149,20 @@ namespace Bookshelf.Core
             _categoryRepository.DeleteUserCategories(userId);
             _bookRepository.DeleteUserBooks(userId);
         }
+
+        public bool ValidResetToken(UserDto user, Guid token)
+        {
+            if(!user.PasswordResetToken.HasValue || user.PasswordResetToken.Value != token)
+            {
+                return false;
+            }
+
+            if(!user.PasswordResetExpiry.HasValue || user.PasswordResetExpiry.Value < DateTime.Now)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
