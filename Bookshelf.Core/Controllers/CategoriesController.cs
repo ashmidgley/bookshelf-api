@@ -82,12 +82,12 @@ namespace Bookshelf.Core
         [HttpDelete("{id}")]
         public ActionResult<Category> Delete(int id)
         {
-            var category = _categoryRepository.GetCategory(id);
-            if(category.Id == default)
+            if(!_categoryRepository.CategoryExists(id))
             {
-                return BadRequest($"Category with id {category.Id} not found.");
+                return BadRequest($"Category with id {id} not found.");
             }
 
+            var category = _categoryRepository.GetCategory(id);
             if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
             {
                 return Unauthorized();

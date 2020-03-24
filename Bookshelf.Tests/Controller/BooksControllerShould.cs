@@ -24,7 +24,7 @@ namespace Bookshelf.Tests
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
 
-            var controller = new BooksController(repository, null, null, null, _newBookValidator, _updatedBookValidator);
+            var controller = new BooksController(repository, null, null, _newBookValidator, _updatedBookValidator);
             
             var response = controller.GetBook(1);
             
@@ -39,7 +39,7 @@ namespace Bookshelf.Tests
             var repository = A.Fake<IBookRepository>();
             A.CallTo(() => repository.GetUserBooks(A<int>.Ignored)).Returns(result);
 
-            var controller = new BooksController(repository, null, null, null, _newBookValidator, _updatedBookValidator);
+            var controller = new BooksController(repository, null, null, _newBookValidator, _updatedBookValidator);
             
             var response = controller.GetUserBooks(1);
             
@@ -71,7 +71,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => repository.Add(A<Book>.Ignored)).Returns(1);
             A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
 
-            var controller = new BooksController(repository, null, searchHelper, userHelper, _newBookValidator, _updatedBookValidator);
+            var controller = new BooksController(repository, searchHelper, userHelper, _newBookValidator, _updatedBookValidator);
 
             var responseOne = await controller.Post(newBook);
             var responseTwo = await controller.Post(new NewBookDto());
@@ -108,7 +108,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => repository.BookExists(A<int>.Ignored)).Returns(true);
             A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
            
-            var controller = new BooksController(repository, null, null, userHelper, _newBookValidator, _updatedBookValidator);
+            var controller = new BooksController(repository, null, userHelper, _newBookValidator, _updatedBookValidator);
 
             var responseOne = controller.Put(updatedBook);
             var responseTwo = controller.Put(new BookDto());
@@ -121,16 +121,20 @@ namespace Bookshelf.Tests
         public void DeleteBook()
         {
             const int id = 1;
-            var result = new BookDto();
-            result.Id = id;
+            
+            var result = new BookDto
+            {
+                Id = id
+            };
 
             var repository = A.Fake<IBookRepository>();
+            A.CallTo(() => repository.BookExists(id)).Returns(true);
             A.CallTo(() => repository.GetBook(id)).Returns(result);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
-            var controller = new BooksController(repository, null, null, userHelper, _newBookValidator, _updatedBookValidator);
+            var controller = new BooksController(repository, null, userHelper, _newBookValidator, _updatedBookValidator);
 
             var responseOne = controller.Delete(id);
             var responseTwo = controller.Delete(5);

@@ -106,15 +106,19 @@ namespace Bookshelf.Tests
         public void DeleteCategory()
         {
             const int id = 1;
-            var result = new Category();
-            result.Id = id;
+
+            var result = new Category
+            {
+                Id = id
+            };
+
+            var repository = A.Fake<ICategoryRepository>();
+             A.CallTo(() => repository.CategoryExists(id)).Returns(true);
+            A.CallTo(() => repository.GetCategory(id)).Returns(result);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
-            var repository = A.Fake<ICategoryRepository>();
-            A.CallTo(() => repository.GetCategory(id)).Returns(result);
-            
             var controller = new CategoriesController(repository, userHelper, _categoryValidator);
 
             var responseOne = controller.Delete(id);

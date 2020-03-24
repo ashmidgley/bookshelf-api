@@ -41,6 +41,7 @@ namespace Bookshelf.Core
         {
             var rating = _context.Ratings
                 .Single(r => r.Id == id);
+                
             _context.Ratings.Remove(rating);
             _context.SaveChanges();
         }

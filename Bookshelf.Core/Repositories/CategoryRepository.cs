@@ -41,6 +41,7 @@ namespace Bookshelf.Core
         {
             var category = _context.Categories
                 .Single(c => c.Id == id);
+
             _context.Categories.Remove(category);
             _context.SaveChanges();
         }

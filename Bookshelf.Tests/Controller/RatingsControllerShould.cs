@@ -106,15 +106,19 @@ namespace Bookshelf.Tests
         public void DeleteRating()
         {
             const int id = 1;
-            var result = new Rating();
-            result.Id = id;
+
+            var result = new Rating
+            {
+                Id = id
+            };
+
+            var repository = A.Fake<IRatingRepository>();
+            A.CallTo(() => repository.RatingExists(id)).Returns(true);
+            A.CallTo(() => repository.GetRating(id)).Returns(result);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
-            var repository = A.Fake<IRatingRepository>();
-            A.CallTo(() => repository.GetRating(id)).Returns(result);
-            
             var controller = new RatingsController(repository, userHelper, _ratingValidator);
 
             var responseOne = controller.Delete(id);

@@ -47,7 +47,6 @@ namespace Bookshelf.Core
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IRatingRepository, RatingRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IBookHelper, BookHelper>();
             services.AddTransient<IUserHelper, UserHelper>();
             services.AddTransient<ISearchHelper, SearchHelper>();
             services.AddTransient<IEmailHelper, EmailHelper>();

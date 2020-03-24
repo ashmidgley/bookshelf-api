@@ -6,26 +6,25 @@ namespace Bookshelf.Core
     public class BookRepository : IBookRepository
     {
         private readonly BookshelfContext _context;
-        private readonly IBookHelper _helper;
 
-        public BookRepository(BookshelfContext context, IBookHelper helper)
+        public BookRepository(BookshelfContext context)
         {
             _context = context;
-            _helper = helper;
         }
 
         public IEnumerable<BookDto> GetUserBooks(int userId)
         {
             return _context.Books
                 .Where(b => b.UserId == userId)
-                .Select(b => _helper.ToBookDto(b));
+                .Select(b => ToBookDto(b));
         }
 
         public BookDto GetBook(int id)
         {
             var book = _context.Books
                 .Single(b => b.Id == id);
-            return _helper.ToBookDto(book);
+
+            return ToBookDto(book);
         }
 
         public int Add(Book book)
@@ -37,7 +36,7 @@ namespace Bookshelf.Core
 
         public void Update(BookDto dto)
         {
-            var book = _helper.ToBook(dto);
+            var book = ToBook(dto);
             _context.Books.Update(book);
             _context.SaveChanges();
         }
@@ -46,6 +45,7 @@ namespace Bookshelf.Core
         {
             var book = _context.Books
                 .Single(b => b.Id == id);
+                
             _context.Books.Remove(book);
             _context.SaveChanges();
         }
@@ -63,6 +63,41 @@ namespace Bookshelf.Core
         {
             return _context.Books
                 .Any(x => x.Id == id);
+        }
+
+         private static BookDto ToBookDto(Book book)
+        {
+            return new BookDto
+            {
+                Id = book.Id,
+                UserId = book.UserId,
+                CategoryId = book.CategoryId,
+                RatingId = book.RatingId,
+                ImageUrl = book.ImageUrl,
+                Title = book.Title,
+                Author = book.Author,
+                FinishedOn = book.FinishedOn,
+                Year = book.FinishedOn.Year,
+                PageCount = book.PageCount,
+                Summary = book.Summary
+            };
+        }
+
+        private static Book ToBook(BookDto dto)
+        {
+            return new Book
+            {
+                Id = dto.Id,
+                UserId = dto.UserId,
+                CategoryId = dto.CategoryId,
+                RatingId = dto.RatingId,
+                ImageUrl = dto.ImageUrl,
+                Title = dto.Title,
+                Author = dto.Author,
+                FinishedOn = dto.FinishedOn,
+                PageCount = dto.PageCount,
+                Summary = dto.Summary
+            };
         }
     }
 }
