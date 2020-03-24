@@ -99,5 +99,26 @@ namespace Bookshelf.Core
             var user = _userRepository.GetUser(userId);
             return _userHelper.ValidResetToken(user, token);
         }
+
+        [HttpPut]
+        public ActionResult<UserDto> UpdatePasswordUsingToken(ResetTokenUpdateDto model)
+        {
+            if(!_userRepository.UserPresent(model.UserId))
+            {
+               return BadRequest($"User with Id {model.UserId} does not exist."); 
+            }
+
+            var user = _userRepository.GetUser(model.UserId);
+            if(!_userHelper.ValidResetToken(user, model.Token))
+            {
+                return BadRequest("Password reset token is not valid.");
+            }
+
+            var passwordHash = _userHelper.HashPassword(model.Password);
+            _userRepository.UpdatePasswordHash(user.Id, passwordHash);
+            _userRepository.SetPasswordResetFields(user.Id, null, null);
+
+            return _userRepository.GetUser(user.Id);
+        }
     }
 }
