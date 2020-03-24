@@ -90,7 +90,7 @@ namespace Bookshelf.Core
             _context.SaveChanges();
         }
 
-        public void SetPasswordResetFields(int id, Guid resetToken, DateTime expiryDate)
+        public void SetPasswordResetFields(int id, Guid? resetToken, DateTime? expiryDate)
         {
             var user = _context.Users
                 .Single(u => u.Id == id);

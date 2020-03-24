@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using Bookshelf.Core;
 using FakeItEasy;
@@ -107,6 +108,88 @@ namespace Bookshelf.Tests
 
             Assert.Null(response.Value.Token);
             Assert.AreEqual("Email already in use. Please try another.", response.Value.Error);
+        }
+
+        [Test]
+        public void ReturnUserDto_WhenResetTokenValid_InCallToUpdatePasswordUsingToken()
+        {
+            var model = new ResetTokenUpdateDto 
+            {
+                UserId = 1,
+                Token = Guid.NewGuid(),
+                Password = "test"
+            };
+            
+            var user = new UserDto
+            {
+                Id = 1
+            };
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(model.UserId)).Returns(true);
+            A.CallTo(() => userRepository.GetUser(model.UserId)).Returns(user);
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.ValidResetToken(user, model.Token)).Returns(true);
+
+            var controller = new AuthController(userRepository, userHelper, null);
+
+            var response = controller.UpdatePasswordUsingToken(model);
+
+            A.CallTo(() => userRepository.UpdatePasswordHash(model.UserId, A<string>.Ignored)).MustHaveHappened();
+            A.CallTo(() => userRepository.SetPasswordResetFields(model.UserId, null, null)).MustHaveHappened();
+            Assert.AreEqual(model.UserId, response.Value.Id);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserNotPresent_InCallToUpdatePasswordUsingToken()
+        {
+            var model = new ResetTokenUpdateDto 
+            {
+                UserId = 1,
+                Token = Guid.NewGuid(),
+                Password = "test"
+            };
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(model.UserId)).Returns(false);
+
+            var controller = new AuthController(userRepository, null, null);
+
+            var response = controller.UpdatePasswordUsingToken(model);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {model.UserId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenTokenInvalid_InCallToUpdatePasswordUsingToken()
+        {
+            var model = new ResetTokenUpdateDto 
+            {
+                UserId = 1,
+                Token = Guid.NewGuid(),
+                Password = "test"
+            };
+
+            var user = new UserDto
+            {
+                Id = 1
+            };
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(model.UserId)).Returns(true);
+            A.CallTo(() => userRepository.GetUser(model.UserId)).Returns(user);
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.ValidResetToken(user, model.Token)).Returns(false);
+
+            var controller = new AuthController(userRepository, userHelper, null);
+
+            var response = controller.UpdatePasswordUsingToken(model);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual("Password reset token is not valid.", ((BadRequestObjectResult)response.Result).Value);
         }
     }
 }

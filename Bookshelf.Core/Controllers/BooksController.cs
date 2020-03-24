@@ -11,17 +11,15 @@ namespace Bookshelf.Core
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
-        private readonly IBookHelper _bookHelper;
         private readonly ISearchHelper _searchHelper;
         private readonly IUserHelper _userHelper;
         private readonly NewBookValidator _newBookValidator;
         private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, IBookHelper bookHelper, ISearchHelper searchHelper, IUserHelper userHelper,
+        public BooksController(IBookRepository bookRepository, ISearchHelper searchHelper, IUserHelper userHelper,
             NewBookValidator newBookValidator, UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
-            _bookHelper = bookHelper;
             _searchHelper = searchHelper;
             _userHelper = userHelper;
             _newBookValidator = newBookValidator;
@@ -90,12 +88,12 @@ namespace Bookshelf.Core
         [HttpDelete("{id}")]
         public ActionResult<BookDto> Delete(int id)
         {
-            var book = _bookRepository.GetBook(id);
-            if(book.Id == default)
+            if(!_bookRepository.BookExists(id))
             {
-                return BadRequest($"Book with id {book.Id} not found.");
+                return BadRequest($"Book with id {id} not found.");
             }
-            
+
+            var book = _bookRepository.GetBook(id);
             if(!_userHelper.MatchingUsers(HttpContext, book.UserId))
             {
                 return Unauthorized();

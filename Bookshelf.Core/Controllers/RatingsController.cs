@@ -82,12 +82,12 @@ namespace Bookshelf.Core
         [HttpDelete("{id}")]
         public ActionResult<Rating> Delete(int id)
         {
-            var rating = _ratingRepository.GetRating(id);
-            if(rating.Id == default)
+            if(!_ratingRepository.RatingExists(id))
             {
-                return BadRequest($"Rating with id {rating.Id} not found.");
+                return BadRequest($"Rating with id {id} not found.");
             }
             
+            var rating = _ratingRepository.GetRating(id);
             if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
             {
                 return Unauthorized();
