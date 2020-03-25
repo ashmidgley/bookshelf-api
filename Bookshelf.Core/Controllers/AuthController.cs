@@ -47,7 +47,6 @@ namespace Bookshelf.Core
         public ActionResult<string> Register(LoginDto login)
         {
             var validation = _loginDtoValidator.Validate(login);
-
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
