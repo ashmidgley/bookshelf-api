@@ -20,7 +20,7 @@ namespace Bookshelf.Core
 
         [HttpPost]
         [Route("login")]
-        public ActionResult<TokenDto> Login([FromBody]LoginDto login)
+        public ActionResult<string> Login([FromBody]LoginDto login)
         {
             var validation = _loginDtoValidator.Validate(login);
             if (!validation.IsValid)
@@ -30,31 +30,22 @@ namespace Bookshelf.Core
 
             if(!_userRepository.UserPresent(login.Email))
             {
-                return new TokenDto
-                {
-                    Error = "Incorrect email address. Please try again."
-                };
+                return BadRequest("Incorrect email address. Please try again.");
             }
 
             if (!_userHelper.PasswordsMatch(login.Password, _userRepository.GetPasswordHash(login.Email)))
             {
-                return new TokenDto
-                {
-                    Error = "Incorrect password. Please try again."
-                };
+                return BadRequest("Incorrect password. Please try again.");
             }
 
             var user = _userRepository.GetUser(login.Email);
 
-            return new TokenDto 
-            { 
-                Token = _userHelper.BuildToken(user)
-            };
+            return _userHelper.BuildToken(user);
         }
 
         [HttpPost]
         [Route("register")]
-        public ActionResult<TokenDto> Register(LoginDto login)
+        public ActionResult<string> Register(LoginDto login)
         {
             var validation = _loginDtoValidator.Validate(login);
 
@@ -65,10 +56,7 @@ namespace Bookshelf.Core
 
             if(_userRepository.UserPresent(login.Email)) 
             {
-                return new TokenDto
-                {
-                    Error = "Email already in use. Please try another."
-                };
+                return BadRequest("Email already in use. Please try another.");
             }
 
             var newUser = new User
@@ -81,10 +69,7 @@ namespace Bookshelf.Core
             _userHelper.Register(id);
             var user = _userRepository.GetUser(id);
 
-            return new TokenDto 
-            { 
-                Token = _userHelper.BuildToken(user)
-            };
+            return  _userHelper.BuildToken(user);
         }
 
         [HttpGet]
@@ -97,6 +82,7 @@ namespace Bookshelf.Core
             }
 
             var user = _userRepository.GetUser(userId);
+            
             return _userHelper.ValidResetToken(user, token);
         }
 
