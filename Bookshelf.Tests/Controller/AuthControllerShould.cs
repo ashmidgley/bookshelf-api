@@ -10,8 +10,6 @@ namespace Bookshelf.Tests
     [TestFixture]
     public class AuthControllerShould
     {
-        LoginDtoValidator _loginDtoValidator => new LoginDtoValidator();
-
         [Test]
         public void ReturnToken_WhenAuthorizedUser_CallsLogin()
         {
@@ -30,7 +28,9 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(true);
             A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns(token);
 
-            var controller = new AuthController(userRepository, userHelper, _loginDtoValidator);
+            var loginDtoValidator = new LoginDtoValidator();
+
+            var controller = new AuthController(userRepository, userHelper, loginDtoValidator);
 
             var response = controller.Login(login);
 
@@ -49,7 +49,9 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(false);
 
-            var controller = new AuthController(userRepository, null, _loginDtoValidator);
+            var loginDtoValidator = new LoginDtoValidator();
+
+            var controller = new AuthController(userRepository, null, loginDtoValidator);
 
             var response = controller.Login(login);
 
@@ -72,7 +74,9 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(false);
 
-            var controller = new AuthController(userRepository, userHelper, _loginDtoValidator);
+            var loginDtoValidator = new LoginDtoValidator();
+
+            var controller = new AuthController(userRepository, userHelper, loginDtoValidator);
 
             var response = controller.Login(login);
 
@@ -97,7 +101,9 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns(token);
 
-            var controller = new AuthController(userRepository, userHelper, _loginDtoValidator);
+            var loginDtoValidator = new LoginDtoValidator();
+
+            var controller = new AuthController(userRepository, userHelper, loginDtoValidator);
 
             var response = controller.Register(register);
 
@@ -118,7 +124,9 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(true);
 
-            var controller = new AuthController(userRepository, null, _loginDtoValidator);
+            var loginDtoValidator = new LoginDtoValidator();
+
+            var controller = new AuthController(userRepository, null, loginDtoValidator);
 
             var response = controller.Register(register);
 

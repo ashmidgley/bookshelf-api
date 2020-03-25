@@ -12,42 +12,31 @@ namespace Bookshelf.Tests
 {
     [TestFixture]
     public class BooksControllerShould
-    {        
-        private NewBookValidator _newBookValidator => new NewBookValidator();
-        private UpdatedBookValidator _updatedBookValidator => new UpdatedBookValidator();
-
+    {
         [Test]
-        public void ReturnBook()
+        public void ReturnGetBook_OnCallToGetBook()
         {
-            var result = new BookDto();
-
-            var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
-
-            var controller = new BooksController(repository, null, null, _newBookValidator, _updatedBookValidator);
+            var bookRepository = A.Fake<IBookRepository>();
+            var controller = new BooksController(bookRepository, null, null, null, null);
             
             var response = controller.GetBook(1);
             
-            Assert.AreEqual(result, response.Value);
+            A.CallTo(() => bookRepository.GetBook(1)).MustHaveHappened();
         }
 
         [Test]
-        public void ReturnUserBooks()
+        public void ReturnGetUserBooks_OnCallToGetUserBooks()
         {
-            var result = new List<BookDto>();
-
-            var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.GetUserBooks(A<int>.Ignored)).Returns(result);
-
-            var controller = new BooksController(repository, null, null, _newBookValidator, _updatedBookValidator);
+            var bookRepository = A.Fake<IBookRepository>();
+            var controller = new BooksController(bookRepository, null, null, null, null);
             
             var response = controller.GetUserBooks(1);
             
-            Assert.AreEqual(result, response);
+            A.CallTo(() => bookRepository.GetUserBooks(1)).MustHaveHappened();
         }
 
         [Test]
-        public async Task AddNewBook()
+        public async Task ReturnBookDto_WhenValidUser_CallsAddBook()
         {
             var newBook = new NewBookDto
             {
@@ -59,29 +48,32 @@ namespace Bookshelf.Tests
                 FinishedOn = DateTime.Now
             };
 
-            var result = new BookDto();
+            var result = new BookDto
+            {
+                UserId = newBook.UserId
+            };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(true);
 
             var searchHelper = A.Fake<ISearchHelper>();
-            A.CallTo(() => searchHelper.PullGoogleBooksData(A<NewBookDto>.Ignored)).Returns(new Book());
 
-            var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.Add(A<Book>.Ignored)).Returns(1);
-            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+            var bookRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => bookRepository.GetBook(A<int>.Ignored)).Returns(result);
 
-            var controller = new BooksController(repository, searchHelper, userHelper, _newBookValidator, _updatedBookValidator);
+            var newBookValidator = new NewBookValidator();
 
-            var responseOne = await controller.Post(newBook);
-            var responseTwo = await controller.Post(new NewBookDto());
+            var controller = new BooksController(bookRepository, searchHelper, userHelper, newBookValidator, null);
 
-            Assert.AreEqual(result, responseOne.Value);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+            var response = await controller.AddBook(newBook);
+
+            A.CallTo(() => searchHelper.PullGoogleBooksData(newBook)).MustHaveHappened();
+            A.CallTo(() => bookRepository.Add(A<Book>.Ignored)).MustHaveHappened();
+            Assert.AreEqual(result.UserId, response.Value.UserId);
         }
 
         [Test]
-        public void UpdateExistingBook()
+        public void ReturnBookDto_WhenValidUser_CallsUpdateBook()
         {
             var updatedBook = new BookDto
             {
@@ -98,49 +90,52 @@ namespace Bookshelf.Tests
                 Summary = "test"
             };
 
-            var result = new BookDto();
-            result.Id = 1;
+            var result = new BookDto
+            {
+                Id = updatedBook.Id
+            };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedBook.UserId)).Returns(true);
 
-            var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.BookExists(A<int>.Ignored)).Returns(true);
-            A.CallTo(() => repository.GetBook(A<int>.Ignored)).Returns(result);
+            var bookRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => bookRepository.BookExists(updatedBook.Id)).Returns(true);
+            A.CallTo(() => bookRepository.GetBook(updatedBook.Id)).Returns(result);
            
-            var controller = new BooksController(repository, null, userHelper, _newBookValidator, _updatedBookValidator);
+            var updatedBookValidator = new UpdatedBookValidator();
 
-            var responseOne = controller.Put(updatedBook);
-            var responseTwo = controller.Put(new BookDto());
+            var controller = new BooksController(bookRepository, null, userHelper, null, updatedBookValidator);
 
-            Assert.AreEqual(result, responseOne.Value);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+            var response = controller.UpdateBook(updatedBook);
+
+            A.CallTo(() => bookRepository.Update(A<BookDto>.Ignored)).MustHaveHappened();
+            Assert.AreEqual(result.Id, response.Value.Id);
         }
 
         [Test]
-        public void DeleteBook()
+        public void ReturnBookDto_WhenValidUser_CallsDeleteBook()
         {
-            const int id = 1;
+            var id = 1;
             
             var result = new BookDto
             {
-                Id = id
+                Id = id,
+                UserId = 1
             };
 
-            var repository = A.Fake<IBookRepository>();
-            A.CallTo(() => repository.BookExists(id)).Returns(true);
-            A.CallTo(() => repository.GetBook(id)).Returns(result);
+            var bookRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => bookRepository.BookExists(id)).Returns(true);
+            A.CallTo(() => bookRepository.GetBook(id)).Returns(result);
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(true);
 
-            var controller = new BooksController(repository, null, userHelper, _newBookValidator, _updatedBookValidator);
+            var controller = new BooksController(bookRepository, null, userHelper, null, null);
 
-            var responseOne = controller.Delete(id);
-            var responseTwo = controller.Delete(5);
+            var response = controller.DeleteBook(id);
             
-            Assert.AreEqual(result, responseOne.Value);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+            A.CallTo(() => bookRepository.Delete(id)).MustHaveHappened();
+            Assert.AreEqual(result.Id, response.Value.Id);
         }
     }
 }
