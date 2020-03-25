@@ -42,55 +42,54 @@ namespace Bookshelf.Core
         }
 
         [HttpPost]
-        public async Task<ActionResult<BookDto>> Post([FromBody] NewBookDto newBook)
+        public async Task<ActionResult<BookDto>> AddBook([FromBody] NewBookDto newBook)
         {
-            if(!_userHelper.MatchingUsers(HttpContext, newBook.UserId))
-            {
-                return Unauthorized();
-            }
-
             var validation = _newBookValidator.Validate(newBook);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
-
-            var book = await _searchHelper.PullGoogleBooksData(newBook);
-            var id = _bookRepository.Add(book);
-
-            return _bookRepository.GetBook(id);
-        }
-
-        [HttpPut]
-        public ActionResult<BookDto> Put([FromBody] BookDto dto)
-        {
-            if(!_userHelper.MatchingUsers(HttpContext, dto.UserId))
+            
+            if(!_userHelper.MatchingUsers(HttpContext, newBook.UserId))
             {
                 return Unauthorized();
             }
 
+            var book = await _searchHelper.PullGoogleBooksData(newBook);
+            var id = _bookRepository.Add(book);
+            return _bookRepository.GetBook(id);
+        }
+
+        [HttpPut]
+        public ActionResult<BookDto> UpdateBook([FromBody] BookDto dto)
+        {
             var validation = _updatedBookValidator.Validate(dto);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
-            
+
+            if(!_userHelper.MatchingUsers(HttpContext, dto.UserId))
+            {
+                return Unauthorized();
+            }
+
             if(!_bookRepository.BookExists(dto.Id))
             {
-                return BadRequest($"Book with id {dto.Id} not found.");
+                return BadRequest($"Book with Id {dto.Id} does not exist.");
             }
 
             _bookRepository.Update(dto);
-            
             return _bookRepository.GetBook(dto.Id);
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult<BookDto> Delete(int id)
+        [HttpDelete]
+        [Route("{id}")]
+        public ActionResult<BookDto> DeleteBook(int id)
         {
             if(!_bookRepository.BookExists(id))
             {
-                return BadRequest($"Book with id {id} not found.");
+                return BadRequest($"Book with Id {id} does not exist.");
             }
 
             var book = _bookRepository.GetBook(id);
@@ -100,7 +99,6 @@ namespace Bookshelf.Core
             }
 
             _bookRepository.Delete(id);
-            
             return book;
         }
     }
