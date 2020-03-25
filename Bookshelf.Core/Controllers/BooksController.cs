@@ -76,7 +76,7 @@ namespace Bookshelf.Core
 
             if(!_bookRepository.BookExists(dto.Id))
             {
-                return BadRequest($"Book with id {dto.Id} not found.");
+                return BadRequest($"Book with Id {dto.Id} does not exist.");
             }
 
             _bookRepository.Update(dto);
@@ -89,7 +89,7 @@ namespace Bookshelf.Core
         {
             if(!_bookRepository.BookExists(id))
             {
-                return BadRequest($"Book with id {id} does not exist.");
+                return BadRequest($"Book with Id {id} does not exist.");
             }
 
             var book = _bookRepository.GetBook(id);

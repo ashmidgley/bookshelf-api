@@ -1,12 +1,11 @@
 using NUnit.Framework;
 using Bookshelf.Core;
 using System;
-using System.Collections.Generic;
 using FakeItEasy;
-using System.Net;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bookshelf.Tests
 {
@@ -73,6 +72,31 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public async Task ReturnUnauthorized_WhenInvalidUser_CallsAddBook()
+        {
+             var newBook = new NewBookDto
+            {
+                Title = "Test",
+                Author = "Test",
+                UserId = 1,
+                CategoryId = 2,
+                RatingId = 1,
+                FinishedOn = DateTime.Now
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(false);
+
+            var newBookValidator = new NewBookValidator();
+
+            var controller = new BooksController(null, null, userHelper, newBookValidator, null);
+
+            var response = await controller.AddBook(newBook);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
         public void ReturnBookDto_WhenValidUser_CallsUpdateBook()
         {
             var updatedBook = new BookDto
@@ -113,6 +137,70 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public void ReturnUnauthorized_WhenInvalidUser_CallsUpdateBook()
+        {
+            var updatedBook = new BookDto
+            {
+                Id = 1,
+                UserId = 1,
+                CategoryId = 2,
+                RatingId = 1,
+                Title = "Test",
+                Author = "Test",
+                FinishedOn = DateTime.Now,
+                ImageUrl = "test.png",
+                Year = 2019,
+                PageCount = 111,
+                Summary = "test"
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedBook.UserId)).Returns(false);
+
+            var updatedBookValidator = new UpdatedBookValidator();
+
+            var controller = new BooksController(null, null, userHelper, null, updatedBookValidator);
+
+            var response = controller.UpdateBook(updatedBook);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenBookDoesNotExist_OnCallToUpdateBook()
+        {
+            var updatedBook = new BookDto
+            {
+                Id = 1,
+                UserId = 1,
+                CategoryId = 2,
+                RatingId = 1,
+                Title = "Test",
+                Author = "Test",
+                FinishedOn = DateTime.Now,
+                ImageUrl = "test.png",
+                Year = 2019,
+                PageCount = 111,
+                Summary = "test"
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedBook.UserId)).Returns(true);
+
+            var bookRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => bookRepository.BookExists(updatedBook.Id)).Returns(false);
+           
+            var updatedBookValidator = new UpdatedBookValidator();
+
+            var controller = new BooksController(bookRepository, null, userHelper, null, updatedBookValidator);
+
+            var response = controller.UpdateBook(updatedBook);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Book with Id {updatedBook.Id} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
         public void ReturnBookDto_WhenValidUser_CallsDeleteBook()
         {
             var id = 1;
@@ -136,6 +224,47 @@ namespace Bookshelf.Tests
             
             A.CallTo(() => bookRepository.Delete(id)).MustHaveHappened();
             Assert.AreEqual(result.Id, response.Value.Id);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenBookDoesNotExist_OnCallToDeleteBook()
+        {
+            var id = 1;
+
+            var bookRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => bookRepository.BookExists(id)).Returns(false);
+
+            var controller = new BooksController(bookRepository, null, null, null, null);
+
+            var response = controller.DeleteBook(id);
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Book with Id {id} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnUnauthorized_WhenInvalidUser_CallsDeleteBook()
+        {
+            var id = 1;
+            
+            var result = new BookDto
+            {
+                Id = id,
+                UserId = 1
+            };
+
+            var bookRepository = A.Fake<IBookRepository>();
+            A.CallTo(() => bookRepository.BookExists(id)).Returns(true);
+            A.CallTo(() => bookRepository.GetBook(id)).Returns(result);
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(false);
+
+            var controller = new BooksController(bookRepository, null, userHelper, null, null);
+
+            var response = controller.DeleteBook(id);
+            
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
         }
     }
 }
