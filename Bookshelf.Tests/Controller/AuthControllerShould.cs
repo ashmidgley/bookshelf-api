@@ -30,9 +30,9 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(true);
             A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns(token);
 
-            var usersController = new AuthController(userRepository, userHelper, _loginDtoValidator);
+            var controller = new AuthController(userRepository, userHelper, _loginDtoValidator);
 
-            var response = usersController.Login(login);
+            var response = controller.Login(login);
 
             Assert.AreEqual(token, response.Value);
         }
@@ -49,9 +49,9 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(false);
 
-            var usersController = new AuthController(userRepository, null, _loginDtoValidator);
+            var controller = new AuthController(userRepository, null, _loginDtoValidator);
 
-            var response = usersController.Login(login);
+            var response = controller.Login(login);
 
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
             Assert.AreEqual($"Incorrect email address. Please try again.", ((BadRequestObjectResult)response.Result).Value);
@@ -72,9 +72,9 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(false);
 
-            var usersController = new AuthController(userRepository, userHelper, _loginDtoValidator);
+            var controller = new AuthController(userRepository, userHelper, _loginDtoValidator);
 
-            var response = usersController.Login(login);
+            var response = controller.Login(login);
 
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
             Assert.AreEqual($"Incorrect password. Please try again.", ((BadRequestObjectResult)response.Result).Value);
@@ -97,12 +97,13 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns(token);
 
-            var usersController = new AuthController(userRepository, userHelper, _loginDtoValidator);
+            var controller = new AuthController(userRepository, userHelper, _loginDtoValidator);
 
-            var responseOne = usersController.Register(register);
-            var responseTwo = usersController.Register(new LoginDto());
+            var response = controller.Register(register);
 
-            Assert.AreEqual(token, responseOne.Value);
+            A.CallTo(() => userRepository.Add(A<User>.Ignored)).MustHaveHappened();
+            A.CallTo(() => userHelper.Register(A<int>.Ignored)).MustHaveHappened();
+            Assert.AreEqual(token, response.Value);
         }
 
         [Test]
@@ -117,12 +118,67 @@ namespace Bookshelf.Tests
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(true);
 
-            var usersController = new AuthController(userRepository, null, _loginDtoValidator);
+            var controller = new AuthController(userRepository, null, _loginDtoValidator);
 
-            var response = usersController.Register(register);
+            var response = controller.Register(register);
 
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
             Assert.AreEqual("Email already in use. Please try another.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnTrue_WhenValidToken_OnCallToResetTokenValid()
+        {
+            var userId = 1;
+            var token = Guid.NewGuid();
+            
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.ValidResetToken(A<UserDto>.Ignored, token)).Returns(true);
+
+            var controller = new AuthController(userRepository, userHelper, null);
+
+            var response = controller.ResetTokenValid(userId, token);
+
+            Assert.IsTrue(response.Value);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenInvalidUser_OnCallToResetTokenValid()
+        {
+            var userId = 1;
+            var token = Guid.NewGuid();
+            
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(userId)).Returns(false);
+
+            var controller = new AuthController(userRepository, null, null);
+
+            var response = controller.ResetTokenValid(userId, token);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnFalse_WhenInvalidToken_OnCallToResetTokenValid()
+        {
+            var userId = 1;
+            var token = Guid.NewGuid();
+            
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.ValidResetToken(A<UserDto>.Ignored, token)).Returns(false);
+
+            var controller = new AuthController(userRepository, userHelper, null);
+
+            var response = controller.ResetTokenValid(userId, token);
+
+            Assert.IsFalse(response.Value);
         }
 
         [Test]

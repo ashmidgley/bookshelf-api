@@ -39,7 +39,6 @@ namespace Bookshelf.Core
             }
 
             var user = _userRepository.GetUser(login.Email);
-
             return _userHelper.BuildToken(user);
         }
 
@@ -68,8 +67,7 @@ namespace Bookshelf.Core
             var id = _userRepository.Add(newUser);
             _userHelper.Register(id);
             var user = _userRepository.GetUser(id);
-
-            return  _userHelper.BuildToken(user);
+            return _userHelper.BuildToken(user);
         }
 
         [HttpGet]
@@ -78,11 +76,10 @@ namespace Bookshelf.Core
         {
             if(!_userRepository.UserPresent(userId))
             {
-                return false;
+                return BadRequest($"User with Id {userId} does not exist."); 
             }
 
             var user = _userRepository.GetUser(userId);
-            
             return _userHelper.ValidResetToken(user, token);
         }
 
@@ -103,7 +100,6 @@ namespace Bookshelf.Core
             var passwordHash = _userHelper.HashPassword(model.Password);
             _userRepository.UpdatePasswordHash(user.Id, passwordHash);
             _userRepository.SetPasswordResetFields(user.Id, null, null);
-
             return _userRepository.GetUser(user.Id);
         }
     }
