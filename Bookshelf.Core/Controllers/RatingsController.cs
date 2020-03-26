@@ -22,7 +22,7 @@ namespace Bookshelf.Core
 
         [HttpGet]
         [Route("{ratingId}")]
-        public ActionResult<Rating> Get(int ratingId)
+        public ActionResult<Rating> GetRating(int ratingId)
         {
             return _ratingRepository.GetRating(ratingId);
         }

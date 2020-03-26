@@ -16,7 +16,7 @@ namespace Bookshelf.Tests
             var ratingRepository = A.Fake<IRatingRepository>();
             var controller = new RatingsController(ratingRepository, null, null);
 
-            var response = controller.Get(1);
+            var response = controller.GetRating(1);
             
             A.CallTo(() => ratingRepository.GetRating(1)).MustHaveHappened();
         }
