@@ -21,14 +21,11 @@ namespace Bookshelf.Core
 
         [HttpPost]
         [Route("send-reset-token")]
-        public ActionResult<PasswordResetDto> SendResetToken(PasswordResetDto model)
+        public ActionResult SendResetToken(PasswordResetDto model)
         {
             if(!_userRepository.UserPresent(model.Email))
             {
-                return new PasswordResetDto
-                {
-                    Error = $"User with email {model.Email} does not exist."
-                };
+                return BadRequest($"User with email {model.Email} does not exist.");
             }
 
             var user = _userRepository.GetUser(model.Email);
@@ -39,7 +36,7 @@ namespace Bookshelf.Core
             var url = $"{_config["SiteUrl"]}/{user.Id}/{resetToken}";
             _emailHelper.SendResetToken(model.Email, url);
 
-            return model;
+            return Ok();
         }
     }
 }
