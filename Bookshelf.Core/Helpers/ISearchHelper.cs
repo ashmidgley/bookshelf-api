@@ -4,6 +4,7 @@ namespace Bookshelf.Core
 {
     public interface ISearchHelper
     {
-        Task<Book> PullGoogleBooksData(NewBookDto book);
+        Task<bool> BookExists(NewBookDto book);
+        Task<Book> PullBook(NewBookDto book);
     }
 }

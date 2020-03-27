@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Bookshelf.Core
 {
@@ -11,15 +12,17 @@ namespace Bookshelf.Core
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
+        private readonly IUserRepository _userRepository;
         private readonly ISearchHelper _searchHelper;
         private readonly IUserHelper _userHelper;
         private readonly NewBookValidator _newBookValidator;
         private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, ISearchHelper searchHelper, IUserHelper userHelper,
+        public BooksController(IBookRepository bookRepository, IUserRepository userRepository, ISearchHelper searchHelper, IUserHelper userHelper,
             NewBookValidator newBookValidator, UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
+            _userRepository = userRepository;
             _searchHelper = searchHelper;
             _userHelper = userHelper;
             _newBookValidator = newBookValidator;
@@ -27,18 +30,28 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
-        [Route("{bookId}")]
-        public ActionResult<BookDto> GetBook(int bookId)
+        [Route("{id}")]
+        public ActionResult<BookDto> GetBook(int id)
         {
-            return _bookRepository.GetBook(bookId);
+            if(!_bookRepository.BookExists(id))
+            {
+                return BadRequest($"Book with Id {id} does not exist.");
+            }
+
+            return _bookRepository.GetBook(id);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public IEnumerable<BookDto> GetUserBooks(int userId)
+        public ActionResult<IEnumerable<BookDto>> GetUserBooks(int userId)
         {
-            return _bookRepository.GetUserBooks(userId);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _bookRepository.GetUserBooks(userId).ToList();
         }
 
         [HttpPost]
@@ -55,7 +68,13 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
-            var book = await _searchHelper.PullGoogleBooksData(newBook);
+            var bookExists = await _searchHelper.BookExists(newBook);
+            if(!bookExists)
+            {
+                return BadRequest($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.");
+            }
+
+            var book = await _searchHelper.PullBook(newBook);
             var id = _bookRepository.Add(book);
             return _bookRepository.GetBook(id);
         }

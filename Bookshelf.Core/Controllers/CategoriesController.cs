@@ -11,12 +11,15 @@ namespace Bookshelf.Core
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
         private readonly CategoryValidator _validator;
 
-        public CategoriesController(ICategoryRepository categoryRepository, IUserHelper userHelper, CategoryValidator validator)
+        public CategoriesController(ICategoryRepository categoryRepository, IUserRepository userRepository, IUserHelper userHelper,
+            CategoryValidator validator)
         {
             _categoryRepository = categoryRepository;
+            _userRepository = userRepository;
             _userHelper = userHelper;
             _validator = validator;
         }
@@ -25,66 +28,75 @@ namespace Bookshelf.Core
         [Route("{id}")]
         public ActionResult<Category> GetCategory(int id)
         {
+            if(!_categoryRepository.CategoryExists(id))
+            {
+                return BadRequest($"Category with Id {id} does not exist.");
+            }
+
             return _categoryRepository.GetCategory(id);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public IEnumerable<Category> GetUserCategories(int userId)
+        public ActionResult<IEnumerable<Category>> GetUserCategories(int userId)
         {
-            return _categoryRepository.GetUserCategories(userId);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _categoryRepository.GetUserCategories(userId).ToList();
         }
 
         [HttpPost]
-        public ActionResult<Category> Post([FromBody] Category category)
+        public ActionResult<Category> AddCategory([FromBody] Category category)
         {
-            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
-            {
-                return Unauthorized();
-            }
-
             var validation = _validator.Validate(category);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
 
-            var id = _categoryRepository.Add(category);
+            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
+            {
+                return Unauthorized();
+            }
             
+            var id = _categoryRepository.Add(category);
             return _categoryRepository.GetCategory(id);
         }
 
         [HttpPut]
-        public ActionResult<Category> Put([FromBody] Category category)
+        public ActionResult<Category> UpdateCategory([FromBody] Category category)
         {
-            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
-            {
-                return Unauthorized();
-            }
-
             var validation = _validator.Validate(category);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
 
+            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
+            {
+                return Unauthorized();
+            }
+
             if(!_categoryRepository.CategoryExists(category.Id))
             {
-                return BadRequest($"Category with id {category.Id} not found.");
+                return BadRequest($"Category with Id {category.Id} does not exist.");
             }
 
             _categoryRepository.Update(category);
-            
             return _categoryRepository.GetCategory(category.Id);
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult<Category> Delete(int id)
+        [HttpDelete]
+        [Route("{id}")]
+        public ActionResult<Category> DeleteCategory(int id)
         {
             if(!_categoryRepository.CategoryExists(id))
             {
-                return BadRequest($"Category with id {id} not found.");
+                return BadRequest($"Category with Id {id} does not exist.");
             }
 
             var category = _categoryRepository.GetCategory(id);
@@ -94,7 +106,6 @@ namespace Bookshelf.Core
             }
 
             _categoryRepository.Delete(category.Id);
-            
             return category;
         }
     }

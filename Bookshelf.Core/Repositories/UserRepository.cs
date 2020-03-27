@@ -51,13 +51,13 @@ namespace Bookshelf.Core
             return user.Id;
         }
 
-        public bool UserPresent(int id)
+        public bool UserExists(int id)
         {
             return _context.Users
                 .Any(u => u.Id == id);
         }
 
-        public bool UserPresent(string email)
+        public bool UserExists(string email)
         {
             return _context.Users
                 .Any(u => u.Email.Equals(email));

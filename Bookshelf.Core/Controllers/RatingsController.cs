@@ -11,80 +11,92 @@ namespace Bookshelf.Core
     public class RatingsController : ControllerBase
     {
         private readonly IRatingRepository _ratingRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
         private readonly RatingValidator _validator;
 
-        public RatingsController(IRatingRepository ratingRepository, IUserHelper userHelper, RatingValidator validator)
+        public RatingsController(IRatingRepository ratingRepository, IUserRepository userRepository, IUserHelper userHelper,
+            RatingValidator validator)
         {
             _ratingRepository = ratingRepository;
+            _userRepository = userRepository;
             _userHelper = userHelper;
             _validator = validator;
         }
 
         [HttpGet]
-        [Route("{ratingId}")]
-        public ActionResult<Rating> Get(int ratingId)
+        [Route("{id}")]
+        public ActionResult<Rating> GetRating(int id)
         {
-            return _ratingRepository.GetRating(ratingId);
+            if(!_ratingRepository.RatingExists(id))
+            {
+                return BadRequest($"Rating with Id {id} does not exist.");
+            }
+
+            return _ratingRepository.GetRating(id);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public IEnumerable<Rating> GetUserRatings(int userId)
+        public ActionResult<IEnumerable<Rating>> GetUserRatings(int userId)
         {
-            return _ratingRepository.GetUserRatings(userId);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _ratingRepository.GetUserRatings(userId).ToList();
         }
 
         [HttpPost]
-        public ActionResult<Rating> Post([FromBody] Rating rating)
+        public ActionResult<Rating> AddRating([FromBody] Rating rating)
         {
-            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
-            {
-                return Unauthorized();
-            }
-
             var validation = _validator.Validate(rating);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
 
-            var id = _ratingRepository.Add(rating);
+            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
+            {
+                return Unauthorized();
+            }
 
+            var id = _ratingRepository.Add(rating);
             return _ratingRepository.GetRating(id);
         }
 
         [HttpPut]
-        public ActionResult<Rating> Put([FromBody] Rating rating)
+        public ActionResult<Rating> UpdateRating([FromBody] Rating rating)
         {
-            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
-            {
-                return Unauthorized();
-            }
-
             var validation = _validator.Validate(rating);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
 
+            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
+            {
+                return Unauthorized();
+            }
+
             if(!_ratingRepository.RatingExists(rating.Id))
             {
-                return BadRequest($"Rating with id {rating.Id} not found.");
+                return BadRequest($"Rating with Id {rating.Id} does not exist.");
             }
 
             _ratingRepository.Update(rating);
-
             return _ratingRepository.GetRating(rating.Id);
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult<Rating> Delete(int id)
+        [HttpDelete]
+        [Route("{id}")]
+        public ActionResult<Rating> DeleteRating(int id)
         {
             if(!_ratingRepository.RatingExists(id))
             {
-                return BadRequest($"Rating with id {id} not found.");
+                return BadRequest($"Rating with Id {id} does not exist.");
             }
             
             var rating = _ratingRepository.GetRating(id);
@@ -94,7 +106,6 @@ namespace Bookshelf.Core
             }
 
             _ratingRepository.Delete(id);
-
             return rating;
         }
     }

@@ -22,7 +22,24 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
-        public ActionResult<List<UserDto>> GetAll()
+        [Route("{id}")]
+        public ActionResult<UserDto> GetUser(int id)
+        {
+            if(!_userHelper.IsAdmin(HttpContext))
+            {
+                return Unauthorized();
+            }
+
+            if(!_userRepository.UserExists(id))
+            {
+                return BadRequest($"User with Id {id} does not exist.");
+            }
+
+            return _userRepository.GetUser(id);
+        }
+
+        [HttpGet]
+        public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {
             if(!_userHelper.IsAdmin(HttpContext))
             {
@@ -32,67 +49,47 @@ namespace Bookshelf.Core
             return _userRepository.GetAll().ToList();
         }
 
-        [HttpGet]
-        [Route("{id}")]
-        public ActionResult<UserDto> Get(int id)
-        {
-            if(!_userHelper.IsAdmin(HttpContext))
-            {
-                return Unauthorized();
-            }
-
-            return _userRepository.GetUser(id);
-        }
-
         [HttpPut]
-        public ActionResult<UserDto> Update(UserDto user)
+        public ActionResult<UserDto> UpdateUser(UserDto user)
         {
-            if(!_userHelper.IsAdmin(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             var validation = _userDtoValidator.Validate(user);
             if (!validation.IsValid)
             {
                 return BadRequest(validation.ToString());
             }
 
-            if(!_userRepository.UserPresent(user.Id))
+            if(!_userHelper.IsAdmin(HttpContext))
             {
-                return BadRequest($"User with id {user.Id} not found.");
+                return Unauthorized();
+            }
+
+            if(!_userRepository.UserExists(user.Id))
+            {
+                return BadRequest($"User with Id {user.Id} does not exist.");
             }
 
             _userRepository.Update(user);
-
             return _userRepository.GetUser(user.Id);
         }
 
         [HttpPut]
         [Route("email")]
-        public ActionResult<EmailUpdateDto> UpdateEmail(UserUpdateDto user)
+        public ActionResult<UserDto> UpdateEmail(UserUpdateDto user)
         {
             if(!_userHelper.MatchingUsers(HttpContext, user.Id))
             {
                return Unauthorized(); 
             }
             
-            if(_userRepository.UserPresent(user.Email))
+            if(_userRepository.UserExists(user.Email))
             {
-                return  new EmailUpdateDto
-                {
-                    Error = $"Email {user.Email} is already in use."
-                };
+                return BadRequest($"Email {user.Email} is already in use.");
             }
 
             var currentUser = _userRepository.GetUser(user.Id);
             currentUser.Email = user.Email;
             _userRepository.Update(currentUser);
-
-            return new EmailUpdateDto
-            {
-                User = _userRepository.GetUser(user.Id)
-            };
+            return _userRepository.GetUser(user.Id);
         }
         
         [HttpPut]
@@ -106,17 +103,16 @@ namespace Bookshelf.Core
 
             var passwordHash = _userHelper.HashPassword(user.Password);
             _userRepository.UpdatePasswordHash(user.Id, passwordHash);
-
             return _userRepository.GetUser(user.Id);
         }
 
         [HttpDelete]
-        public ActionResult<UserDto> Delete(int id)
+        [Route("{id}")]
+        public ActionResult<UserDto> DeleteUser(int id)
         {
-            var user = _userRepository.GetUser(id);
-            if(user.Id == default)
+            if(!_userRepository.UserExists(id))
             {
-                return BadRequest($"Rating with id {user.Id} not found.");
+                return BadRequest($"User with Id {id} does not exist.");
             }
             
             if(!_userHelper.IsAdmin(HttpContext) && !_userHelper.MatchingUsers(HttpContext, id))
@@ -125,8 +121,7 @@ namespace Bookshelf.Core
             }
 
             _userHelper.DeleteUser(id);
-
-            return user;
+            return _userRepository.GetUser(id);
         }
     }
 }

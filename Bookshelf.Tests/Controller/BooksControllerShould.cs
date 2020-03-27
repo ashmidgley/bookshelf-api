@@ -13,25 +13,59 @@ namespace Bookshelf.Tests
     public class BooksControllerShould
     {
         [Test]
-        public void ReturnGetBook_OnCallToGetBook()
+        public void ReturnGetBook_WhenBookExists_OnCallToGetBook()
         {
+            var bookId = 1;
             var bookRepository = A.Fake<IBookRepository>();
-            var controller = new BooksController(bookRepository, null, null, null, null);
+            A.CallTo(() => bookRepository.BookExists(bookId)).Returns(true);
+            var controller = new BooksController(bookRepository, null, null, null, null, null);
             
-            var response = controller.GetBook(1);
+            var response = controller.GetBook(bookId);
             
-            A.CallTo(() => bookRepository.GetBook(1)).MustHaveHappened();
+            A.CallTo(() => bookRepository.GetBook(bookId)).MustHaveHappened();
         }
 
         [Test]
-        public void ReturnGetUserBooks_OnCallToGetUserBooks()
+        public void ReturnBadRequest_WhenBookDoesNotExist_OnCallToGetBook()
         {
+            var bookId = 1;
             var bookRepository = A.Fake<IBookRepository>();
-            var controller = new BooksController(bookRepository, null, null, null, null);
+            A.CallTo(() => bookRepository.BookExists(bookId)).Returns(false);
+            var controller = new BooksController(bookRepository, null, null, null, null, null);
             
-            var response = controller.GetUserBooks(1);
+            var response = controller.GetBook(bookId);
             
-            A.CallTo(() => bookRepository.GetUserBooks(1)).MustHaveHappened();
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Book with Id {bookId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnGetUserBooks_WhenUserExists_OnCallToGetUserBooks()
+        {
+            var userId = 1;
+            var bookRepository = A.Fake<IBookRepository>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+            var controller = new BooksController(bookRepository, userRepository, null, null, null, null);
+            
+            var response = controller.GetUserBooks(userId);
+            
+            A.CallTo(() => bookRepository.GetUserBooks(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetUserBooks()
+        {
+            var userId = 1;
+            var bookRepository = A.Fake<IBookRepository>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+            var controller = new BooksController(bookRepository, userRepository, null, null, null, null);
+            
+            var response = controller.GetUserBooks(userId);
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
         }
 
         [Test]
@@ -56,17 +90,18 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(true);
 
             var searchHelper = A.Fake<ISearchHelper>();
+            A.CallTo(() => searchHelper.BookExists(newBook)).Returns(true);
 
             var bookRepository = A.Fake<IBookRepository>();
             A.CallTo(() => bookRepository.GetBook(A<int>.Ignored)).Returns(result);
 
             var newBookValidator = new NewBookValidator();
 
-            var controller = new BooksController(bookRepository, searchHelper, userHelper, newBookValidator, null);
+            var controller = new BooksController(bookRepository, null, searchHelper, userHelper, newBookValidator, null);
 
             var response = await controller.AddBook(newBook);
 
-            A.CallTo(() => searchHelper.PullGoogleBooksData(newBook)).MustHaveHappened();
+            A.CallTo(() => searchHelper.PullBook(newBook)).MustHaveHappened();
             A.CallTo(() => bookRepository.Add(A<Book>.Ignored)).MustHaveHappened();
             Assert.AreEqual(result.UserId, response.Value.UserId);
         }
@@ -89,11 +124,44 @@ namespace Bookshelf.Tests
 
             var newBookValidator = new NewBookValidator();
 
-            var controller = new BooksController(null, null, userHelper, newBookValidator, null);
+            var controller = new BooksController(null, null, null, userHelper, newBookValidator, null);
 
             var response = await controller.AddBook(newBook);
 
             Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public async Task ReturnBadRequest_WhenBookDoesNotExist_OnCallToAddBook()
+        {
+            var newBook = new NewBookDto
+            {
+                Title = "Test",
+                Author = "Test",
+                UserId = 1,
+                CategoryId = 2,
+                RatingId = 1,
+                FinishedOn = DateTime.Now
+            };
+
+            var result = new BookDto
+            {
+                UserId = newBook.UserId
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(true);
+
+            var searchHelper = A.Fake<ISearchHelper>();
+            A.CallTo(() => searchHelper.BookExists(newBook)).Returns(false);
+
+            var newBookValidator = new NewBookValidator();
+            var controller = new BooksController(null, null, searchHelper, userHelper, newBookValidator, null);
+
+            var response = await controller.AddBook(newBook);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.", ((BadRequestObjectResult)response.Result).Value);
         }
 
         [Test]
@@ -128,7 +196,7 @@ namespace Bookshelf.Tests
            
             var updatedBookValidator = new UpdatedBookValidator();
 
-            var controller = new BooksController(bookRepository, null, userHelper, null, updatedBookValidator);
+            var controller = new BooksController(bookRepository, null, null, userHelper, null, updatedBookValidator);
 
             var response = controller.UpdateBook(updatedBook);
 
@@ -159,7 +227,7 @@ namespace Bookshelf.Tests
 
             var updatedBookValidator = new UpdatedBookValidator();
 
-            var controller = new BooksController(null, null, userHelper, null, updatedBookValidator);
+            var controller = new BooksController(null, null, null, userHelper, null, updatedBookValidator);
 
             var response = controller.UpdateBook(updatedBook);
 
@@ -192,7 +260,7 @@ namespace Bookshelf.Tests
            
             var updatedBookValidator = new UpdatedBookValidator();
 
-            var controller = new BooksController(bookRepository, null, userHelper, null, updatedBookValidator);
+            var controller = new BooksController(bookRepository, null, null, userHelper, null, updatedBookValidator);
 
             var response = controller.UpdateBook(updatedBook);
 
@@ -218,7 +286,7 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(true);
 
-            var controller = new BooksController(bookRepository, null, userHelper, null, null);
+            var controller = new BooksController(bookRepository, null, null, userHelper, null, null);
 
             var response = controller.DeleteBook(id);
             
@@ -234,7 +302,7 @@ namespace Bookshelf.Tests
             var bookRepository = A.Fake<IBookRepository>();
             A.CallTo(() => bookRepository.BookExists(id)).Returns(false);
 
-            var controller = new BooksController(bookRepository, null, null, null, null);
+            var controller = new BooksController(bookRepository, null, null, null, null, null);
 
             var response = controller.DeleteBook(id);
             
@@ -260,7 +328,7 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(false);
 
-            var controller = new BooksController(bookRepository, null, userHelper, null, null);
+            var controller = new BooksController(bookRepository, null, null, userHelper, null, null);
 
             var response = controller.DeleteBook(id);
             

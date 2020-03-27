@@ -22,7 +22,7 @@ namespace Bookshelf.Tests
             var token = "test";
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(login.Email)).Returns(true);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(true);
@@ -47,7 +47,7 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(login.Email)).Returns(false);
 
             var loginDtoValidator = new LoginDtoValidator();
 
@@ -69,7 +69,7 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(login.Email)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(login.Email)).Returns(true);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.PasswordsMatch(login.Password, A<string>.Ignored, null)).Returns(false);
@@ -96,7 +96,7 @@ namespace Bookshelf.Tests
             var token = "test";
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(A<string>.Ignored)).Returns(false);
             
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.BuildToken(A<UserDto>.Ignored)).Returns(token);
@@ -122,7 +122,7 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(A<string>.Ignored)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(A<string>.Ignored)).Returns(true);
 
             var loginDtoValidator = new LoginDtoValidator();
 
@@ -141,7 +141,7 @@ namespace Bookshelf.Tests
             var token = Guid.NewGuid();
             
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
             
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.ValidResetToken(A<UserDto>.Ignored, token)).Returns(true);
@@ -160,7 +160,7 @@ namespace Bookshelf.Tests
             var token = Guid.NewGuid();
             
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
 
             var controller = new AuthController(userRepository, null, null);
 
@@ -177,7 +177,7 @@ namespace Bookshelf.Tests
             var token = Guid.NewGuid();
             
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
             
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.ValidResetToken(A<UserDto>.Ignored, token)).Returns(false);
@@ -205,7 +205,7 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(model.UserId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(model.UserId)).Returns(true);
             A.CallTo(() => userRepository.GetUser(model.UserId)).Returns(user);
 
             var userHelper = A.Fake<IUserHelper>();
@@ -231,7 +231,7 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(model.UserId)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(model.UserId)).Returns(false);
 
             var controller = new AuthController(userRepository, null, null);
 
@@ -257,7 +257,7 @@ namespace Bookshelf.Tests
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(model.UserId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(model.UserId)).Returns(true);
             A.CallTo(() => userRepository.GetUser(model.UserId)).Returns(user);
 
             var userHelper = A.Fake<IUserHelper>();

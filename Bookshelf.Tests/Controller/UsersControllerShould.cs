@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Net;
 using Bookshelf.Core;
 using FakeItEasy;
@@ -11,46 +10,89 @@ namespace Bookshelf.Tests
     [TestFixture]
     public class UsersControllerShould
     {
-        UserDtoValidator _userDtoValidator => new UserDtoValidator();
-
         [Test]
-        public void ReturnsAllUsers_WhenCallerAdmin()
+        public void ReturnGetUser_WhenAdmin_CallsGetUser()
         {
-            var result = new List<UserDto>();
-
+            var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.GetAll()).Returns(result);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
 
-            var usersController = new UsersController(userRepository, userHelper, _userDtoValidator);
+            var usersController = new UsersController(userRepository, userHelper, null);
 
-            var response = usersController.GetAll();
+            var response = usersController.GetUser(userId);
 
-            Assert.AreEqual(result, response.Value);
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
         }
 
         [Test]
-        public void ReturnUser_WhenCallerAdmin()
+        public void ReturnUnauthorized_WhenInvalidUser_CallsGetUser()
         {
-            var result = new UserDto();
+            var userId = 1;
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
 
+            var userRepository = A.Fake<IUserRepository>();
+
+            var usersController = new UsersController(userRepository, userHelper, null);
+
+            var response = usersController.GetUser(userId);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetUser()
+        {
+            var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.GetUser(A<int>.Ignored)).Returns(result);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
 
-            var usersController = new UsersController(userRepository, userHelper, _userDtoValidator);
+            var usersController = new UsersController(userRepository, userHelper, null);
 
-            var response = usersController.Get(1);
+            var response = usersController.GetUser(userId);
 
-            Assert.AreEqual(result, response.Value);
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
         }
 
         [Test]
-        public void UpdateUser()
+        public void ReturnGetAll_WhenAdmin_CallsGetAllUsers()
+        {
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+
+            var usersController = new UsersController(userRepository, userHelper, null);
+
+            var response = usersController.GetAllUsers();
+
+            A.CallTo(() => userRepository.GetAll()).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnUnauthorized_WhenInvalidUser_CallsGetAllUsers()
+        {
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
+
+            var userRepository = A.Fake<IUserRepository>();
+
+            var usersController = new UsersController(userRepository, userHelper, null);
+
+            var response = usersController.GetAllUsers();
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnsUserDto_WhenValidUser_CallsUpdateUser()
         {
             var updatedUser = new UserDto
             {
@@ -63,28 +105,71 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(A<int>.Ignored)).Returns(true);
-            A.CallTo(() => userRepository.GetUser(A<int>.Ignored)).Returns(updatedUser);
+            A.CallTo(() => userRepository.UserExists(updatedUser.Id)).Returns(true);
+            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(updatedUser);
 
-            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
+            var userDtoValidator = new UserDtoValidator();
 
-            var responseOne = userController.Update(updatedUser);
-            var responseTwo = userController.Update(new UserDto());
+            var userController = new UsersController(userRepository, userHelper, userDtoValidator);
 
-            Assert.AreEqual(updatedUser, responseOne.Value);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+            var response = userController.UpdateUser(updatedUser);
+
+            A.CallTo(() => userRepository.Update(updatedUser)).MustHaveHappened();
+            Assert.AreEqual(updatedUser, response.Value);
         }
 
         [Test]
-        public void UpdateEmail()
+        public void ReturnUnauthorized_WhenInvalidUser_CallsUpdateUser()
         {
-            var updatedUser = new UserUpdateDto
+            var updatedUser = new UserDto
             {
                 Id = 1,
-                Email = "test"
+                Email = "test",
+                IsAdmin = true
             };
 
-            var user = new UserDto
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
+
+            var userDtoValidator = new UserDtoValidator();
+
+            var userController = new UsersController(null, userHelper, userDtoValidator);
+
+            var response = userController.UpdateUser(updatedUser);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnsBadRequest_WhenUserDoesNotExist_OnCallToUpdateUser()
+        {
+            var updatedUser = new UserDto
+            {
+                Id = 1,
+                Email = "test",
+                IsAdmin = true
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(updatedUser.Id)).Returns(false);
+
+            var userDtoValidator = new UserDtoValidator();
+
+            var userController = new UsersController(userRepository, userHelper, userDtoValidator);
+
+            var response = userController.UpdateUser(updatedUser);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {updatedUser.Id} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void CallGetUser_WhenValidUser_CallsUpdateEmail()
+        {
+            var updatedUser = new UserUpdateDto
             {
                 Id = 1,
                 Email = "test"
@@ -94,40 +179,60 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(false);
-            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(user);
+            A.CallTo(() => userRepository.UserExists(updatedUser.Email)).Returns(false);
 
-            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
-
-            var responseOne = userController.UpdateEmail(updatedUser);
-
-            Assert.AreEqual(updatedUser.Email, responseOne.Value.User.Email);
-        }
-
-        [Test]
-        public void ReturnErrorMessage_WhenEmailExisting()
-        {
-            var updatedUser = new UserUpdateDto
-            {
-                Id = 1,
-                Email = "existing"
-            };
-
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
-
-            var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(true);
-
-            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
+            var userController = new UsersController(userRepository, userHelper, null);
 
             var response = userController.UpdateEmail(updatedUser);
 
-            Assert.AreEqual($"Email {updatedUser.Email} is already in use.", response.Value.Error);
+            A.CallTo(() => userRepository.Update(A<UserDto>.Ignored)).MustHaveHappened();
+            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).MustHaveHappenedTwiceExactly();
         }
 
         [Test]
-        public void UpdatePassword()
+        public void ReturnUnauthorized_WhenInvalidUser_CallsUpdateEmail()
+        {
+            var updatedUser = new UserUpdateDto
+            {
+                Id = 1,
+                Email = "test"
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(false);
+
+            var userController = new UsersController(null, userHelper, null);
+
+            var response = userController.UpdateEmail(updatedUser);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenExistingEmail_OnCallToUpdateEmail()
+        {
+            var updatedUser = new UserUpdateDto
+            {
+                Id = 1,
+                Email = "existing@bookshelf.com"
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(updatedUser.Email)).Returns(true);
+
+            var userController = new UsersController(userRepository, userHelper, null);
+
+            var response = userController.UpdateEmail(updatedUser);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Email {updatedUser.Email} is already in use.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void CallGetUser_WhenValidUser_CallsUpdatePassword()
         {
             var updatedUser = new UserUpdateDto
             {
@@ -135,48 +240,111 @@ namespace Bookshelf.Tests
                 Password = "test"
             };
 
-            var user = new UserDto
-            {
-                Id = 1
-            };
-
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(user);
 
-            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
+            var userController = new UsersController(userRepository, userHelper, null);
 
             var response = userController.UpdatePassword(updatedUser);
 
             A.CallTo(() => userRepository.UpdatePasswordHash(updatedUser.Id, A<string>.Ignored)).MustHaveHappened();
-            Assert.AreEqual(updatedUser.Id, response.Value.Id);
+            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).MustHaveHappened();
         }
 
         [Test]
-        public void DeleteUser()
+        public void ReturnUnauthorized_WhenInvalidUser_CallsUpdatePassword()
         {
-            var expected = new UserDto
+            var updatedUser = new UserUpdateDto
             {
-                Id = 1
+                Id = 1,
+                Password = "test"
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, 1)).Returns(true);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(false);
+
+            var userController = new UsersController(null, userHelper, null);
+
+            var response = userController.UpdatePassword(updatedUser);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void CallGetUser_WhenAdmin_CallsDeleteUser()
+        {
+            var userId = 1;
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.GetUser(1)).Returns(expected);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
 
-            var userController = new UsersController(userRepository, userHelper, _userDtoValidator);
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(false);
 
-            var responseOne = userController.Delete(1);
-            A.CallTo(() => userHelper.DeleteUser(1)).MustHaveHappened();
-            Assert.AreEqual(expected.Id, responseOne.Value.Id);
+            var userController = new UsersController(userRepository, userHelper, null);
 
-            var responseTwo = userController.Delete(2);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)responseTwo.Result).StatusCode);
+            var response = userController.DeleteUser(userId);
+
+            A.CallTo(() => userHelper.DeleteUser(userId)).MustHaveHappened();
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void CallGetUser_WhenMatchingUser_CallsDeleteUser()
+        {
+            var userId = 1;
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(true);
+
+            var userController = new UsersController(userRepository, userHelper, null);
+
+            var response = userController.DeleteUser(userId);
+
+            A.CallTo(() => userHelper.DeleteUser(userId)).MustHaveHappened();
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToDeleteUser()
+        {
+            var userId = 1;
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+
+            var userController = new UsersController(userRepository, null, null);
+
+            var response = userController.DeleteUser(userId);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnUnauthorized_WhenInvalidUser_CallsDeleteUser()
+        {
+            var userId = 1;
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(false);
+
+            var userController = new UsersController(userRepository, userHelper, null);
+
+            var response = userController.DeleteUser(userId);
+
+            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
         }
     }
 }
