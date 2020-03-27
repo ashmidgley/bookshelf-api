@@ -68,7 +68,13 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
-            var book = await _searchHelper.PullGoogleBooksData(newBook);
+            var bookExists = await _searchHelper.BookExists(newBook);
+            if(!bookExists)
+            {
+                return BadRequest($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.");
+            }
+
+            var book = await _searchHelper.PullBook(newBook);
             var id = _bookRepository.Add(book);
             return _bookRepository.GetBook(id);
         }

@@ -90,6 +90,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(true);
 
             var searchHelper = A.Fake<ISearchHelper>();
+            A.CallTo(() => searchHelper.BookExists(newBook)).Returns(true);
 
             var bookRepository = A.Fake<IBookRepository>();
             A.CallTo(() => bookRepository.GetBook(A<int>.Ignored)).Returns(result);
@@ -100,7 +101,7 @@ namespace Bookshelf.Tests
 
             var response = await controller.AddBook(newBook);
 
-            A.CallTo(() => searchHelper.PullGoogleBooksData(newBook)).MustHaveHappened();
+            A.CallTo(() => searchHelper.PullBook(newBook)).MustHaveHappened();
             A.CallTo(() => bookRepository.Add(A<Book>.Ignored)).MustHaveHappened();
             Assert.AreEqual(result.UserId, response.Value.UserId);
         }
@@ -128,6 +129,39 @@ namespace Bookshelf.Tests
             var response = await controller.AddBook(newBook);
 
             Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public async Task ReturnBadRequest_WhenBookDoesNotExist_OnCallToAddBook()
+        {
+            var newBook = new NewBookDto
+            {
+                Title = "Test",
+                Author = "Test",
+                UserId = 1,
+                CategoryId = 2,
+                RatingId = 1,
+                FinishedOn = DateTime.Now
+            };
+
+            var result = new BookDto
+            {
+                UserId = newBook.UserId
+            };
+
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(true);
+
+            var searchHelper = A.Fake<ISearchHelper>();
+            A.CallTo(() => searchHelper.BookExists(newBook)).Returns(false);
+
+            var newBookValidator = new NewBookValidator();
+            var controller = new BooksController(null, null, searchHelper, userHelper, newBookValidator, null);
+
+            var response = await controller.AddBook(newBook);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.", ((BadRequestObjectResult)response.Result).Value);
         }
 
         [Test]

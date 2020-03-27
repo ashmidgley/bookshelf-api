@@ -2,6 +2,8 @@ using NUnit.Framework;
 using Bookshelf.Core;
 using Microsoft.Extensions.Configuration;
 using FakeItEasy;
+using System.Threading.Tasks;
+using System;
 
 namespace Bookshelf.Tests
 {
@@ -10,7 +12,45 @@ namespace Bookshelf.Tests
     {
         [Test]
         [Explicit]
-        public void ReturnTheMartian_WhenValidSearchParams_OnCallToSearchGoogleBooks()
+        public async Task ReturnTrue_WhenBookExists_OnCallToBookExists()
+        {
+            var theMartian = new NewBookDto
+            {
+                Title = "The Martian",
+                Author = "Andy Weir"
+            };
+            
+            var config = A.Fake<IConfiguration>();
+            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
+            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
+
+            var searchHelper = new SearchHelper(config);
+
+            Assert.IsTrue(await searchHelper.BookExists(theMartian));
+        }
+
+        [Test]
+        [Explicit]
+        public async Task ReturnFalse_WhenBookDoesNotExist_OnCallToBookExists()
+        {
+            var phonyBook = new NewBookDto
+            {
+                Title = "asdgasgasdg",
+                Author = "asddsgsadg"
+            };
+            
+            var config = A.Fake<IConfiguration>();
+            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
+            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
+
+            var searchHelper = new SearchHelper(config);
+
+            Assert.IsFalse(await searchHelper.BookExists(phonyBook));
+        }
+
+        [Test]
+        [Explicit]
+        public async Task ReturnTheMartian_WhenValidSearchParams_OnCallToSearchGoogleBooks()
         {
             var theMartian = new NewBookDto
             {
@@ -26,7 +66,7 @@ namespace Bookshelf.Tests
 
             var searchHelper = new SearchHelper(config);
 
-            var result = searchHelper.PullGoogleBooksData(theMartian).Result;
+            var result = await searchHelper.PullBook(theMartian);
 
             var martianImage = "http://books.google.com/books/content?id=AvTLDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api";
             var martianPageCount = 384;
@@ -39,7 +79,7 @@ namespace Bookshelf.Tests
 
         [Test]
         [Explicit]
-        public void ReturnEmptyBook_WhenInvalidSearchParams_OnCallToSearchGoogleBooks()
+        public void ThrowException_WhenInvalidSearchParams_OnCallToSearchGoogleBooks()
         {
             var phonyBook = new NewBookDto
             {
@@ -55,11 +95,7 @@ namespace Bookshelf.Tests
 
             var searchHelper = new SearchHelper(config);
 
-            var result = searchHelper.PullGoogleBooksData(phonyBook).Result;
-
-            Assert.AreEqual(defaultImage, result.ImageUrl);
-            Assert.AreEqual(0, result.PageCount);
-            Assert.AreEqual(default, result.Summary);
+            Assert.ThrowsAsync<Exception>(() => searchHelper.PullBook(phonyBook));
         }
     }
 }

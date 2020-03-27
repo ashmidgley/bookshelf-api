@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -18,31 +19,22 @@ namespace Bookshelf.Core
             _config = config;
         }
 
-        public async Task<Book> PullGoogleBooksData(NewBookDto book)
+        public async Task<bool> BookExists(NewBookDto book)
         {
-            var result = CreateInitialBook(book);
             var search = await SearchGoogleBooks(book.Title.ToLower(), book.Author.ToLower());
-
-            if(search.TotalItems > 0)
-            {
-                result = SetBonusItems(result, search);
-            }
-
-            return result;
+            return search.TotalItems > 0;
         }
 
-        private Book CreateInitialBook(NewBookDto book)
+        public async Task<Book> PullBook(NewBookDto book)
         {
-            return new Book
+            var search = await SearchGoogleBooks(book.Title.ToLower(), book.Author.ToLower());
+
+            if(search.TotalItems == 0)
             {
-                Title = book.Title,
-                Author = book.Author,
-                UserId = book.UserId,
-                CategoryId = book.CategoryId,
-                RatingId = book.RatingId,
-                FinishedOn = book.FinishedOn,
-                ImageUrl = _config["DefaultCover"]
-            };
+                throw new Exception($"{book.Title} By {book.Author} not found in Google Books search.");
+            }
+
+            return CreateBook(book, search);
         }
 
         private async Task<GoogleBookSearch> SearchGoogleBooks(string title, string author)
@@ -56,10 +48,20 @@ namespace Bookshelf.Core
             return JsonSerializer.Deserialize<GoogleBookSearch>(json);
         }
 
-        private Book SetBonusItems(Book result, GoogleBookSearch search)
+        private Book CreateBook(NewBookDto book, GoogleBookSearch search)
         {
+            var result = new Book
+            {
+                UserId = book.UserId,
+                CategoryId = book.CategoryId,
+                RatingId = book.RatingId,
+                FinishedOn = book.FinishedOn,
+                ImageUrl = _config["DefaultCover"]
+            };
+
             var volume = search.Items.First().VolumeInfo;
             result.Title = volume.Title;
+
             if(volume.Subtitle != null) {
                 result.Title += $" {volume.Subtitle}";
             }
@@ -77,6 +79,7 @@ namespace Bookshelf.Core
             }
 
             result.Summary = volume.Description;
+            
             return result;
         }
     }
