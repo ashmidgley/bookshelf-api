@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace Bookshelf.Core
 {
@@ -10,29 +11,42 @@ namespace Bookshelf.Core
     public class RatingsController : ControllerBase
     {
         private readonly IRatingRepository _ratingRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
         private readonly RatingValidator _validator;
 
-        public RatingsController(IRatingRepository ratingRepository, IUserHelper userHelper, RatingValidator validator)
+        public RatingsController(IRatingRepository ratingRepository, IUserRepository userRepository, IUserHelper userHelper,
+            RatingValidator validator)
         {
             _ratingRepository = ratingRepository;
+            _userRepository = userRepository;
             _userHelper = userHelper;
             _validator = validator;
         }
 
         [HttpGet]
-        [Route("{ratingId}")]
-        public ActionResult<Rating> GetRating(int ratingId)
+        [Route("{id}")]
+        public ActionResult<Rating> GetRating(int id)
         {
-            return _ratingRepository.GetRating(ratingId);
+            if(!_ratingRepository.RatingExists(id))
+            {
+                return BadRequest($"Rating with Id {id} does not exist.");
+            }
+
+            return _ratingRepository.GetRating(id);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public IEnumerable<Rating> GetUserRatings(int userId)
+        public ActionResult<IEnumerable<Rating>> GetUserRatings(int userId)
         {
-            return _ratingRepository.GetUserRatings(userId);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _ratingRepository.GetUserRatings(userId).ToList();
         }
 
         [HttpPost]

@@ -11,25 +11,59 @@ namespace Bookshelf.Tests
     public class RatingsControllerShould
     {
         [Test]
-        public void ReturnGetRating_OnCallToGetRating()
+        public void ReturnGetRating_WhenRatingExists_OnCallToGetRating()
         {
+            var id = 1;
             var ratingRepository = A.Fake<IRatingRepository>();
-            var controller = new RatingsController(ratingRepository, null, null);
+            A.CallTo(() => ratingRepository.RatingExists(id)).Returns(true);
+            var controller = new RatingsController(ratingRepository, null, null, null);
 
-            var response = controller.GetRating(1);
+            var response = controller.GetRating(id);
             
-            A.CallTo(() => ratingRepository.GetRating(1)).MustHaveHappened();
+            A.CallTo(() => ratingRepository.GetRating(id)).MustHaveHappened();
         }
 
         [Test]
-        public void ReturnGetUserRatings_OnCallToGetUserRatings()
+        public void ReturnBadRequest_WhenRatingDoesNotExist_OnCallToGetRating()
         {
+            var id = 1;
             var ratingRepository = A.Fake<IRatingRepository>();
-            var controller = new RatingsController(ratingRepository, null, null);
+            A.CallTo(() => ratingRepository.RatingExists(id)).Returns(false);
+            var controller = new RatingsController(ratingRepository, null, null, null);
 
-            var ratings = controller.GetUserRatings(1);
+            var response = controller.GetRating(id);
             
-            A.CallTo(() => ratingRepository.GetUserRatings(1)).MustHaveHappened();
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Rating with Id {id} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnGetUserRatings_WhenUserExists_OnCallToGetUserRatings()
+        {
+            var userId = 1;
+            var ratingRepository = A.Fake<IRatingRepository>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+            var controller = new RatingsController(ratingRepository, userRepository, null, null);
+
+            var response = controller.GetUserRatings(userId);
+            
+            A.CallTo(() => ratingRepository.GetUserRatings(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetUserRatings()
+        {
+            var userId = 1;
+            var ratingRepository = A.Fake<IRatingRepository>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+            var controller = new RatingsController(ratingRepository, userRepository, null, null);
+
+            var response = controller.GetUserRatings(userId);
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
         }
 
          [Test]
@@ -55,7 +89,7 @@ namespace Bookshelf.Tests
 
             var validator = new RatingValidator();
 
-            var controller = new RatingsController(ratingRepository, userHelper, validator);
+            var controller = new RatingsController(ratingRepository, null, userHelper, validator);
 
             var response = controller.AddRating(newRating);
 
@@ -78,7 +112,7 @@ namespace Bookshelf.Tests
 
             var validator = new RatingValidator();
 
-            var controller = new RatingsController(null, userHelper, validator);
+            var controller = new RatingsController(null, null, userHelper, validator);
 
             var response = controller.AddRating(newRating);
 
@@ -110,7 +144,7 @@ namespace Bookshelf.Tests
            
             var validator = new RatingValidator();
 
-            var controller = new RatingsController(ratingRepository, userHelper, validator);
+            var controller = new RatingsController(ratingRepository, null, userHelper, validator);
 
             var response = controller.UpdateRating(updatedRating);
 
@@ -134,7 +168,7 @@ namespace Bookshelf.Tests
 
             var validator = new RatingValidator();
 
-            var controller = new RatingsController(null, userHelper, validator);
+            var controller = new RatingsController(null, null, userHelper, validator);
 
             var response = controller.UpdateRating(updatedRating);
 
@@ -160,7 +194,7 @@ namespace Bookshelf.Tests
            
             var validator = new RatingValidator();
 
-            var controller = new RatingsController(ratingRepository, userHelper, validator);
+            var controller = new RatingsController(ratingRepository, null, userHelper, validator);
 
             var response = controller.UpdateRating(updatedRating);
 
@@ -186,7 +220,7 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(true);
 
-            var controller = new RatingsController(ratingRepository, userHelper, null);
+            var controller = new RatingsController(ratingRepository, null, userHelper, null);
 
             var response = controller.DeleteRating(id);
             
@@ -202,7 +236,7 @@ namespace Bookshelf.Tests
             var ratingRepository = A.Fake<IRatingRepository>();
             A.CallTo(() => ratingRepository.RatingExists(id)).Returns(false);
 
-            var controller = new RatingsController(ratingRepository, null, null);
+            var controller = new RatingsController(ratingRepository, null, null, null);
 
             var response = controller.DeleteRating(id);
             
@@ -228,7 +262,7 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(false);
 
-            var controller = new RatingsController(ratingRepository, userHelper, null);
+            var controller = new RatingsController(ratingRepository, null, userHelper, null);
 
             var response = controller.DeleteRating(id);
             
