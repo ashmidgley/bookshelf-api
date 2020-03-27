@@ -28,7 +28,7 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            if(!_userRepository.UserPresent(login.Email))
+            if(!_userRepository.UserExists(login.Email))
             {
                 return BadRequest("Incorrect email address. Please try again.");
             }
@@ -52,7 +52,7 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            if(_userRepository.UserPresent(login.Email)) 
+            if(_userRepository.UserExists(login.Email)) 
             {
                 return BadRequest("Email already in use. Please try another.");
             }
@@ -73,7 +73,7 @@ namespace Bookshelf.Core
         [Route("reset-token-valid/{userId}/{token}")]
         public ActionResult<bool> ResetTokenValid(int userId, Guid token)
         {
-            if(!_userRepository.UserPresent(userId))
+            if(!_userRepository.UserExists(userId))
             {
                 return BadRequest($"User with Id {userId} does not exist."); 
             }
@@ -85,7 +85,7 @@ namespace Bookshelf.Core
         [HttpPut]
         public ActionResult<UserDto> UpdatePasswordUsingToken(ResetTokenUpdateDto model)
         {
-            if(!_userRepository.UserPresent(model.UserId))
+            if(!_userRepository.UserExists(model.UserId))
             {
                return BadRequest($"User with Id {model.UserId} does not exist."); 
             }

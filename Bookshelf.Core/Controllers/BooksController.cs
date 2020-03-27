@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Bookshelf.Core
 {
@@ -11,15 +12,17 @@ namespace Bookshelf.Core
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
+        private readonly IUserRepository _userRepository;
         private readonly ISearchHelper _searchHelper;
         private readonly IUserHelper _userHelper;
         private readonly NewBookValidator _newBookValidator;
         private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, ISearchHelper searchHelper, IUserHelper userHelper,
+        public BooksController(IBookRepository bookRepository, IUserRepository userRepository, ISearchHelper searchHelper, IUserHelper userHelper,
             NewBookValidator newBookValidator, UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
+            _userRepository = userRepository;
             _searchHelper = searchHelper;
             _userHelper = userHelper;
             _newBookValidator = newBookValidator;
@@ -30,15 +33,25 @@ namespace Bookshelf.Core
         [Route("{bookId}")]
         public ActionResult<BookDto> GetBook(int bookId)
         {
+            if(!_bookRepository.BookExists(bookId))
+            {
+                return BadRequest($"Book with Id {bookId} does not exist.");
+            }
+
             return _bookRepository.GetBook(bookId);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public IEnumerable<BookDto> GetUserBooks(int userId)
+        public ActionResult<IEnumerable<BookDto>> GetUserBooks(int userId)
         {
-            return _bookRepository.GetUserBooks(userId);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _bookRepository.GetUserBooks(userId).ToList();
         }
 
         [HttpPost]

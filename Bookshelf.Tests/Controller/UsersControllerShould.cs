@@ -84,7 +84,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(updatedUser.Id)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(updatedUser.Id)).Returns(true);
             A.CallTo(() => userRepository.GetUser(updatedUser.Id)).Returns(updatedUser);
 
             var userDtoValidator = new UserDtoValidator();
@@ -133,7 +133,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(updatedUser.Id)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(updatedUser.Id)).Returns(false);
 
             var userDtoValidator = new UserDtoValidator();
 
@@ -158,7 +158,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(updatedUser.Email)).Returns(false);
 
             var userController = new UsersController(userRepository, userHelper, null);
 
@@ -200,7 +200,7 @@ namespace Bookshelf.Tests
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(updatedUser.Email)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(updatedUser.Email)).Returns(true);
 
             var userController = new UsersController(userRepository, userHelper, null);
 
@@ -257,7 +257,7 @@ namespace Bookshelf.Tests
             var userId = 1;
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
@@ -277,7 +277,7 @@ namespace Bookshelf.Tests
             var userId = 1;
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
@@ -297,7 +297,7 @@ namespace Bookshelf.Tests
             var userId = 1;
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
 
             var userController = new UsersController(userRepository, null, null);
 
@@ -313,7 +313,7 @@ namespace Bookshelf.Tests
             var userId = 1;
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(userId)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
 
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);

@@ -19,7 +19,7 @@ namespace Bookshelf.Core
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(model.Email)).Returns(true);
+            A.CallTo(() => userRepository.UserExists(model.Email)).Returns(true);
 
             var config = A.Fake<IConfiguration>();
             var emailHelper = A.Fake<IEmailHelper>();
@@ -42,7 +42,7 @@ namespace Bookshelf.Core
             };
 
             var userRepository = A.Fake<IUserRepository>();
-            A.CallTo(() => userRepository.UserPresent(model.Email)).Returns(false);
+            A.CallTo(() => userRepository.UserExists(model.Email)).Returns(false);
 
             var emailsController = new EmailsController(null, userRepository, null);
 

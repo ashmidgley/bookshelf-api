@@ -23,7 +23,7 @@ namespace Bookshelf.Core
         [Route("send-reset-token")]
         public ActionResult SendResetToken(PasswordResetDto model)
         {
-            if(!_userRepository.UserPresent(model.Email))
+            if(!_userRepository.UserExists(model.Email))
             {
                 return BadRequest($"User with email {model.Email} does not exist.");
             }

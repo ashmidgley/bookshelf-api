@@ -58,7 +58,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
-            if(!_userRepository.UserPresent(user.Id))
+            if(!_userRepository.UserExists(user.Id))
             {
                 return BadRequest($"User with Id {user.Id} does not exist.");
             }
@@ -76,7 +76,7 @@ namespace Bookshelf.Core
                return Unauthorized(); 
             }
             
-            if(_userRepository.UserPresent(user.Email))
+            if(_userRepository.UserExists(user.Email))
             {
                 return BadRequest($"Email {user.Email} is already in use.");
             }
@@ -105,7 +105,7 @@ namespace Bookshelf.Core
         [Route("{id}")]
         public ActionResult<UserDto> DeleteUser(int id)
         {
-            if(!_userRepository.UserPresent(id))
+            if(!_userRepository.UserExists(id))
             {
                 return BadRequest($"User with Id {id} does not exist.");
             }

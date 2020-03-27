@@ -13,8 +13,8 @@ namespace Bookshelf.Core
         void Update(UserDto user);
         void UpdatePasswordHash(int id, string passwordHash);
         void Delete(int id);
-        bool UserPresent(int id);
-        bool UserPresent(string email);
+        bool UserExists(int id);
+        bool UserExists(string email);
         void SetPasswordResetFields(int id, Guid? resetToken, DateTime? expiryDate);
     }
 }

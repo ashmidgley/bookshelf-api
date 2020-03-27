@@ -21,8 +21,8 @@ namespace Bookshelf.Tests
             var defaultImage = "default.png";
             var config = A.Fake<IConfiguration>();
             A.CallTo(() => config["DefaultCover"]).Returns(defaultImage);
-            A.CallTo(() => config["GoogleBooks:Url"]).Returns("https://www.googleapis.com/books/v1");
-            A.CallTo(() => config["GoogleBooks:Key"]).Returns("AIzaSyCXxqGUxHHIKTglmzBQKA9sLTVSV8Q6yJw");
+            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
+            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
 
             var searchHelper = new SearchHelper(config);
 
@@ -50,8 +50,8 @@ namespace Bookshelf.Tests
             var defaultImage = "default.png";
             var config = A.Fake<IConfiguration>();
             A.CallTo(() => config["DefaultCover"]).Returns(defaultImage);
-            A.CallTo(() => config["GoogleBooks:Url"]).Returns("https://www.googleapis.com/books/v1");
-            A.CallTo(() => config["GoogleBooks:Key"]).Returns("AIzaSyCXxqGUxHHIKTglmzBQKA9sLTVSV8Q6yJw");
+            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
+            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
 
             var searchHelper = new SearchHelper(config);
 
