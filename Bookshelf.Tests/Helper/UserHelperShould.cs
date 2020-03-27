@@ -12,7 +12,7 @@ namespace Bookshelf.Tests
     public class UserHelperShould
     {
         [TestCase("password", "1vEjmwXiHmO98JoEdYcDaQ==", ExpectedResult = "1vEjmwXiHmO98JoEdYcDaY9cJUmKiqXkRihgnJ88NZO7QlTK")]
-        public string ReturnHashedPassword(string input, string saltString)
+        public string ReturnHashedPassword_OnCallToHashPassword(string input, string saltString)
         {
             var salt = Convert.FromBase64String(saltString);
             var userHelper = new UserHelper(null, null, null, null, null);
@@ -22,7 +22,7 @@ namespace Bookshelf.Tests
 
         [TestCase("password", "1vEjmwXiHmO98JoEdYcDaY9cJUmKiqXkRihgnJ88NZO7QlTK", "1vEjmwXiHmO98JoEdYcDaQ==", ExpectedResult = true)]
         [TestCase("password123", "1vEjmwXiHmO98JoEdYcDaY9cJUmKiqXkRihgnJ88NZO7QlTK", "1vEjmwXiHmO98JoEdYcDaQ==", ExpectedResult = false)]
-        public bool CheckPasswordsMatch(string password, string passwordHash, string saltString)
+        public bool CheckBool_OnCallToPasswordsMatch(string password, string passwordHash, string saltString)
         {
             var salt = Convert.FromBase64String(saltString);
             var userHelper = new UserHelper(null, null, null, null, null);
@@ -31,7 +31,7 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void RegisterUserWithDefaultValues()
+        public void RegisterUserWithDefaultValues_OnCallToRegister()
         {
             var categoryRepository = A.Fake<ICategoryRepository>();
             var ratingRepository = A.Fake<IRatingRepository>();
@@ -46,7 +46,7 @@ namespace Bookshelf.Tests
 
         [TestCase("true", ExpectedResult = true)]
         [TestCase("false", ExpectedResult = false)]
-        public bool CheckIfUserInContextIsAdmin(string isAdmin)
+        public bool ReturnBool_OnCallToIsAdmin(string isAdmin)
         {
             var claims = new List<Claim>
             {
@@ -63,7 +63,7 @@ namespace Bookshelf.Tests
 
         [TestCase("1", ExpectedResult = true)]
         [TestCase("2", ExpectedResult = false)]
-        public bool CheckIfUserInContextMatchesId(string id)
+        public bool ReturnBool_OnCallToMatchingUsers(string id)
         {
             var claims = new List<Claim>
             {
@@ -78,24 +78,26 @@ namespace Bookshelf.Tests
             return userHelper.MatchingUsers(context, 1);
         }
 
-        [TestCase("411a5eae-f119-47be-8d1e-16e3258ecacb", ExpectedResult = true)]
-        [TestCase("fe16fe74-ebad-47d1-848d-1b7991119007", ExpectedResult = false)]
-        public bool CheckIfPasswordResetTokenMatches(string input)
+        [Test]
+        public void CallRepositoryMethods_OnCallToDeleteUser()
         {
-            var token = new Guid(input);
-            var user = new UserDto
-            {
-                PasswordResetToken = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb"),
-                PasswordResetExpiry = DateTime.Now.AddDays(1)
-            };
+            var userId = 1;
+            var userRepository = A.Fake<IUserRepository>();
+            var ratingRepository = A.Fake<IRatingRepository>();
+            var categoryRepository = A.Fake<ICategoryRepository>();
+            var bookRepository = A.Fake<IBookRepository>();
+            var userHelper = new UserHelper(null, userRepository, bookRepository, categoryRepository, ratingRepository);
 
-            var userHelper = new UserHelper(null, null, null, null, null);
+            userHelper.DeleteUser(userId);
 
-            return userHelper.ValidResetToken(user, token);
+            A.CallTo(() => userRepository.Delete(userId)).MustHaveHappened();
+            A.CallTo(() => ratingRepository.DeleteUserRatings(userId)).MustHaveHappened();
+            A.CallTo(() => categoryRepository.DeleteUserCategories(userId)).MustHaveHappened();
+            A.CallTo(() => bookRepository.DeleteUserBooks(userId)).MustHaveHappened();
         }
 
         [Test]
-        public void ReturnTrue_WhenPasswordResetExpiryValid()
+        public void ReturnTrue_WhenValidToken_OnCallToValidResetToken()
         {
             var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
             var user = new UserDto
@@ -110,7 +112,36 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void ReturnFalse_WhenPasswordResetExpiryInvalid()
+        public void ReturnFalse_WhenInvalidToken_OnCallToValidResetToken()
+        {
+            var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
+            var user = new UserDto
+            {
+                PasswordResetToken = Guid.NewGuid(),
+                PasswordResetExpiry = DateTime.Now.AddDays(1)
+            };
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+
+            Assert.IsFalse(userHelper.ValidResetToken(user, token));
+        }
+
+        [Test]
+        public void ReturnFalse_WhenTokenNull_OnCallToValidResetToken()
+        {
+            var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
+            var user = new UserDto
+            {
+                PasswordResetExpiry = DateTime.Now.AddDays(1)
+            };
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+
+            Assert.IsFalse(userHelper.ValidResetToken(user, token));
+        }
+
+        [Test]
+        public void ReturnFalse_WhenInvalidPasswordResetExpiry_OnCallToValidResetToken()
         {
             var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
             var user = new UserDto
@@ -125,13 +156,12 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void ReturnFalse_WhenPasswordResetExpiryNull()
+        public void ReturnFalse_WhenPasswordResetExpiryNull_OnCallToValidResetToken()
         {
             var token = new Guid("411a5eae-f119-47be-8d1e-16e3258ecacb");
             var user = new UserDto
             {
-                PasswordResetToken = token,
-                PasswordResetExpiry = null
+                PasswordResetToken = token
             };
 
             var userHelper = new UserHelper(null, null, null, null, null);
