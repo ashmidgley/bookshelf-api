@@ -77,7 +77,6 @@ namespace Bookshelf.Core
             }
 
             result.Summary = volume.Description;
-
             return result;
         }
     }
