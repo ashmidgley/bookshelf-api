@@ -11,25 +11,59 @@ namespace Bookshelf.Tests
     public class CategoriesControllerShould
     {
         [Test]
-        public void ReturnGetCategory_OnCallToGetCategory()
+        public void ReturnGetCategory_WhenCategoryExists_OnCallToGetCategory()
         {
+            var id = 1;
             var categoryRepository = A.Fake<ICategoryRepository>();
-            var controller = new CategoriesController(categoryRepository, null, null);
+            A.CallTo(() => categoryRepository.CategoryExists(id)).Returns(true);
+            var controller = new CategoriesController(categoryRepository, null, null, null);
 
-            var response = controller.GetCategory(1);
+            var response = controller.GetCategory(id);
 
-            A.CallTo(() => categoryRepository.GetCategory(1)).MustHaveHappened();
+            A.CallTo(() => categoryRepository.GetCategory(id)).MustHaveHappened();
         }
 
         [Test]
-        public void ReturnGetUserCategories_OnCallToGetUserCategories()
+        public void ReturnBadRequest_WhenCategoryDoesNotExist_OnCallToGetCategory()
         {
+            var id = 1;
             var categoryRepository = A.Fake<ICategoryRepository>();
-            var controller = new CategoriesController(categoryRepository, null, null);
+            A.CallTo(() => categoryRepository.CategoryExists(id)).Returns(false);
+            var controller = new CategoriesController(categoryRepository, null, null, null);
 
-            var response = controller.GetUserCategories(1);
+            var response = controller.GetCategory(id);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"Category with Id {id} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void ReturnGetUserCategories_WhenUserExists_OnCallToGetUserCategories()
+        {
+            var userId = 1;
+            var categoryRepository = A.Fake<ICategoryRepository>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+            var controller = new CategoriesController(categoryRepository, userRepository, null, null);
+
+            var response = controller.GetUserCategories(userId);
             
-            A.CallTo(() => categoryRepository.GetUserCategories(1)).MustHaveHappened();
+            A.CallTo(() => categoryRepository.GetUserCategories(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetUserCategories()
+        {
+            var userId = 1;
+            var categoryRepository = A.Fake<ICategoryRepository>();
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+            var controller = new CategoriesController(categoryRepository, userRepository, null, null);
+
+            var response = controller.GetUserCategories(userId);
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
         }
 
         [Test]
@@ -55,7 +89,7 @@ namespace Bookshelf.Tests
 
             var validator = new CategoryValidator();
 
-            var controller = new CategoriesController(categoryRepository, userHelper, validator);
+            var controller = new CategoriesController(categoryRepository, null, userHelper, validator);
 
             var response = controller.AddCategory(newCategory);
 
@@ -78,7 +112,7 @@ namespace Bookshelf.Tests
 
             var validator = new CategoryValidator();
 
-            var controller = new CategoriesController(null, userHelper, validator);
+            var controller = new CategoriesController(null, null, userHelper, validator);
 
             var response = controller.AddCategory(newCategory);
 
@@ -110,7 +144,7 @@ namespace Bookshelf.Tests
            
             var validator = new CategoryValidator();
 
-            var controller = new CategoriesController(categoryRepository, userHelper, validator);
+            var controller = new CategoriesController(categoryRepository, null, userHelper, validator);
 
             var response = controller.UpdateCategory(updatedCategory);
 
@@ -134,7 +168,7 @@ namespace Bookshelf.Tests
 
             var validator = new CategoryValidator();
 
-            var controller = new CategoriesController(null, userHelper, validator);
+            var controller = new CategoriesController(null, null, userHelper, validator);
 
              var response = controller.UpdateCategory(updatedCategory);
 
@@ -160,7 +194,7 @@ namespace Bookshelf.Tests
            
              var validator = new CategoryValidator();
 
-            var controller = new CategoriesController(categoryRepository, userHelper, validator);
+            var controller = new CategoriesController(categoryRepository, null, userHelper, validator);
 
             var response = controller.UpdateCategory(updatedCategory);
 
@@ -186,7 +220,7 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(true);
 
-            var controller = new CategoriesController(categoryRepository, userHelper, null);
+            var controller = new CategoriesController(categoryRepository, null, userHelper, null);
 
             var response = controller.DeleteCategory(id);
             
@@ -202,7 +236,7 @@ namespace Bookshelf.Tests
             var categoryRepository = A.Fake<ICategoryRepository>();
             A.CallTo(() => categoryRepository.CategoryExists(id)).Returns(false);
 
-            var controller = new CategoriesController(categoryRepository, null, null);
+            var controller = new CategoriesController(categoryRepository, null, null, null);
 
             var response = controller.DeleteCategory(id);
             
@@ -228,7 +262,7 @@ namespace Bookshelf.Tests
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, result.UserId)).Returns(false);
 
-            var controller = new CategoriesController(categoryRepository, userHelper, null);
+            var controller = new CategoriesController(categoryRepository, null, userHelper, null);
 
             var response = controller.DeleteCategory(id);
             

@@ -30,15 +30,15 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
-        [Route("{bookId}")]
-        public ActionResult<BookDto> GetBook(int bookId)
+        [Route("{id}")]
+        public ActionResult<BookDto> GetBook(int id)
         {
-            if(!_bookRepository.BookExists(bookId))
+            if(!_bookRepository.BookExists(id))
             {
-                return BadRequest($"Book with Id {bookId} does not exist.");
+                return BadRequest($"Book with Id {id} does not exist.");
             }
 
-            return _bookRepository.GetBook(bookId);
+            return _bookRepository.GetBook(id);
         }
 
         [HttpGet]

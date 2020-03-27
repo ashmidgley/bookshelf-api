@@ -11,12 +11,15 @@ namespace Bookshelf.Core
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUserHelper _userHelper;
         private readonly CategoryValidator _validator;
 
-        public CategoriesController(ICategoryRepository categoryRepository, IUserHelper userHelper, CategoryValidator validator)
+        public CategoriesController(ICategoryRepository categoryRepository, IUserRepository userRepository, IUserHelper userHelper,
+            CategoryValidator validator)
         {
             _categoryRepository = categoryRepository;
+            _userRepository = userRepository;
             _userHelper = userHelper;
             _validator = validator;
         }
@@ -25,15 +28,25 @@ namespace Bookshelf.Core
         [Route("{id}")]
         public ActionResult<Category> GetCategory(int id)
         {
+            if(!_categoryRepository.CategoryExists(id))
+            {
+                return BadRequest($"Category with Id {id} does not exist.");
+            }
+
             return _categoryRepository.GetCategory(id);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public IEnumerable<Category> GetUserCategories(int userId)
+        public ActionResult<IEnumerable<Category>> GetUserCategories(int userId)
         {
-            return _categoryRepository.GetUserCategories(userId);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _categoryRepository.GetUserCategories(userId).ToList();
         }
 
         [HttpPost]
