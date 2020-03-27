@@ -13,21 +13,24 @@ namespace Bookshelf.Tests
         [Test]
         public void ReturnGetUser_WhenAdmin_CallsGetUser()
         {
+            var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
 
             var usersController = new UsersController(userRepository, userHelper, null);
 
-            var response = usersController.GetUser(1);
+            var response = usersController.GetUser(userId);
 
-            A.CallTo(() => userRepository.GetUser(1)).MustHaveHappened();
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
         }
 
         [Test]
         public void ReturnUnauthorized_WhenInvalidUser_CallsGetUser()
         {
+            var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
 
@@ -35,9 +38,27 @@ namespace Bookshelf.Tests
 
             var usersController = new UsersController(userRepository, userHelper, null);
 
-            var response = usersController.GetUser(1);
+            var response = usersController.GetUser(userId);
 
             Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetUser()
+        {
+            var userId = 1;
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+
+            var usersController = new UsersController(userRepository, userHelper, null);
+
+            var response = usersController.GetUser(userId);
+
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
         }
 
         [Test]

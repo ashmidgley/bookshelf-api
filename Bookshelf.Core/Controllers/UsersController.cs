@@ -30,6 +30,11 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
+            if(!_userRepository.UserExists(id))
+            {
+                return BadRequest($"User with Id {id} does not exist.");
+            }
+
             return _userRepository.GetUser(id);
         }
 
