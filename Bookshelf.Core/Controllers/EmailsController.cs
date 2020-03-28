@@ -34,9 +34,11 @@ namespace Bookshelf.Core
             _userRepository.SetPasswordResetFields(user.Id, resetToken, expiryDate);
 
             var url = $"{_config["SiteUrl"]}/{user.Id}/{resetToken}";
-            _emailHelper.SendResetToken(model.Email, url);
-
+            
             return Ok();
+
+            // TODO
+            // _emailHelper.SendResetToken(model.Email, url);
         }
     }
 }
