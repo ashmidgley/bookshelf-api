@@ -120,8 +120,9 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
+            var user = _userRepository.GetUser(id);
             _userHelper.DeleteUser(id);
-            return _userRepository.GetUser(id);
+            return user;
         }
     }
 }

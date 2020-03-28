@@ -70,6 +70,8 @@ namespace Bookshelf.Core
 
             currentUser.Email = user.Email;
             currentUser.IsAdmin = user.IsAdmin;
+            currentUser.PasswordResetToken = user.PasswordResetToken;
+            currentUser.PasswordResetExpiry = user.PasswordResetExpiry;
 
             _context.SaveChanges();
         }
