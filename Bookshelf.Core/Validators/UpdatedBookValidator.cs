@@ -16,7 +16,6 @@ namespace Bookshelf.Core
             RuleFor(dto => dto.FinishedOn).NotNull();
             RuleFor(dto => dto.Year).NotNull();
             RuleFor(dto => dto.PageCount).NotNull();
-            RuleFor(dto => dto.Summary).NotNull();
         }
     }
 }

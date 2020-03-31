@@ -178,8 +178,7 @@ namespace Bookshelf.Tests
                 FinishedOn = DateTime.Now,
                 ImageUrl = "test.png",
                 Year = 2019,
-                PageCount = 111,
-                Summary = "test"
+                PageCount = 111
             };
 
             var result = new BookDto
