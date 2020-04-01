@@ -72,6 +72,17 @@ namespace Bookshelf.Core
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseXContentTypeOptions();
+            app.UseXXssProtection(options => options.EnabledWithBlockMode());
+            app.UseXfo(options => options.Deny());
+            app.UseReferrerPolicy(opts => opts.NoReferrerWhenDowngrade());
+            app.UseCsp(options => options.DefaultSources(s => s.Self()));
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Feature-Policy", "geolocation 'none';midi 'none';notifications 'none';push 'none';sync-xhr 'none';microphone 'none';camera 'none';magnetometer 'none';gyroscope 'none';speaker 'self';vibrate 'none';fullscreen 'self';payment 'none';");
+                await next.Invoke();
+            });
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
