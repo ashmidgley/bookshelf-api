@@ -61,8 +61,6 @@ namespace Bookshelf.Core
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSecurityHeaders();
-
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<BookshelfContext>();
@@ -73,6 +71,18 @@ namespace Bookshelf.Core
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseHsts(options => options.MaxAge(days: 30));
+            app.UseXContentTypeOptions();
+            app.UseXXssProtection(options => options.EnabledWithBlockMode());
+            app.UseXfo(options => options.Deny());
+            app.UseReferrerPolicy(opts => opts.NoReferrerWhenDowngrade());
+            app.UseCsp(options => options.DefaultSources(s => s.Self()));
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Feature-Policy", "geolocation 'none';midi 'none';notifications 'none';push 'none';sync-xhr 'none';microphone 'none';camera 'none';magnetometer 'none';gyroscope 'none';speaker 'self';vibrate 'none';fullscreen 'self';payment 'none';");
+                await next.Invoke();
+            });
 
             app.UseHttpsRedirection();
 
