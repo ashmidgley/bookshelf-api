@@ -72,7 +72,6 @@ namespace Bookshelf.Core
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHsts(options => options.MaxAge(days: 30));
             app.UseXContentTypeOptions();
             app.UseXXssProtection(options => options.EnabledWithBlockMode());
             app.UseXfo(options => options.Deny());

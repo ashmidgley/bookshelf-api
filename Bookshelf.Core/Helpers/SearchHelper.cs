@@ -60,14 +60,14 @@ namespace Bookshelf.Core
             };
 
             var volume = search.Items.First().VolumeInfo;
+            result.Author = volume.Authors[0];
+            result.PageCount = volume.PageCount;
+            result.Summary = volume.Description;
             result.Title = volume.Title;
 
             if(volume.Subtitle != null) {
                 result.Title += $" {volume.Subtitle}";
             }
-
-            result.Author = volume.Authors[0];
-            result.PageCount = volume.PageCount;
             
             if(volume.ImageLinks.Thumbnail != null)
             {
@@ -77,8 +77,7 @@ namespace Bookshelf.Core
             {
                 result.ImageUrl = volume.ImageLinks.SmallThumbnail;
             }
-
-            result.Summary = volume.Description;
+            result.ImageUrl = result.ImageUrl.Replace("http", "https");
             
             return result;
         }
