@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Bookshelf.Core
 {
-    public class GoogleBookSearch
+    public class GoogleBookSearchDto
     {
         [JsonPropertyName("totalItems")]
         public int TotalItems { get; set; }
