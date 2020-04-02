@@ -33,7 +33,7 @@ namespace Bookshelf.Core
             var expiryDate = DateTime.Now.AddDays(1);
             _userRepository.SetPasswordResetFields(user.Id, resetToken, expiryDate);
 
-            var resetLink = $"{_config["SiteUrl"]}/{user.Id}/{resetToken}";
+            var resetLink = $"{_config["SiteUrl"]}/reset-password/{user.Id}/{resetToken}";
             _emailHelper.SendResetToken(model.Email, resetLink);
 
             return Ok();
