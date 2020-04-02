@@ -37,7 +37,7 @@ namespace Bookshelf.Core
             return CreateBook(book, search);
         }
 
-        private async Task<GoogleBookSearch> SearchGoogleBooks(string title, string author)
+        private async Task<GoogleBookSearchDto> SearchGoogleBooks(string title, string author)
         {
             var apiUrl = _config["GoogleBooks:Url"];
             var apiKey = _config["GoogleBooks:Key"];
@@ -45,10 +45,10 @@ namespace Bookshelf.Core
             var encodedAuthor = HttpUtility.UrlEncode(author);
             var url = $"{apiUrl}/volumes?q={encodedTitle}+inauthor:{encodedAuthor}&{_queryParams}&key={apiKey}";
             var json = await _client.GetStringAsync(url);
-            return JsonSerializer.Deserialize<GoogleBookSearch>(json);
+            return JsonSerializer.Deserialize<GoogleBookSearchDto>(json);
         }
 
-        private Book CreateBook(NewBookDto book, GoogleBookSearch search)
+        private Book CreateBook(NewBookDto book, GoogleBookSearchDto search)
         {
             var result = new Book
             {
