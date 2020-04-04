@@ -9,5 +9,6 @@ namespace Bookshelf.Core
         string SenderName { get; set; }
         string SenderAddress { get; set; }
         string EmailTemplate { get; set; }
+        string SiteUrl { get; set; }
     }
 }

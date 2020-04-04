@@ -1,6 +1,5 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace Bookshelf.Core
 {
@@ -8,11 +7,11 @@ namespace Bookshelf.Core
     [ApiController]
     public class EmailsController : ControllerBase
     {
-        private readonly IConfiguration _config;
+        private readonly IEmailConfiguration _config;
         private readonly IUserRepository _userRepository;
         private readonly IEmailHelper _emailHelper;
 
-        public EmailsController(IConfiguration config, IUserRepository userRepository, IEmailHelper emailHelper)
+        public EmailsController(IEmailConfiguration config, IUserRepository userRepository, IEmailHelper emailHelper)
         {
             _config = config;
             _userRepository = userRepository;
@@ -33,7 +32,7 @@ namespace Bookshelf.Core
             var expiryDate = DateTime.Now.AddDays(1);
             _userRepository.SetPasswordResetFields(user.Id, resetToken, expiryDate);
 
-            var resetLink = $"{_config["SiteUrl"]}/reset-password/{user.Id}/{resetToken}";
+            var resetLink = $"{_config.SiteUrl}/reset-password/{user.Id}/{resetToken}";
             _emailHelper.SendResetToken(model.Email, resetLink);
 
             return Ok();
