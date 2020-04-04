@@ -6,14 +6,13 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Bookshelf.Core
 {
     public class UserHelper : IUserHelper
     {
-        private IConfiguration _config;
+        private IJwtConfiguration _config;
         private IUserRepository _userRepository;
         private IBookRepository _bookRepository;
         private ICategoryRepository _categoryRepository;
@@ -50,7 +49,7 @@ namespace Bookshelf.Core
             }
         };
         
-        public UserHelper(IConfiguration config, IUserRepository userRepository, IBookRepository bookRepository,
+        public UserHelper(IJwtConfiguration config, IUserRepository userRepository, IBookRepository bookRepository,
             ICategoryRepository categoryRepository, IRatingRepository ratingRepository)
         {
             _config = config;
@@ -69,9 +68,9 @@ namespace Bookshelf.Core
                 new Claim("IsAdmin", user.IsAdmin.ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Issuer"], claims, expires: DateTime.Now.AddDays(2), signingCredentials: creds);
+            var token = new JwtSecurityToken(_config.Issuer, _config.Issuer, claims, expires: DateTime.Now.AddDays(2), signingCredentials: creds);
             
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

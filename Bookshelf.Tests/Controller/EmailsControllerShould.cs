@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using FakeItEasy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
 namespace Bookshelf.Core
@@ -21,7 +20,7 @@ namespace Bookshelf.Core
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserExists(model.Email)).Returns(true);
 
-            var config = A.Fake<IConfiguration>();
+            var config = A.Fake<IEmailConfiguration>();
             var emailHelper = A.Fake<IEmailHelper>();
 
             var emailsController = new EmailsController(config, userRepository, emailHelper);
@@ -29,8 +28,7 @@ namespace Bookshelf.Core
             var response = emailsController.SendResetToken(model);
 
             A.CallTo(() => userRepository.SetPasswordResetFields(A<int>.Ignored, A<Guid?>.Ignored, A<DateTime?>.Ignored)).MustHaveHappened();
-            // TODO
-            // A.CallTo(() => emailHelper.SendResetToken(model.Email, A<string>.Ignored)).MustHaveHappened();
+            A.CallTo(() => emailHelper.SendResetToken(model.Email, A<string>.Ignored)).MustHaveHappened();
             Assert.AreEqual((int)HttpStatusCode.OK, ((OkResult)response).StatusCode);
         }
 

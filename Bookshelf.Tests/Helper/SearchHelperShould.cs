@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using Bookshelf.Core;
-using Microsoft.Extensions.Configuration;
 using FakeItEasy;
 using System.Threading.Tasks;
 using System;
@@ -20,9 +19,9 @@ namespace Bookshelf.Tests
                 Author = "Andy Weir"
             };
             
-            var config = A.Fake<IConfiguration>();
-            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
-            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
+            var config = A.Fake<IGoogleBooksConfiguration>();
+            A.CallTo(() => config.Url).Returns("");
+            A.CallTo(() => config.Key).Returns("");
 
             var searchHelper = new SearchHelper(config);
 
@@ -39,9 +38,9 @@ namespace Bookshelf.Tests
                 Author = "asddsgsadg"
             };
             
-            var config = A.Fake<IConfiguration>();
-            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
-            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
+            var config = A.Fake<IGoogleBooksConfiguration>();
+            A.CallTo(() => config.Url).Returns("");
+            A.CallTo(() => config.Key).Returns("");
 
             var searchHelper = new SearchHelper(config);
 
@@ -59,10 +58,10 @@ namespace Bookshelf.Tests
             };
             
             var defaultImage = "default.png";
-            var config = A.Fake<IConfiguration>();
-            A.CallTo(() => config["DefaultCover"]).Returns(defaultImage);
-            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
-            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
+            var config = A.Fake<IGoogleBooksConfiguration>();
+            A.CallTo(() => config.DefaultCover).Returns(defaultImage);
+            A.CallTo(() => config.Url).Returns("");
+            A.CallTo(() => config.Key).Returns("");
 
             var searchHelper = new SearchHelper(config);
 
@@ -88,10 +87,10 @@ namespace Bookshelf.Tests
             };
             
             var defaultImage = "default.png";
-            var config = A.Fake<IConfiguration>();
-            A.CallTo(() => config["DefaultCover"]).Returns(defaultImage);
-            A.CallTo(() => config["GoogleBooks:Url"]).Returns("");
-            A.CallTo(() => config["GoogleBooks:Key"]).Returns("");
+            var config = A.Fake<IGoogleBooksConfiguration>();
+            A.CallTo(() => config.DefaultCover).Returns(defaultImage);
+            A.CallTo(() => config.Url).Returns("");
+            A.CallTo(() => config.Key).Returns("");
 
             var searchHelper = new SearchHelper(config);
 

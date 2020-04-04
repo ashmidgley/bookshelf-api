@@ -43,7 +43,9 @@ namespace Bookshelf.Core
             services.AddControllers();
             services.AddCors();
 
-            services.AddSingleton<IEmailConfiguration>(Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
+            services.AddSingleton<IJwtConfiguration>(Configuration.GetSection("Jwt").Get<JwtConfiguration>());
+            services.AddSingleton<IGoogleBooksConfiguration>(Configuration.GetSection("GoogleBooks").Get<GoogleBooksConfiguration>());
+            services.AddSingleton<IEmailConfiguration>(Configuration.GetSection("Email").Get<EmailConfiguration>());
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<IBookRepository, BookRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();

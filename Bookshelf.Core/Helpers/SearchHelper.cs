@@ -4,17 +4,16 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.Extensions.Configuration;
 
 namespace Bookshelf.Core
 {
     public class SearchHelper : ISearchHelper
     {
-        private IConfiguration _config;
+        private IGoogleBooksConfiguration _config;
         private readonly HttpClient _client = new HttpClient();
         private readonly string _queryParams = "orderBy=relevance&maxResults=1";
         
-        public SearchHelper(IConfiguration config)
+        public SearchHelper(IGoogleBooksConfiguration config)
         {
             _config = config;
         }
@@ -39,8 +38,8 @@ namespace Bookshelf.Core
 
         private async Task<GoogleBookSearchDto> SearchGoogleBooks(string title, string author)
         {
-            var apiUrl = _config["GoogleBooks:Url"];
-            var apiKey = _config["GoogleBooks:Key"];
+            var apiUrl = _config.Url;
+            var apiKey = _config.Key;
             var encodedTitle = HttpUtility.UrlEncode(title);
             var encodedAuthor = HttpUtility.UrlEncode(author);
             var url = $"{apiUrl}/volumes?q={encodedTitle}+inauthor:{encodedAuthor}&{_queryParams}&key={apiKey}";
@@ -56,7 +55,7 @@ namespace Bookshelf.Core
                 CategoryId = book.CategoryId,
                 RatingId = book.RatingId,
                 FinishedOn = book.FinishedOn,
-                ImageUrl = _config["DefaultCover"]
+                ImageUrl = _config.DefaultCover
             };
 
             var volume = search.Items.First().VolumeInfo;
