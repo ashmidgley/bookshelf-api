@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
 
 namespace Bookshelf.Core
 {
@@ -68,15 +69,22 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
-            var bookExists = await _searchHelper.BookExists(newBook);
-            if(!bookExists)
+            try 
             {
-                return BadRequest($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.");
-            }
+                var bookExists = await _searchHelper.BookExists(newBook);
+                if(!bookExists)
+                {
+                    return BadRequest($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.");
+                }
 
-            var book = await _searchHelper.PullBook(newBook);
-            var id = _bookRepository.Add(book);
-            return _bookRepository.GetBook(id);
+                var book = await _searchHelper.PullBook(newBook);
+                var id = _bookRepository.Add(book);
+                return _bookRepository.GetBook(id);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"Error pulling data from Google Books: {ex.Message}");
+            }
         }
 
         [HttpPut]

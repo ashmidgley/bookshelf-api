@@ -11,7 +11,6 @@ namespace Bookshelf.Core
     {
         private IGoogleBooksConfiguration _config;
         private readonly HttpClient _client = new HttpClient();
-        private readonly string _queryParams = "orderBy=relevance&maxResults=1";
         
         public SearchHelper(IGoogleBooksConfiguration config)
         {
@@ -42,7 +41,7 @@ namespace Bookshelf.Core
             var apiKey = _config.Key;
             var encodedTitle = HttpUtility.UrlEncode(title);
             var encodedAuthor = HttpUtility.UrlEncode(author);
-            var url = $"{apiUrl}/volumes?q={encodedTitle}+inauthor:{encodedAuthor}&{_queryParams}&key={apiKey}";
+            var url = $"{apiUrl}/volumes?q=intitle:{encodedTitle}+inauthor:{encodedAuthor}&maxResults=1&key={apiKey}";
             var json = await _client.GetStringAsync(url);
             return JsonSerializer.Deserialize<GoogleBookSearchDto>(json);
         }
