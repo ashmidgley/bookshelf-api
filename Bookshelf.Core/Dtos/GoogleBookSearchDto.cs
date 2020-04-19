@@ -37,8 +37,6 @@ namespace Bookshelf.Core
 
     public class ImageLink
     {
-        [JsonPropertyName("smallThumbnail")]
-        public string SmallThumbnail { get; set; }
         [JsonPropertyName("thumbnail")]
         public string Thumbnail { get; set; }
     }
