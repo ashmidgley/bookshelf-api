@@ -56,7 +56,14 @@ namespace Bookshelf.Core
         }
 
         [HttpPost]
-        public async Task<ActionResult<BookDto>> AddBook([FromBody] NewBookDto newBook)
+        [Route("search")]
+        public async Task<IEnumerable<Book>> SearchBooks([FromBody] SearchDto search)
+        {
+            return await _searchHelper.SearchBooks(search.Title, search.Author, search.MaxResults);
+        } 
+
+        [HttpPost]
+        public ActionResult<BookDto> AddBook([FromBody] Book newBook)
         {
             var validation = _newBookValidator.Validate(newBook);
             if (!validation.IsValid)
@@ -69,22 +76,8 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
-            try 
-            {
-                var bookExists = await _searchHelper.BookExists(newBook);
-                if(!bookExists)
-                {
-                    return BadRequest($"{newBook.Title} By {newBook.Author} not found in Google Books search. Please try again.");
-                }
-
-                var book = await _searchHelper.PullBook(newBook);
-                var id = _bookRepository.Add(book);
-                return _bookRepository.GetBook(id);
-            }
-            catch(Exception ex)
-            {
-                return BadRequest($"Error pulling data from Google Books: {ex.Message}");
-            }
+            var id = _bookRepository.Add(newBook);
+            return _bookRepository.GetBook(id);
         }
 
         [HttpPut]

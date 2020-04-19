@@ -1,10 +1,10 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Bookshelf.Core
 {
     public interface ISearchHelper
     {
-        Task<bool> BookExists(NewBookDto book);
-        Task<Book> PullBook(NewBookDto book);
+        Task<IEnumerable<Book>> SearchBooks(string title, string author, int maxResults);
     }
 }

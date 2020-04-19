@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -17,47 +17,46 @@ namespace Bookshelf.Core
             _config = config;
         }
 
-        public async Task<bool> BookExists(NewBookDto book)
+        public async Task<IEnumerable<Book>> SearchBooks(string title, string author, int maxResults)
         {
-            var search = await SearchGoogleBooks(book.Title.ToLower(), book.Author.ToLower());
-            return search.TotalItems > 0;
-        }
-
-        public async Task<Book> PullBook(NewBookDto book)
-        {
-            var search = await SearchGoogleBooks(book.Title.ToLower(), book.Author.ToLower());
-
-            if(search.TotalItems == 0)
+            try
             {
-                throw new Exception($"{book.Title} By {book.Author} not found in Google Books search.");
-            }
+                var search = await SearchGoogleBooks(title.ToLower(), author.ToLower(), maxResults);
 
-            return CreateBook(book, search);
+                var books = new List<Book>();
+                foreach(var item in search.Items)
+                {
+                    var book = CreateBook(item.VolumeInfo);
+                    books.Add(book);
+                }
+
+                return books;
+            }
+            catch(NullReferenceException)
+            {
+                // No books to deserialize from google books search.
+                return new List<Book>();
+            }
         }
 
-        private async Task<GoogleBookSearchDto> SearchGoogleBooks(string title, string author)
+        private async Task<GoogleBookSearchDto> SearchGoogleBooks(string title, string author, int maxResults)
         {
             var apiUrl = _config.Url;
             var apiKey = _config.Key;
             var encodedTitle = HttpUtility.UrlEncode(title);
             var encodedAuthor = HttpUtility.UrlEncode(author);
-            var url = $"{apiUrl}/volumes?q=intitle:{encodedTitle}+inauthor:{encodedAuthor}&maxResults=1&key={apiKey}";
+            var url = $"{apiUrl}/volumes?q=intitle:{encodedTitle}+inauthor:{encodedAuthor}&maxResults={maxResults}&key={apiKey}";
             var json = await _client.GetStringAsync(url);
             return JsonSerializer.Deserialize<GoogleBookSearchDto>(json);
         }
 
-        private Book CreateBook(NewBookDto book, GoogleBookSearchDto search)
+        private Book CreateBook(VolumeInfo volume)
         {
             var result = new Book
             {
-                UserId = book.UserId,
-                CategoryId = book.CategoryId,
-                RatingId = book.RatingId,
-                FinishedOn = book.FinishedOn,
                 ImageUrl = _config.DefaultCover
             };
 
-            var volume = search.Items.First().VolumeInfo;
             result.Author = volume.Authors[0];
             result.PageCount = volume.PageCount;
             result.Summary = volume.Description;
@@ -71,10 +70,7 @@ namespace Bookshelf.Core
             {
                 result.ImageUrl = volume.ImageLinks.Thumbnail;
             }
-            else if(volume.ImageLinks.SmallThumbnail != null)
-            {
-                result.ImageUrl = volume.ImageLinks.SmallThumbnail;
-            }
+
             result.ImageUrl = result.ImageUrl.Replace("http", "https");
             
             return result;
