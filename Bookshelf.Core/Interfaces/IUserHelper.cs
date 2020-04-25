@@ -13,5 +13,6 @@ namespace Bookshelf.Core
         bool MatchingUsers(HttpContext context, int userId);
         void DeleteUser(int userId);
         bool ValidResetToken(UserDto user, Guid token);
+        int GetUserId(HttpContext context);
     }
 }
