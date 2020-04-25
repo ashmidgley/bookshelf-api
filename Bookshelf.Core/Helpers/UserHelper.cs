@@ -163,5 +163,11 @@ namespace Bookshelf.Core
 
             return true;
         }
+
+        public int GetUserId(HttpContext context)
+        {
+            var currentUser = context.User;
+            return int.Parse(currentUser.Claims.FirstOrDefault(c => c.Type.Equals("Id")).Value);
+        }
     }
 }

@@ -25,7 +25,7 @@ namespace Bookshelf.Core
         [Route("{id}")]
         public ActionResult<UserDto> GetUser(int id)
         {
-            if(!_userHelper.IsAdmin(HttpContext))
+            if(!_userHelper.MatchingUsers(HttpContext, id) && !_userHelper.IsAdmin(HttpContext))
             {
                 return Unauthorized();
             }
@@ -36,6 +36,14 @@ namespace Bookshelf.Core
             }
 
             return _userRepository.GetUser(id);
+        }
+
+        [HttpGet]
+        [Route("current")]
+        public ActionResult<UserDto> GetCurrentUser()
+        {
+            var userId = _userHelper.GetUserId(HttpContext);
+            return _userRepository.GetUser(userId);
         }
 
         [HttpGet]
