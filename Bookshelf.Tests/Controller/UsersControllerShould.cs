@@ -11,10 +11,29 @@ namespace Bookshelf.Tests
     public class UsersControllerShould
     {
         [Test]
+        public void ReturnGetUser_WhenMatchingUser_CallsGetUser()
+        {
+            var userId = 1;
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(true);
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+
+            var usersController = new UsersController(userRepository, userHelper, null);
+
+            var response = usersController.GetUser(userId);
+
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
+        }
+
+        [Test]
         public void ReturnGetUser_WhenAdmin_CallsGetUser()
         {
             var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(false);
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
@@ -32,6 +51,7 @@ namespace Bookshelf.Tests
         {
             var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(false);
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
 
             var userRepository = A.Fake<IUserRepository>();
@@ -48,6 +68,7 @@ namespace Bookshelf.Tests
         {
             var userId = 1;
             var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(false);
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
@@ -77,6 +98,20 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public void ReturnGetUser_OnCallToGetCurrentUser()
+        {
+            var userId = 1;
+            var userRepository = A.Fake<IUserRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+
+            var usersController = new UsersController(userRepository, userHelper, null);
+            var response = usersController.GetCurrentUser();
+
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
+        }
+
+        [Test]
         public void ReturnUnauthorized_WhenInvalidUser_CallsGetAllUsers()
         {
             var userHelper = A.Fake<IUserHelper>();
@@ -89,6 +124,19 @@ namespace Bookshelf.Tests
             var response = usersController.GetAllUsers();
 
             Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
+        }
+
+        [Test]
+        public void ReturnCallToGetAll_WhenValidUser_CallsGetAllUsers()
+        {
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
+
+            var userRepository = A.Fake<IUserRepository>();
+            var usersController = new UsersController(userRepository, userHelper, null);
+            var response = usersController.GetAllUsers();
+
+            A.CallTo(() => userRepository.GetAll()).MustHaveHappened();
         }
 
         [Test]

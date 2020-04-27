@@ -25,6 +25,7 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("{id}")]
         public ActionResult<Rating> GetRating(int id)
         {

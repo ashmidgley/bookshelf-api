@@ -3,7 +3,6 @@ using Bookshelf.Core;
 using System;
 using FakeItEasy;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
@@ -66,6 +65,22 @@ namespace Bookshelf.Tests
             
             Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
             Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
+        public void CallSearchHelper_OnCallToSearchBooks()
+        {
+            var search = new SearchDto
+            {
+                Title = "title",
+                Author = "author",
+                MaxResults = 5
+            };
+
+            var searchHelper = A.Fake<ISearchHelper>();
+            var controller = new BooksController(null, null, searchHelper, null, null, null);
+            var result = controller.SearchBooks(search);
+            A.CallTo(() => searchHelper.SearchBooks(search.Title, search.Author, search.MaxResults)).MustHaveHappened();
         }
 
         [Test]

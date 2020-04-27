@@ -168,5 +168,23 @@ namespace Bookshelf.Tests
 
             Assert.IsFalse(userHelper.ValidResetToken(user, token));
         }
+
+        [Test]
+        public void ReturnUserId_OnCallToGetUserId()
+        {
+            var id = "1";
+            var claims = new List<Claim>
+            {
+                new Claim("Id", id)
+            };
+
+            var context = A.Fake<HttpContext>();
+            context.User = new System.Security.Claims.ClaimsPrincipal(new ClaimsIdentity(claims));
+
+            var userHelper = new UserHelper(null, null, null, null, null);
+            var result = userHelper.GetUserId(context);
+
+            Assert.AreEqual(int.Parse(id), result);
+        }
     }
 }

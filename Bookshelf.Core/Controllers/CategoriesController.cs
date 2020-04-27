@@ -25,6 +25,7 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("{id}")]
         public ActionResult<Category> GetCategory(int id)
         {

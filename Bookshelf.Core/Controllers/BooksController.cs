@@ -31,6 +31,7 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("{id}")]
         public ActionResult<BookDto> GetBook(int id)
         {
