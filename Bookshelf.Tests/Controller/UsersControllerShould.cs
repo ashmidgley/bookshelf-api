@@ -203,14 +203,15 @@ namespace Bookshelf.Tests
         [Test]
         public void CallGetUser_WhenValidUser_CallsUpdateEmail()
         {
+            var userId = 1;
             var updatedUser = new UserUpdateDto
             {
-                Id = 1,
                 Email = "test"
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserExists(updatedUser.Email)).Returns(false);
@@ -220,7 +221,7 @@ namespace Bookshelf.Tests
             var response = userController.UpdateEmail(updatedUser);
 
             A.CallTo(() => userRepository.Update(A<UserDto>.Ignored)).MustHaveHappened();
-            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappenedTwiceExactly();
         }
 
         [Test]
@@ -228,12 +229,11 @@ namespace Bookshelf.Tests
         {
             var updatedUser = new UserUpdateDto
             {
-                Id = 1,
                 Email = "test"
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(false);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(false);
 
             var userController = new UsersController(null, userHelper, null);
 
@@ -247,12 +247,11 @@ namespace Bookshelf.Tests
         {
             var updatedUser = new UserUpdateDto
             {
-                Id = 1,
                 Email = "existing@bookshelf.com"
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
             A.CallTo(() => userRepository.UserExists(updatedUser.Email)).Returns(true);
@@ -268,14 +267,15 @@ namespace Bookshelf.Tests
         [Test]
         public void CallGetUser_WhenValidUser_CallsUpdatePassword()
         {
+            var userId = 1;
             var updatedUser = new UserUpdateDto
             {
-                Id = 1,
                 Password = "test"
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(true);
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, userId)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
 
@@ -283,8 +283,8 @@ namespace Bookshelf.Tests
 
             var response = userController.UpdatePassword(updatedUser);
 
-            A.CallTo(() => userRepository.UpdatePasswordHash(updatedUser.Id, A<string>.Ignored)).MustHaveHappened();
-            A.CallTo(() => userRepository.GetUser(updatedUser.Id)).MustHaveHappened();
+            A.CallTo(() => userRepository.UpdatePasswordHash(userId, A<string>.Ignored)).MustHaveHappened();
+            A.CallTo(() => userRepository.GetUser(userId)).MustHaveHappened();
         }
 
         [Test]
@@ -292,12 +292,11 @@ namespace Bookshelf.Tests
         {
             var updatedUser = new UserUpdateDto
             {
-                Id = 1,
                 Password = "test"
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, updatedUser.Id)).Returns(false);
+            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, A<int>.Ignored)).Returns(false);
 
             var userController = new UsersController(null, userHelper, null);
 
