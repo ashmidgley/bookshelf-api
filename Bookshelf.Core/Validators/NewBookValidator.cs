@@ -6,7 +6,6 @@ namespace Bookshelf.Core
     {
         public NewBookValidator()
         {
-            RuleFor(book => book.UserId).NotNull();
             RuleFor(book => book.CategoryId).NotNull();
             RuleFor(book => book.RatingId).NotNull();
             RuleFor(book => book.ImageUrl).NotNull();

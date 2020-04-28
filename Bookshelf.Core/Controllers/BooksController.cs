@@ -44,6 +44,19 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
+        [Route("user")]
+        public ActionResult<IEnumerable<BookDto>> GetCurrentUserBooks()
+        {
+            var userId = _userHelper.GetUserId(HttpContext);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _bookRepository.GetUserBooks(userId).ToList();
+        }
+
+        [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
         public ActionResult<IEnumerable<BookDto>> GetUserBooks(int userId)
@@ -77,6 +90,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
+            newBook.UserId = _userHelper.GetUserId(HttpContext);
             var id = _bookRepository.Add(newBook);
             return _bookRepository.GetBook(id);
         }

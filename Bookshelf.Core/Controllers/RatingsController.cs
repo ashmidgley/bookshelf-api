@@ -38,6 +38,19 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
+        [Route("user")]
+        public ActionResult<IEnumerable<Rating>> GetCurrentUserRatings()
+        {
+            var userId = _userHelper.GetUserId(HttpContext);
+            if(!_userRepository.UserExists(userId))
+            {
+                return BadRequest($"User with Id {userId} does not exist.");
+            }
+
+            return _ratingRepository.GetUserRatings(userId).ToList();
+        }
+
+        [HttpGet]
         [AllowAnonymous]
         [Route("user/{userId}")]
         public ActionResult<IEnumerable<Rating>> GetUserRatings(int userId)
@@ -64,6 +77,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
+            rating.UserId = _userHelper.GetUserId(HttpContext);
             var id = _ratingRepository.Add(rating);
             return _ratingRepository.GetRating(id);
         }

@@ -38,6 +38,41 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public void ReturnGetUserRatings_WhenUserExists_OnCallToGetCurrentUserRatings()
+        {
+            var userId = 1;
+            var ratingRepository = A.Fake<IRatingRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+
+            var controller = new RatingsController(ratingRepository, userRepository, userHelper, null);
+            var response = controller.GetCurrentUserRatings();
+            
+            A.CallTo(() => ratingRepository.GetUserRatings(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetCurrentUserRatings()
+        {
+            var userId = 1;
+            var ratingRepository = A.Fake<IRatingRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+            
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+
+            var controller = new RatingsController(ratingRepository, userRepository, userHelper, null);
+            var response = controller.GetCurrentUserRatings();
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
         public void ReturnGetUserRatings_WhenUserExists_OnCallToGetUserRatings()
         {
             var userId = 1;
@@ -71,7 +106,6 @@ namespace Bookshelf.Tests
         {
             var newRating = new Rating
             {
-                UserId = 1,
                 Description = "Test",
                 Code = "Test"
             };
@@ -102,7 +136,6 @@ namespace Bookshelf.Tests
         {
             var newRating = new Rating
             {
-                UserId = 1,
                 Description = "Test",
                 Code = "Test"
             };
