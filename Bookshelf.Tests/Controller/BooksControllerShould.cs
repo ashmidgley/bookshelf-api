@@ -39,6 +39,43 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public void ReturnGetUserBooks_WhenUserExists_OnCallToGetCurrentUserBooks()
+        {
+            var userId = 1;
+
+            var bookRepository = A.Fake<IBookRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+            
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(A<int>.Ignored)).Returns(true);
+            
+            var controller = new BooksController(bookRepository, userRepository, null, userHelper, null, null);
+            var response = controller.GetCurrentUserBooks();
+            
+            A.CallTo(() => bookRepository.GetUserBooks(A<int>.Ignored)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetCurrentUserBooks()
+        {
+            var userId = 1;
+
+            var bookRepository = A.Fake<IBookRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+            
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+           
+            var controller = new BooksController(bookRepository, userRepository, null, userHelper, null, null);
+            var response = controller.GetCurrentUserBooks();
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
         public void ReturnGetUserBooks_WhenUserExists_OnCallToGetUserBooks()
         {
             var userId = 1;

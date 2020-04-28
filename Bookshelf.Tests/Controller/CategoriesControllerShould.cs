@@ -38,6 +38,43 @@ namespace Bookshelf.Tests
         }
 
         [Test]
+        public void ReturnGetUserCategories_WhenUserExists_OnCallToGetCurrentUserCategories()
+        {
+            var userId = 1;
+
+            var categoryRepository = A.Fake<ICategoryRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(true);
+
+            var controller = new CategoriesController(categoryRepository, userRepository, userHelper, null);
+            var response = controller.GetCurrentUserCategories();
+            
+            A.CallTo(() => categoryRepository.GetUserCategories(userId)).MustHaveHappened();
+        }
+
+        [Test]
+        public void ReturnBadRequest_WhenUserDoesNotExist_OnCallToGetCurrentUserCategories()
+        {
+            var userId = 1;
+
+            var categoryRepository = A.Fake<ICategoryRepository>();
+            var userHelper = A.Fake<IUserHelper>();
+            A.CallTo(() => userHelper.GetUserId(A<HttpContext>.Ignored)).Returns(userId);
+
+            var userRepository = A.Fake<IUserRepository>();
+            A.CallTo(() => userRepository.UserExists(userId)).Returns(false);
+
+            var controller = new CategoriesController(categoryRepository, userRepository, userHelper, null);
+            var response = controller.GetCurrentUserCategories();
+            
+            Assert.AreEqual((int)HttpStatusCode.BadRequest, ((BadRequestObjectResult)response.Result).StatusCode);
+            Assert.AreEqual($"User with Id {userId} does not exist.", ((BadRequestObjectResult)response.Result).Value);
+        }
+
+        [Test]
         public void ReturnGetUserCategories_WhenUserExists_OnCallToGetUserCategories()
         {
             var userId = 1;
