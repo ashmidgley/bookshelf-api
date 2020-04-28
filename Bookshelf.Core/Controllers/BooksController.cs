@@ -84,11 +84,6 @@ namespace Bookshelf.Core
             {
                 return BadRequest(validation.ToString());
             }
-            
-            if(!_userHelper.MatchingUsers(HttpContext, newBook.UserId))
-            {
-                return Unauthorized();
-            }
 
             newBook.UserId = _userHelper.GetUserId(HttpContext);
             var id = _bookRepository.Add(newBook);

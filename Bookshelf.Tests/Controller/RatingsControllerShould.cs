@@ -102,7 +102,7 @@ namespace Bookshelf.Tests
         }
 
          [Test]
-        public void ReturnRating_WhenValidUser_CallsAddRating()
+        public void ReturnRating_OnCallToAddRating()
         {
             var newRating = new Rating
             {
@@ -116,40 +116,16 @@ namespace Bookshelf.Tests
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newRating.UserId)).Returns(true);
-
             var ratingRepository = A.Fake<IRatingRepository>();
             A.CallTo(() => ratingRepository.GetRating(A<int>.Ignored)).Returns(result);
 
             var validator = new RatingValidator();
-
             var controller = new RatingsController(ratingRepository, null, userHelper, validator);
 
             var response = controller.AddRating(newRating);
 
             A.CallTo(() => ratingRepository.Add(newRating)).MustHaveHappened();
             Assert.AreEqual(result.UserId, response.Value.UserId);
-        }
-
-        [Test]
-        public void ReturnUnauthorized_WhenInvalidUser_CallsAddRating()
-        {
-            var newRating = new Rating
-            {
-                Description = "Test",
-                Code = "Test"
-            };
-
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newRating.UserId)).Returns(false);
-
-            var validator = new RatingValidator();
-
-            var controller = new RatingsController(null, null, userHelper, validator);
-
-            var response = controller.AddRating(newRating);
-
-            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
         }
 
         [Test]

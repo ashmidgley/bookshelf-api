@@ -71,11 +71,6 @@ namespace Bookshelf.Core
             {
                 return BadRequest(validation.ToString());
             }
-
-            if(!_userHelper.MatchingUsers(HttpContext, category.UserId))
-            {
-                return Unauthorized();
-            }
             
             category.UserId = _userHelper.GetUserId(HttpContext);
             var id = _categoryRepository.Add(category);

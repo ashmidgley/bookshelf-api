@@ -104,7 +104,7 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void ReturnCategory_WhenValidUser_CallsAddCategory()
+        public void ReturnCategory_OnCallToAddCategory()
         {
             var newCategory = new Category
             {
@@ -118,40 +118,16 @@ namespace Bookshelf.Tests
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newCategory.UserId)).Returns(true);
-
             var categoryRepository = A.Fake<ICategoryRepository>();
             A.CallTo(() => categoryRepository.GetCategory(A<int>.Ignored)).Returns(result);
 
             var validator = new CategoryValidator();
-
             var controller = new CategoriesController(categoryRepository, null, userHelper, validator);
 
             var response = controller.AddCategory(newCategory);
 
             A.CallTo(() => categoryRepository.Add(newCategory)).MustHaveHappened();
             Assert.AreEqual(result.UserId, response.Value.UserId);
-        }
-
-        [Test]
-        public void ReturnUnauthorized_WhenInvalidUser_CallsAddCategory()
-        {
-            var newCategory = new Category
-            {
-                Description = "Test",
-                Code = "test"
-            };
-
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newCategory.UserId)).Returns(false);
-
-            var validator = new CategoryValidator();
-
-            var controller = new CategoriesController(null, null, userHelper, validator);
-
-            var response = controller.AddCategory(newCategory);
-
-            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
         }
 
         [Test]
