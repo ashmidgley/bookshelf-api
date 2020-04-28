@@ -121,7 +121,7 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void ReturnBookDto_WhenValidUser_CallsAddBook()
+        public void ReturnBookDto_OnCallToAddBook()
         {
             var newBook = new Book
             {
@@ -140,8 +140,6 @@ namespace Bookshelf.Tests
             };
 
             var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(true);
-
             var bookRepository = A.Fake<IBookRepository>();
             A.CallTo(() => bookRepository.GetBook(A<int>.Ignored)).Returns(result);
 
@@ -152,31 +150,6 @@ namespace Bookshelf.Tests
 
             A.CallTo(() => bookRepository.Add(newBook)).MustHaveHappened();
             Assert.AreEqual(result.UserId, response.Value.UserId);
-        }
-
-        [Test]
-        public void ReturnUnauthorized_WhenInvalidUser_CallsAddBook()
-        {
-             var newBook = new Book
-            {
-                CategoryId = 2,
-                RatingId = 1,
-                ImageUrl = "test.png",
-                Title = "Test",
-                Author = "Test",
-                FinishedOn = DateTime.Now,
-                PageCount = 0
-            };
-
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.MatchingUsers(A<HttpContext>.Ignored, newBook.UserId)).Returns(false);
-
-            var newBookValidator = new NewBookValidator();
-            var controller = new BooksController(null, null, null, userHelper, newBookValidator, null);
-
-            var response = controller.AddBook(newBook);
-
-            Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
         }
 
         [Test]

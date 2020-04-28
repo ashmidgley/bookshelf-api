@@ -72,11 +72,6 @@ namespace Bookshelf.Core
                 return BadRequest(validation.ToString());
             }
 
-            if(!_userHelper.MatchingUsers(HttpContext, rating.UserId))
-            {
-                return Unauthorized();
-            }
-
             rating.UserId = _userHelper.GetUserId(HttpContext);
             var id = _ratingRepository.Add(rating);
             return _ratingRepository.GetRating(id);
