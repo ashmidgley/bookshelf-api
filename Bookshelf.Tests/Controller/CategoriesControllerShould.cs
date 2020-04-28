@@ -71,7 +71,6 @@ namespace Bookshelf.Tests
         {
             var newCategory = new Category
             {
-                UserId = 1,
                 Description = "Test",
                 Code = "test"
             };
@@ -102,7 +101,6 @@ namespace Bookshelf.Tests
         {
             var newCategory = new Category
             {
-                UserId = 1,
                 Description = "Test",
                 Code = "test"
             };

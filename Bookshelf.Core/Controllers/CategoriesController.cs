@@ -64,6 +64,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
             
+            category.UserId = _userHelper.GetUserId(HttpContext);
             var id = _categoryRepository.Add(category);
             return _categoryRepository.GetCategory(id);
         }

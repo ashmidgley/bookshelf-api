@@ -77,6 +77,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
+            newBook.UserId = _userHelper.GetUserId(HttpContext);
             var id = _bookRepository.Add(newBook);
             return _bookRepository.GetBook(id);
         }

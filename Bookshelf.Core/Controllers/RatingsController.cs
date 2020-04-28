@@ -64,6 +64,7 @@ namespace Bookshelf.Core
                 return Unauthorized();
             }
 
+            rating.UserId = _userHelper.GetUserId(HttpContext);
             var id = _ratingRepository.Add(rating);
             return _ratingRepository.GetRating(id);
         }

@@ -71,7 +71,6 @@ namespace Bookshelf.Tests
         {
             var newRating = new Rating
             {
-                UserId = 1,
                 Description = "Test",
                 Code = "Test"
             };
@@ -102,7 +101,6 @@ namespace Bookshelf.Tests
         {
             var newRating = new Rating
             {
-                UserId = 1,
                 Description = "Test",
                 Code = "Test"
             };

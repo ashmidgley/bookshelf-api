@@ -88,7 +88,6 @@ namespace Bookshelf.Tests
         {
             var newBook = new Book
             {
-                UserId = 1,
                 CategoryId = 2,
                 RatingId = 1,
                 ImageUrl = "test.png",
@@ -123,7 +122,6 @@ namespace Bookshelf.Tests
         {
              var newBook = new Book
             {
-                UserId = 1,
                 CategoryId = 2,
                 RatingId = 1,
                 ImageUrl = "test.png",
