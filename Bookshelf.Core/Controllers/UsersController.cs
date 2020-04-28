@@ -39,14 +39,6 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
-        [Route("current")]
-        public ActionResult<UserDto> GetCurrentUser()
-        {
-            var userId = _userHelper.GetUserId(HttpContext);
-            return _userRepository.GetUser(userId);
-        }
-
-        [HttpGet]
         public ActionResult<IEnumerable<UserDto>> GetAllUsers()
         {
             if(!_userHelper.IsAdmin(HttpContext))
