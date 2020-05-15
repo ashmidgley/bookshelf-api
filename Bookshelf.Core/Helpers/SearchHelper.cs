@@ -62,10 +62,6 @@ namespace Bookshelf.Core
             result.Summary = volume.Description;
             result.Title = volume.Title;
 
-            if(volume.Subtitle != null) {
-                result.Title += $" {volume.Subtitle}";
-            }
-            
             if(volume.ImageLinks.Thumbnail != null)
             {
                 result.ImageUrl = volume.ImageLinks.Thumbnail;
