@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
 using System.Linq;
-using System;
 
 namespace Bookshelf.Core
 {
@@ -14,17 +12,15 @@ namespace Bookshelf.Core
     {
         private readonly IBookRepository _bookRepository;
         private readonly IUserRepository _userRepository;
-        private readonly ISearchHelper _searchHelper;
         private readonly IUserHelper _userHelper;
         private readonly NewBookValidator _newBookValidator;
         private readonly UpdatedBookValidator _updatedBookValidator;
 
-        public BooksController(IBookRepository bookRepository, IUserRepository userRepository, ISearchHelper searchHelper, IUserHelper userHelper,
+        public BooksController(IBookRepository bookRepository, IUserRepository userRepository, IUserHelper userHelper,
             NewBookValidator newBookValidator, UpdatedBookValidator updatedBookValidator)
         {
             _bookRepository = bookRepository;
             _userRepository = userRepository;
-            _searchHelper = searchHelper;
             _userHelper = userHelper;
             _newBookValidator = newBookValidator;
             _updatedBookValidator = updatedBookValidator;
@@ -68,13 +64,6 @@ namespace Bookshelf.Core
 
             return _bookRepository.GetUserBooks(userId).ToList();
         }
-
-        [HttpPost]
-        [Route("search")]
-        public async Task<IEnumerable<Book>> SearchBooks([FromBody] SearchDto search)
-        {
-            return await _searchHelper.SearchBooks(search.Title, search.Author, search.MaxResults);
-        } 
 
         [HttpPost]
         public ActionResult<BookDto> AddBook([FromBody] Book newBook)

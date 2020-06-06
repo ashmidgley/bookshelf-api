@@ -5,6 +5,8 @@ namespace Bookshelf.Core
 {
     public interface ISearchHelper
     {
-        Task<IEnumerable<Book>> SearchBooks(string title, string author, int maxResults);
+        Task<IEnumerable<Book>> SearchBooks(SearchDto search);
+        Task<IEnumerable<Book>> SearchBooksByTitle(SearchTitleDto search);
+        Task<IEnumerable<Book>> SearchBooksByAuthor(SearchAuthorDto search);
     }
 }

@@ -13,6 +13,13 @@ namespace Bookshelf.Tests
         [Explicit]
         public async Task ReturnTheMartian_WhenValidSearchParams_OnCallToSearchBooks()
         {
+            var search = new SearchDto
+            {
+                Title = "The Martian",
+                Author = "Andy Weir",
+                MaxResults = 1
+            };
+
             var defaultImage = "default.png";
             var config = A.Fake<IGoogleBooksConfiguration>();
             A.CallTo(() => config.DefaultCover).Returns(defaultImage);
@@ -21,7 +28,7 @@ namespace Bookshelf.Tests
 
             var searchHelper = new SearchHelper(config);
 
-            var result = await searchHelper.SearchBooks("The Martian", "Andy Weir", 1);
+            var result = await searchHelper.SearchBooks(search);
             var book = result.First();
 
             var martianImage = "https://books.google.com/books/content?id=AvTLDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api";
@@ -37,6 +44,13 @@ namespace Bookshelf.Tests
         [Explicit]
         public async Task ReturnEmptyList_WhenInvalidSearchParams_OnCallToSearchBooks()
         {
+            var search = new SearchDto
+            {
+                Title = "asdgasgasdg",
+                Author = "asdgasgasdg",
+                MaxResults = 1
+            };
+
             var defaultImage = "default.png";
             var config = A.Fake<IGoogleBooksConfiguration>();
             A.CallTo(() => config.DefaultCover).Returns(defaultImage);
@@ -45,7 +59,7 @@ namespace Bookshelf.Tests
 
             var searchHelper = new SearchHelper(config);
 
-            var result = await searchHelper.SearchBooks("asdgasgasdg", "asddsgsadg", 1);
+            var result = await searchHelper.SearchBooks(search);
 
             Assert.AreEqual(0, result.Count());
         }
