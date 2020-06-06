@@ -2,7 +2,6 @@ using NUnit.Framework;
 using Bookshelf.Core;
 using FakeItEasy;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Bookshelf.Tests
 {
@@ -10,58 +9,74 @@ namespace Bookshelf.Tests
     public class SearchHelperShould
     {
         [Test]
-        [Explicit]
-        public async Task ReturnTheMartian_WhenValidSearchParams_OnCallToSearchBooks()
+        public async Task CallDependencies_OnCallToSearchBooks()
         {
             var search = new SearchDto
             {
                 Title = "The Martian",
                 Author = "Andy Weir",
+                OrderBy = "Relevance",
                 MaxResults = 1
             };
 
-            var defaultImage = "default.png";
-            var config = A.Fake<IGoogleBooksConfiguration>();
-            A.CallTo(() => config.DefaultCover).Returns(defaultImage);
-            A.CallTo(() => config.Url).Returns("");
-            A.CallTo(() => config.Key).Returns("");
-
-            var searchHelper = new SearchHelper(config);
+            var queryHelper = A.Fake<IQueryHelper>();
+            var searchMapper = A.Fake<ISearchMapper>();
+            var searchRunner = A.Fake<ISearchRunner>();
+            var searchHelper = new SearchHelper(queryHelper, searchMapper, searchRunner);
 
             var result = await searchHelper.SearchBooks(search);
-            var book = result.First();
 
-            var martianImage = "https://books.google.com/books/content?id=AvTLDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api";
-            var martianPageCount = 384;
-            var martianSummary = "Robinson Crusoe on Mars A survival story for the 21st century and the international bestseller behind the major film from Ridley Scott starring Matt Damon and Jessica Chastain. I’m stranded on Mars. I have no way to communicate with Earth. I’m in a Habitat designed to last 31 days. If the Oxygenator breaks down, I’ll suffocate. If the Water Reclaimer breaks down, I’ll die of thirst. If the Hab breaches, I’ll just kind of explode. If none of those things happen, I’ll eventually run out of food and starve to death. So yeah. I’m screwed. Andy Weir's second novel Artemis is now available";
-
-            Assert.AreEqual(martianImage, book.ImageUrl);
-            Assert.AreEqual(martianPageCount, book.PageCount);
-            Assert.AreEqual(martianSummary, book.Summary);
+            A.CallTo(() => queryHelper.Encode(search.Title)).MustHaveHappened();
+            A.CallTo(() => queryHelper.Encode(search.Author)).MustHaveHappened();
+            A.CallTo(() => queryHelper.GetOrderBy(search.OrderBy)).MustHaveHappened();
+            A.CallTo(() => searchRunner.PerformSearch(A<string>.Ignored)).MustHaveHappened();
+            A.CallTo(() => searchMapper.MapBooks(A<GoogleBookSearchDto>.Ignored)).MustHaveHappened();
         }
 
         [Test]
-        [Explicit]
-        public async Task ReturnEmptyList_WhenInvalidSearchParams_OnCallToSearchBooks()
+        public async Task CallDependencies_OnCallToSearchBooksByTitle()
         {
-            var search = new SearchDto
+            var search = new SearchTitleDto
             {
-                Title = "asdgasgasdg",
-                Author = "asdgasgasdg",
+                Title = "The Martian",
+                OrderBy = "Relevance",
                 MaxResults = 1
             };
 
-            var defaultImage = "default.png";
-            var config = A.Fake<IGoogleBooksConfiguration>();
-            A.CallTo(() => config.DefaultCover).Returns(defaultImage);
-            A.CallTo(() => config.Url).Returns("");
-            A.CallTo(() => config.Key).Returns("");
+            var queryHelper = A.Fake<IQueryHelper>();
+            var searchMapper = A.Fake<ISearchMapper>();
+            var searchRunner = A.Fake<ISearchRunner>();
+            var searchHelper = new SearchHelper(queryHelper, searchMapper, searchRunner);
 
-            var searchHelper = new SearchHelper(config);
+            var result = await searchHelper.SearchBooksByTitle(search);
 
-            var result = await searchHelper.SearchBooks(search);
+            A.CallTo(() => queryHelper.Encode(search.Title)).MustHaveHappened();
+            A.CallTo(() => queryHelper.GetOrderBy(search.OrderBy)).MustHaveHappened();
+            A.CallTo(() => searchRunner.PerformSearch(A<string>.Ignored)).MustHaveHappened();
+            A.CallTo(() => searchMapper.MapBooks(A<GoogleBookSearchDto>.Ignored)).MustHaveHappened();
+        }
 
-            Assert.AreEqual(0, result.Count());
+        [Test]
+        public async Task CallDependencies_OnCallToSearchBooksByAuthor()
+        {
+            var search = new SearchAuthorDto
+            {
+                Author = "Andy Weir",
+                OrderBy = "Relevance",
+                MaxResults = 1
+            };
+
+            var queryHelper = A.Fake<IQueryHelper>();
+            var searchMapper = A.Fake<ISearchMapper>();
+            var searchRunner = A.Fake<ISearchRunner>();
+            var searchHelper = new SearchHelper(queryHelper, searchMapper, searchRunner);
+
+            var result = await searchHelper.SearchBooksByAuthor(search);
+
+            A.CallTo(() => queryHelper.Encode(search.Author)).MustHaveHappened();
+            A.CallTo(() => queryHelper.GetOrderBy(search.OrderBy)).MustHaveHappened();
+            A.CallTo(() => searchRunner.PerformSearch(A<string>.Ignored)).MustHaveHappened();
+            A.CallTo(() => searchMapper.MapBooks(A<GoogleBookSearchDto>.Ignored)).MustHaveHappened();
         }
     }
 }

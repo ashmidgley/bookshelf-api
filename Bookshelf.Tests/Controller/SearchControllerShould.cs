@@ -14,6 +14,7 @@ namespace Bookshelf.Tests
             {
                 Title = "title",
                 Author = "author",
+                OrderBy = "Newest",
                 MaxResults = 5
             };
 
@@ -29,6 +30,7 @@ namespace Bookshelf.Tests
             var search = new SearchTitleDto
             {
                 Title = "title",
+                OrderBy = "Newest",
                 MaxResults = 5
             };
 
@@ -44,6 +46,7 @@ namespace Bookshelf.Tests
             var search = new SearchAuthorDto
             {
                 Author = "author",
+                OrderBy = "Newest",
                 MaxResults = 5
             };
 
