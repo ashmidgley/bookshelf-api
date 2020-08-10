@@ -5,7 +5,7 @@ docker stop bookshelf-api
 echo "##### Removing old API container instance"
 docker rm bookshelf-api
 echo "##### Building new image"
-docker build -t bookshelf-api ./Bookshelf.Core/Bookshelf.Core.csproj
+docker build -t bookshelf-api ../Bookshelf.Core
 echo "##### Starting database container"
 docker start bookshelf-mssql
 echo "##### Starting new API container"
