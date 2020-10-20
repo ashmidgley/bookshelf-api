@@ -12,11 +12,22 @@ namespace Bookshelf.Core
             _context = context;
         }
 
-        public IEnumerable<BookDto> GetUserBooks(int userId)
+        public IEnumerable<BookDto> GetUserBooks(int userId, int page)
         {
             return _context.Books
                 .Where(b => b.UserId == userId)
+                .OrderByDescending(x => x.FinishedOn)
+                .Skip(page * 10)
+                .Take(10)
                 .Select(b => ToBookDto(b));
+        }
+
+        public bool HasMore(int userId, int page)
+        {
+            return  _context.Books
+                .Where(r => r.UserId == userId)
+                .Skip((page + 1) * 10)
+                .Any();
         }
 
         public BookDto GetBook(int id)

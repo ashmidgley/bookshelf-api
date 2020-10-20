@@ -40,8 +40,8 @@ namespace Bookshelf.Core
         }
 
         [HttpGet]
-        [Route("user")]
-        public ActionResult<IEnumerable<BookDto>> GetCurrentUserBooks()
+        [Route("user/{page}")]
+        public ActionResult<BooksDto> GetCurrentUserBooks(int page)
         {
             var userId = _userHelper.GetUserId(HttpContext);
             if(!_userRepository.UserExists(userId))
@@ -49,20 +49,28 @@ namespace Bookshelf.Core
                 return BadRequest($"User with Id {userId} does not exist.");
             }
 
-            return _bookRepository.GetUserBooks(userId).ToList();
+            return new BooksDto
+            {
+                Books = _bookRepository.GetUserBooks(userId, page),
+                HasMore = _bookRepository.HasMore(userId, page)
+            };
         }
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("user/{userId}")]
-        public ActionResult<IEnumerable<BookDto>> GetUserBooks(int userId)
+        [Route("user/{userId}/{page}")]
+        public ActionResult<BooksDto> GetUserBooks(int userId, int page)
         {
             if(!_userRepository.UserExists(userId))
             {
                 return BadRequest($"User with Id {userId} does not exist.");
             }
 
-            return _bookRepository.GetUserBooks(userId).ToList();
+            return new BooksDto
+            {
+                Books = _bookRepository.GetUserBooks(userId, page),
+                HasMore = _bookRepository.HasMore(userId, page)
+            };
         }
 
         [HttpPost]
