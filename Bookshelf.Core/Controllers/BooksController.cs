@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq;
 
 namespace Bookshelf.Core
 {
@@ -39,9 +37,9 @@ namespace Bookshelf.Core
             return _bookRepository.GetBook(id);
         }
 
-        [HttpGet]
-        [Route("user/{page}")]
-        public ActionResult<BooksDto> GetCurrentUserBooks(int page)
+        [HttpPost]
+        [Route("user")]
+        public ActionResult<BooksDto> GetCurrentUserBooks([FromBody] BookQueryOptions queryOptions)
         {
             var userId = _userHelper.GetUserId(HttpContext);
             if(!_userRepository.UserExists(userId))
@@ -51,15 +49,15 @@ namespace Bookshelf.Core
 
             return new BooksDto
             {
-                Books = _bookRepository.GetUserBooks(userId, page),
-                HasMore = _bookRepository.HasMore(userId, page)
+                Books = _bookRepository.GetUserBooks(userId, queryOptions),
+                HasMore = _bookRepository.HasMore(userId, queryOptions)
             };
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
-        [Route("user/{userId}/{page}")]
-        public ActionResult<BooksDto> GetUserBooks(int userId, int page)
+        [Route("user/{userId}")]
+        public ActionResult<BooksDto> GetUserBooks(int userId, [FromBody] BookQueryOptions queryOptions)
         {
             if(!_userRepository.UserExists(userId))
             {
@@ -68,8 +66,8 @@ namespace Bookshelf.Core
 
             return new BooksDto
             {
-                Books = _bookRepository.GetUserBooks(userId, page),
-                HasMore = _bookRepository.HasMore(userId, page)
+                Books = _bookRepository.GetUserBooks(userId, queryOptions),
+                HasMore = _bookRepository.HasMore(userId, queryOptions)
             };
         }
 
