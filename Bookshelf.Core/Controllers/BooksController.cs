@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq;
 
 namespace Bookshelf.Core
 {
@@ -39,9 +37,9 @@ namespace Bookshelf.Core
             return _bookRepository.GetBook(id);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("user")]
-        public ActionResult<IEnumerable<BookDto>> GetCurrentUserBooks()
+        public ActionResult<BooksDto> GetCurrentUserBooks([FromBody] BookQueryOptions queryOptions)
         {
             var userId = _userHelper.GetUserId(HttpContext);
             if(!_userRepository.UserExists(userId))
@@ -49,20 +47,28 @@ namespace Bookshelf.Core
                 return BadRequest($"User with Id {userId} does not exist.");
             }
 
-            return _bookRepository.GetUserBooks(userId).ToList();
+            return new BooksDto
+            {
+                Books = _bookRepository.GetUserBooks(userId, queryOptions),
+                HasMore = _bookRepository.HasMore(userId, queryOptions)
+            };
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
         [Route("user/{userId}")]
-        public ActionResult<IEnumerable<BookDto>> GetUserBooks(int userId)
+        public ActionResult<BooksDto> GetUserBooks(int userId, [FromBody] BookQueryOptions queryOptions)
         {
             if(!_userRepository.UserExists(userId))
             {
                 return BadRequest($"User with Id {userId} does not exist.");
             }
 
-            return _bookRepository.GetUserBooks(userId).ToList();
+            return new BooksDto
+            {
+                Books = _bookRepository.GetUserBooks(userId, queryOptions),
+                HasMore = _bookRepository.HasMore(userId, queryOptions)
+            };
         }
 
         [HttpPost]

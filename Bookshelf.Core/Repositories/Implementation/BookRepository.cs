@@ -12,11 +12,62 @@ namespace Bookshelf.Core
             _context = context;
         }
 
-        public IEnumerable<BookDto> GetUserBooks(int userId)
+        public IEnumerable<BookDto> GetUserBooks(int userId, BookQueryOptions options)
         {
-            return _context.Books
-                .Where(b => b.UserId == userId)
+            var query = _context.Books
+                .Where(b => b.UserId == userId);
+            
+            if(options.Search != null)
+            {
+                query = query
+                    .Where(x => x.Title.Contains(options.Search) || x.Author.Contains(options.Search));
+            }
+
+            if(options.Category.HasValue)
+            {
+                query = query
+                    .Where(x => x.CategoryId == options.Category.Value);
+            }
+
+            if(options.Rating.HasValue)
+            {
+                query = query
+                    .Where(x => x.RatingId == options.Rating.Value);
+            }
+
+            return query
+                .OrderByDescending(x => x.FinishedOn)
+                .Skip(options.Page * 10)
+                .Take(10)
                 .Select(b => ToBookDto(b));
+        }
+
+        public bool HasMore(int userId, BookQueryOptions options)
+        {
+            var query = _context.Books
+                .Where(b => b.UserId == userId);
+            
+            if(options.Search != null)
+            {
+                query = query
+                    .Where(x => x.Title.Contains(options.Search) || x.Author.Contains(options.Search));
+            }
+
+            if(options.Category.HasValue)
+            {
+                query = query
+                    .Where(x => x.CategoryId == options.Category.Value);
+            }
+
+            if(options.Rating.HasValue)
+            {
+                query = query
+                    .Where(x => x.RatingId == options.Rating.Value);
+            }
+
+            return query
+                .Skip((options.Page + 1) * 10)
+                .Any();
         }
 
         public BookDto GetBook(int id)
