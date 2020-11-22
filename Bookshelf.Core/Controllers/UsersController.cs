@@ -38,15 +38,19 @@ namespace Bookshelf.Core
             return _userRepository.GetUser(id);
         }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<UserDto>> GetAllUsers()
+        [HttpPost]
+        public ActionResult<UsersDto> GetUsers([FromBody] UserQueryOptions queryOptions)
         {
             if(!_userHelper.IsAdmin(HttpContext))
             {
                 return Unauthorized();
             }
             
-            return _userRepository.GetAll().ToList();
+            return new UsersDto
+            {
+                Users = _userRepository.GetUsers(queryOptions),
+                HasMore = _userRepository.HasMore(queryOptions)
+            };
         }
 
         [HttpPut]

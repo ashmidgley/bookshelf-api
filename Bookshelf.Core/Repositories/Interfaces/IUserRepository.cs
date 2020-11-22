@@ -5,7 +5,8 @@ namespace Bookshelf.Core
 {
     public interface IUserRepository
     {
-        IEnumerable<UserDto> GetAll();
+        IEnumerable<UserDto> GetUsers(UserQueryOptions queryOptions);
+        bool HasMore(UserQueryOptions queryOptions);
         UserDto GetUser(string email);
         UserDto GetUser(int id);
         string GetPasswordHash(string email);

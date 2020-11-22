@@ -83,22 +83,27 @@ namespace Bookshelf.Tests
         }
 
         [Test]
-        public void ReturnGetAll_WhenAdmin_CallsGetAllUsers()
+        public void ReturnGetUsers_WhenAdmin_CallsGetUsers()
         {
+            var queryOptions = new UserQueryOptions
+            {
+                Page = 1
+            };
+
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
 
             var userRepository = A.Fake<IUserRepository>();
-
             var usersController = new UsersController(userRepository, userHelper, null);
 
-            var response = usersController.GetAllUsers();
+            var response = usersController.GetUsers(queryOptions);
 
-            A.CallTo(() => userRepository.GetAll()).MustHaveHappened();
+            A.CallTo(() => userRepository.GetUsers(queryOptions)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => userRepository.HasMore(queryOptions)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void ReturnUnauthorized_WhenInvalidUser_CallsGetAllUsers()
+        public void ReturnUnauthorized_WhenInvalidUser_CallsGetUsers()
         {
             var userHelper = A.Fake<IUserHelper>();
             A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(false);
@@ -107,22 +112,9 @@ namespace Bookshelf.Tests
 
             var usersController = new UsersController(userRepository, userHelper, null);
 
-            var response = usersController.GetAllUsers();
+            var response = usersController.GetUsers(null);
 
             Assert.AreEqual((int)HttpStatusCode.Unauthorized, ((UnauthorizedResult)response.Result).StatusCode);
-        }
-
-        [Test]
-        public void ReturnCallToGetAll_WhenValidUser_CallsGetAllUsers()
-        {
-            var userHelper = A.Fake<IUserHelper>();
-            A.CallTo(() => userHelper.IsAdmin(A<HttpContext>.Ignored)).Returns(true);
-
-            var userRepository = A.Fake<IUserRepository>();
-            var usersController = new UsersController(userRepository, userHelper, null);
-            var response = usersController.GetAllUsers();
-
-            A.CallTo(() => userRepository.GetAll()).MustHaveHappened();
         }
 
         [Test]

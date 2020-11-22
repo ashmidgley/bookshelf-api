@@ -13,11 +13,19 @@ namespace Bookshelf.Core
             _context = context;
         }
 
-        public IEnumerable<UserDto> GetAll()
+        public IEnumerable<UserDto> GetUsers(UserQueryOptions queryOptions)
+        {
+             return _context.Users
+                .Skip(queryOptions.Page * 10)
+                .Take(10)
+                .Select(u => ToUserDto(u));
+        }
+
+        public bool HasMore(UserQueryOptions queryOptions)
         {
             return _context.Users
-                .Select(u => ToUserDto(u))
-                .ToList();
+                .Skip((queryOptions.Page + 1) * 10)
+                .Any();
         }
 
         public UserDto GetUser(string email)
