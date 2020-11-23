@@ -35,10 +35,11 @@ namespace Bookshelf.Core
                     .Where(x => x.RatingId == options.Rating.Value);
             }
 
+            var entriesPerPage = options.EntriesPerPage ?? 10;
             return query
                 .OrderByDescending(x => x.FinishedOn)
-                .Skip(options.Page * 10)
-                .Take(10)
+                .Skip(options.Page * entriesPerPage)
+                .Take(entriesPerPage)
                 .Select(b => ToBookDto(b));
         }
 
@@ -65,8 +66,9 @@ namespace Bookshelf.Core
                     .Where(x => x.RatingId == options.Rating.Value);
             }
 
+            var entriesPerPage = options.EntriesPerPage ?? 10;
             return query
-                .Skip((options.Page + 1) * 10)
+                .Skip((options.Page + 1) * entriesPerPage)
                 .Any();
         }
 
